@@ -49,7 +49,7 @@ final class NullChannel implements ADC, PWM {
 }
 
 final class NullMaestro extends AbstractList<NullChannel> {
-    private static final byte NUMBER_OF_CHANNELS = 24;
+    private static final byte NUMBER_OF_CHANNELS = 2;
 
     private final Map<Byte, NullChannel> channels = new HashMap<>();
 
