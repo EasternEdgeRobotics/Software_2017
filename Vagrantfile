@@ -16,4 +16,8 @@ Vagrant.configure(2) do |config|
     config.vm.define "rov" do |rov|
         rov.vm.network "public_network", bridge: NETWORK_INTERFACES
     end
+
+    config.vm.define "camera" do |camera|
+        camera.vm.network "public_network", bridge: NETWORK_INTERFACES
+    end
 end
