@@ -2,7 +2,7 @@
 
 Eastern Edge welcomes contributions from everyone. By contributing to this project, you agree to the license terms of the project.
 
-In brief, contrbuting involves the following process:
+In brief, contributing involves the following process:
 
 1. Clone the repository
 1. Create a branch
