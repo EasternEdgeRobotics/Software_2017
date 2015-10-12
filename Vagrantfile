@@ -17,6 +17,13 @@ Vagrant.configure(2) do |config|
         topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
         topside.vm.provider "virtualbox" do |virtualbox|
             virtualbox.customize ["modifyvm", :id, "--usb", "on"]
+            virtualbox.customize [
+                "usbfilter", "add", "0",
+                "--target", :id,
+                "--name", "Logitech Extreme 3D Pro Joystick",
+                "--vendorid", "0x046d",
+                "--productid", "0xc215"
+            ]
         end
     end
 
