@@ -4,11 +4,11 @@ Eastern Edge welcomes contributions from everyone. By contributing to this proje
 
 In brief, contributing involves the following process:
 
-1. Clone the repository
-1. Create a branch
+1. [Clone the repository](https://help.github.com/articles/cloning-a-repository/)
+1. [Create a branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
 1. ??? (Make changes?)
 1. Push the changes to GitHub
-1. Open a Pull Request
+1. [Open a Pull Request](https://help.github.com/articles/creating-a-pull-request/)
 
 ## The development process
 
