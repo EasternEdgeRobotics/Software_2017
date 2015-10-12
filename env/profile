@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+shopt -s globstar
+
+PATH="~/.bin:~/.bin/gradle-2.6/bin:$PATH"
+PS1="\u@\h \W $ "
+
+alias la='ls -lA'
+alias lo='logout'
