@@ -15,6 +15,9 @@ Vagrant.configure(2) do |config|
         topside.vm.provision "file", source: "env/gradle.properties", destination: "~/.gradle/gradle.properties"
         topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
         topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
+        topside.vm.provider "virtualbox" do |virtualbox|
+            virtualbox.customize ["modifyvm", :id, "--usb", "on"]
+        end
     end
 
     config.vm.define "rov" do |rov|
