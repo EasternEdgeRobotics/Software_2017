@@ -75,7 +75,7 @@ public class UdpEventPublisher implements EventPublisher {
         subject = PublishSubject.create();
         outbound = RxNetty.createUdpClient(broadcast, port).connect().toBlocking().first();
         values = new ConcurrentHashMap<Class, Object>();
-        server = RxNetty.createUdpServer(port, new UdpConnectionHandler(serializer, subject));
+        server = RxNetty.createUdpServer(port, new UdpConnectionHandler(this::connection));
     }
 
     /**
@@ -108,5 +108,14 @@ public class UdpEventPublisher implements EventPublisher {
 
         values.put(clazz, observable);
         return observable;
+    }
+
+    /**
+     * Invoked whenever a new connection is established.
+     *
+     * @param bytes the content of the connection
+     */
+    private void connection(byte[] bytes) {
+        subject.onNext(serializer.deserialize(bytes));
     }
 }
