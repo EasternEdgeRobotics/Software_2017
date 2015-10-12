@@ -52,6 +52,16 @@ public class UdpEventPublisher implements EventPublisher {
     private final UdpServer<DatagramPacket, DatagramPacket> server;
 
     /**
+     * Constructs an EventPublisher that uses the given broadcast address
+     * and listens on port 10003.
+     *
+     * @param broadcast the broadcast address to use when emitting events
+     */
+    public UdpEventPublisher(final String broadcast) {
+        this(broadcast, 10003);
+    }
+
+    /**
      * Constructs an EventPublisher that uses the given broadcast
      * address and listens on the given port.
      *
