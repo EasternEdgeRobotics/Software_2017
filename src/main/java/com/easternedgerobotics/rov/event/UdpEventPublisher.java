@@ -25,6 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UdpEventPublisher implements EventPublisher {
     /**
+     * The default port to listen on.
+     */
+    private static final int DEFAULT_PORT = 10003;
+
+    /**
      * The serializer.
      */
     private final Serializer serializer;
@@ -52,12 +57,12 @@ public class UdpEventPublisher implements EventPublisher {
 
     /**
      * Constructs an EventPublisher that uses the given broadcast address
-     * and listens on port 10003.
+     * and listens on port the default port.
      *
      * @param broadcast the broadcast address to use when emitting events
      */
     public UdpEventPublisher(final String broadcast) {
-        this(broadcast, 10003);
+        this(broadcast, DEFAULT_PORT);
     }
 
     /**
