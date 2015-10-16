@@ -97,7 +97,7 @@ public class UdpEventPublisher implements EventPublisher {
      *
      * @param value the value to emit
      */
-    public <T extends MutableValueCompanion> void emit(final T value) {
+    public final <T extends MutableValueCompanion> void emit(final T value) {
         outbound.writeBytesAndFlush(serializer.serialize(value.asMutable()));
     }
 
@@ -108,7 +108,7 @@ public class UdpEventPublisher implements EventPublisher {
      * @return an Observable that emits each value of the given type
      */
     @SuppressWarnings("unchecked")
-    public <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz) {
+    public final <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz) {
         if (values.containsKey(clazz)) {
             return (Observable<T>) values.get(clazz);
         }

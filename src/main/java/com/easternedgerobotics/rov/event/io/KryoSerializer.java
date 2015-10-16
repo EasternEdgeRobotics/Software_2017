@@ -22,14 +22,14 @@ public class KryoSerializer implements Serializer {
     }
 
     @Override
-    public byte[] serialize(final Object value) {
+    public final byte[] serialize(final Object value) {
         final Output output = new FastOutput(16, 1024);
         kryo.writeClassAndObject(output, value);
         return output.toBytes();
     }
 
     @Override
-    public Object deserialize(final byte[] bytes) {
+    public final Object deserialize(final byte[] bytes) {
         return kryo.readClassAndObject(new FastInput(bytes));
     }
 }
