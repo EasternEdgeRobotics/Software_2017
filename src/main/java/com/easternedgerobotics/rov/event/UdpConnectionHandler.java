@@ -11,8 +11,8 @@ import java.util.function.Consumer;
 class UdpConnectionHandler implements ConnectionHandler<DatagramPacket, DatagramPacket> {
     private Consumer<byte[]> callback;
 
-    public UdpConnectionHandler(final Consumer<byte[]> callback) {
-        this.callback = callback;
+    public UdpConnectionHandler(final Consumer<byte[]> consumer) {
+        this.callback = consumer;
     }
 
     @Override
