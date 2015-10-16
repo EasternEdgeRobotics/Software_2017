@@ -13,7 +13,7 @@ import com.esotericsoftware.kryo.io.Output;
  */
 public class KryoSerializer implements Serializer {
     /**
-     * The Kryo instance
+     * The Kryo instance.
      */
     private final Kryo kryo;
 
