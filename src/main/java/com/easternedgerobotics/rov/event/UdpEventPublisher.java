@@ -124,7 +124,7 @@ public class UdpEventPublisher implements EventPublisher {
      *
      * @param bytes the content of the connection
      */
-    private void connection(byte[] bytes) {
+    private void connection(final byte[] bytes) {
         subject.onNext(serializer.deserialize(bytes));
     }
 }
