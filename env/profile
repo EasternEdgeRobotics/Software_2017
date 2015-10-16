@@ -2,7 +2,7 @@
 
 shopt -s globstar
 
-PATH="~/.bin:~/.bin/gradle-2.6/bin:$PATH"
+PATH="~/.bin:~/.bin/gradle-2.7/bin:$PATH"
 PS1="\u@\h \W $ "
 
 alias la='ls -lA'
