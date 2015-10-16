@@ -16,6 +16,6 @@ sudo hostnamectl 'set-hostname' "$1"
 
 if [[ ! -d '.bin/gradle-2.6' ]]
 then
-    wget -q 'https://downloads.gradle.org/distributions/gradle-2.6-bin.zip'
+    curl --remote-name --location 'https://downloads.gradle.org/distributions/gradle-2.6-bin.zip'
     unzip -d '.bin' 'gradle-2.6-bin.zip' && rm 'gradle-2.6-bin.zip'
 fi
