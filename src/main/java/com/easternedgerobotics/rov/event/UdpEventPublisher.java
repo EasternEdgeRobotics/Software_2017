@@ -10,7 +10,6 @@ import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ObservableConnection;
 import io.reactivex.netty.protocol.udp.server.UdpServer;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.subjects.Subject;
 import rx.subjects.PublishSubject;
 
