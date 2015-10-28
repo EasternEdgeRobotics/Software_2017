@@ -1,6 +1,5 @@
 package com.easternedgerobotics.rov.event;
 
-import com.easternedgerobotics.rov.value.ImmutableValueCompanion;
 import com.easternedgerobotics.rov.value.MutableValueCompanion;
 
 import rx.Observable;

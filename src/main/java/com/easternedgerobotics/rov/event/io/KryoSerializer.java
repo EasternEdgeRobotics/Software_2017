@@ -13,7 +13,7 @@ import com.esotericsoftware.kryo.io.Output;
  */
 public class KryoSerializer implements Serializer {
     /**
-     * The Kryo instance
+     * The Kryo instance.
      */
     private final Kryo kryo;
 
@@ -22,14 +22,14 @@ public class KryoSerializer implements Serializer {
     }
 
     @Override
-    public byte[] serialize(Object value) {
+    public final byte[] serialize(final Object value) {
         final Output output = new FastOutput(16, 1024);
         kryo.writeClassAndObject(output, value);
         return output.toBytes();
     }
 
     @Override
-    public Object deserialize(byte[] bytes) {
+    public final Object deserialize(final byte[] bytes) {
         return kryo.readClassAndObject(new FastInput(bytes));
     }
 }

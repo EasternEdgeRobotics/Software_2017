@@ -10,7 +10,6 @@ import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ObservableConnection;
 import io.reactivex.netty.protocol.udp.server.UdpServer;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.subjects.Subject;
 import rx.subjects.PublishSubject;
 
@@ -25,6 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * the instance.
  */
 public class UdpEventPublisher implements EventPublisher {
+    /**
+     * The default port to listen on.
+     */
+    private static final int DEFAULT_PORT = 10003;
+
     /**
      * The serializer.
      */
@@ -53,12 +57,12 @@ public class UdpEventPublisher implements EventPublisher {
 
     /**
      * Constructs an EventPublisher that uses the given broadcast address
-     * and listens on port 10003.
+     * and listens on port the default port.
      *
      * @param broadcast the broadcast address to use when emitting events
      */
     public UdpEventPublisher(final String broadcast) {
-        this(broadcast, 10003);
+        this(broadcast, DEFAULT_PORT);
     }
 
     /**
@@ -93,7 +97,7 @@ public class UdpEventPublisher implements EventPublisher {
      *
      * @param value the value to emit
      */
-    public <T extends MutableValueCompanion> void emit(final T value) {
+    public final <T extends MutableValueCompanion> void emit(final T value) {
         outbound.writeBytesAndFlush(serializer.serialize(value.asMutable()));
     }
 
@@ -104,7 +108,7 @@ public class UdpEventPublisher implements EventPublisher {
      * @return an Observable that emits each value of the given type
      */
     @SuppressWarnings("unchecked")
-    public <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz) {
+    public final <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz) {
         if (values.containsKey(clazz)) {
             return (Observable<T>) values.get(clazz);
         }
@@ -125,7 +129,7 @@ public class UdpEventPublisher implements EventPublisher {
      *
      * @param bytes the content of the connection
      */
-    private void connection(byte[] bytes) {
+    private void connection(final byte[] bytes) {
         subject.onNext(serializer.deserialize(bytes));
     }
 }
