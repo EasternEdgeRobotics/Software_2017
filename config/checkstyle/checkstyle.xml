@@ -52,6 +52,12 @@
         <module name="IllegalImport" />
         <module name="RedundantImport" />
         <module name="UnusedImports" />
+        <module name="CustomImportOrder">
+            <property name="thirdPartyPackageRegExp" value=".*" />
+            <property name="specialImportsRegExp" value="com.easternedgerobotics" />
+            <property name="customImportOrderRules" value="SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE" />
+            <property name="sortImportsInGroupAlphabetically" value="true" />
+        </module>
 
         <!-- Checks for Size Violations -->
         <!-- See http://checkstyle.sf.net/config_sizes.html -->
