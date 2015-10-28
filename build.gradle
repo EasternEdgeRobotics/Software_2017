@@ -16,3 +16,11 @@ dependencies {
     compile 'io.reactivex:rxjava:1.0.12'
     compile 'io.reactivex:rxnetty:0.4.11'
 }
+
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << '-Xlint:unchecked' << '-Xdiags:verbose'
+        }
+    }
+}
