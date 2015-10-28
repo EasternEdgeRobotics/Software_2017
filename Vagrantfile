@@ -36,7 +36,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "topside" do |topside|
         topside.ssh.forward_x11 = true
         network topside
-        topside.vm.synced_folder ".", "/home/vagrant/ROV"
+        topside.vm.synced_folder ".", "/home/vagrant/workspace"
         topside.vm.provision "shell", path: "env/provision", privileged: false, args: "topside"
         topside.vm.provision "file", source: "env/gradle.properties", destination: "~/.gradle/gradle.properties"
         topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
