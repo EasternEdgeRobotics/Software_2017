@@ -15,6 +15,7 @@ dependencies {
     compile 'com.esotericsoftware:kryo:3.0.3'
     compile 'io.reactivex:rxjava:1.0.12'
     compile 'io.reactivex:rxnetty:0.4.11'
+    testCompile 'junit:junit:4.12'
 }
 
 allprojects {
@@ -22,5 +23,12 @@ allprojects {
         tasks.withType(JavaCompile) {
             options.compilerArgs << '-Xlint:unchecked' << '-Xdiags:verbose'
         }
+    }
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+        showStandardStreams = true
     }
 }

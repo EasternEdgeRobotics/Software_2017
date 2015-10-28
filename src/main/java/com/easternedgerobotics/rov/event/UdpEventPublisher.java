@@ -1,6 +1,5 @@
 package com.easternedgerobotics.rov.event;
 
-import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.event.io.Serializer;
 import com.easternedgerobotics.rov.value.ImmutableValueCompanion;
 import com.easternedgerobotics.rov.value.MutableValueCompanion;
@@ -11,7 +10,6 @@ import io.reactivex.netty.channel.ObservableConnection;
 import io.reactivex.netty.protocol.udp.server.UdpServer;
 import rx.Observable;
 import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +36,7 @@ public class UdpEventPublisher implements EventPublisher {
      * The @{link rx.subjects.Subject} used to pass values along to
      * subscribers.
      */
-    private final Subject subject;
+    private final PublishSubject<Object> subject;
 
     /**
      * The outbound broadcast connection.
@@ -56,27 +54,6 @@ public class UdpEventPublisher implements EventPublisher {
     private final UdpServer<DatagramPacket, DatagramPacket> server;
 
     /**
-     * Constructs an EventPublisher that uses the given broadcast address
-     * and listens on port the default port.
-     *
-     * @param broadcast the broadcast address to use when emitting events
-     */
-    public UdpEventPublisher(final String broadcast) {
-        this(broadcast, DEFAULT_PORT);
-    }
-
-    /**
-     * Constructs an EventPublisher that uses the given broadcast
-     * address and listens on the given port.
-     *
-     * @param broadcast the broadcast address to use when emitting events
-     * @param port the port to listen for connections on
-     */
-    public UdpEventPublisher(final String broadcast, final int port) {
-        this(new KryoSerializer(), broadcast, port);
-    }
-
-    /**
      * Constructs an EventPublisher with the given serializer and broadcast
      * address that listens on the given port.
      *
@@ -84,12 +61,18 @@ public class UdpEventPublisher implements EventPublisher {
      * @param broadcast the broadcast address to use when emitting events
      * @param port the port to listen for connections on
      */
-    public UdpEventPublisher(final Serializer sr, final String broadcast, final int port) {
+    public UdpEventPublisher(
+        final Serializer sr,
+        final int port,
+        final String broadcast,
+        final int broadcastPort
+    ) {
         serializer = sr;
         subject = PublishSubject.create();
-        outbound = RxNetty.createUdpClient(broadcast, port).connect().toBlocking().first();
+        outbound = RxNetty.createUdpClient(broadcast, broadcastPort).connect().toBlocking().first();
         values = new ConcurrentHashMap<Class, Object>();
         server = RxNetty.createUdpServer(port, new UdpConnectionHandler(this::connection));
+        server.start();
     }
 
     /**
@@ -122,6 +105,13 @@ public class UdpEventPublisher implements EventPublisher {
 
         values.put(clazz, observable);
         return observable;
+    }
+
+    /**
+     * Stops receiving and broadcasting events.
+     */
+    public final void stop() throws InterruptedException {
+        server.shutdown();
     }
 
     /**
