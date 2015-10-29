@@ -7,6 +7,8 @@ class Bar {
     Bar() {
 
     }
+
+    @SuppressWarnings({"checkstyle:visibilitymodifier"})
     public int x;
 }
 
@@ -14,11 +16,16 @@ class Foo {
     Foo() {
 
     }
+
+    @SuppressWarnings({"checkstyle:visibilitymodifier"})
     public int y;
+
+    @SuppressWarnings({"checkstyle:visibilitymodifier"})
     public Bar b;
 }
 
 public class KryoSerializerTest {
+    @SuppressWarnings({"checkstyle:magicnumber"})
     @Test
     public final void serializeShouldReturnBytes() {
         final Foo f = new Foo();
@@ -34,6 +41,7 @@ public class KryoSerializerTest {
     }
 
     @Test
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:indentation"})
     public final void deserializeShould() {
         final byte[] bytes = {
               1,   0,  99, 111, 109,  46, 101,  97, 115, 116, 101, 114, 110,

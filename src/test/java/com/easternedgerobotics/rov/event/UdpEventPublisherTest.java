@@ -7,6 +7,7 @@ import org.junit.Test;
 
 public class UdpEventPublisherTest {
     @Test
+    @SuppressWarnings({"checkstyle:magicnumber"})
     public final void valuesOfTypeShouldReceiveEmittedValue() throws InterruptedException {
         final Serializer serializer = new TestValueSerializer();
         final UdpEventPublisher eventPublisherA = new UdpEventPublisher(serializer, 1234, "127.0.0.1", 4321);
