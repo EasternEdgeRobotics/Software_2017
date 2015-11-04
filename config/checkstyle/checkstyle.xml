@@ -29,7 +29,13 @@
        <property name="message" value="Line has trailing spaces." />
     </module>
 
+    <module name="SuppressWarningsFilter" />
+
     <module name="TreeWalker">
+        <!-- Allow disabling rules via annotations -->
+        <!-- See http://checkstyle.sourceforge.net/config_annotation.html -->
+        <module name="SuppressWarningsHolder" />
+
         <!-- Validates Javadoc comments to help ensure they are well formed -->
         <!-- See http://checkstyle.sf.net/config_javadoc.html -->
         <module name="JavadocStyle" />
