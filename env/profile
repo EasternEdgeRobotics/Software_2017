@@ -7,3 +7,4 @@ PS1="\u@\h \W $ "
 
 alias la='ls -lA'
 alias lo='logout'
+alias lshosts='nmap -sP 192.168.88.1/24'
