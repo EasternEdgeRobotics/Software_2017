@@ -42,7 +42,7 @@ public class KryoSerializerTest {
 
     @Test
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:indentation"})
-    public final void deserializeShould() {
+    public final void deserializeShouldDeserializeBytes() {
         final byte[] bytes = {
               1,   0,  99, 111, 109,  46, 101,  97, 115, 116, 101, 114, 110,
             101, 100, 103, 101, 114, 111,  98, 111, 116, 105,  99, 115,  46,
