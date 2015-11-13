@@ -58,7 +58,7 @@ multipleStartScripts {
     mainClasses = [
         'picamera': 'com.easternedgerobotics.rov.Picamera',
         'rov': 'com.easternedgerobotics.rov.Rov',
-        'topside': 'com.easternedgerobotics.rov.Topside',
+        'topside': 'com.easternedgerobotics.rov.VideoPlayer',
     ]
 }
 
