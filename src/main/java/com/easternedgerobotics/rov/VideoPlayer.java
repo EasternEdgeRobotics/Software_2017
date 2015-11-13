@@ -25,6 +25,7 @@ public final class VideoPlayer {
     private static final int Y = 1080;
 
     public static void main(final String[] args) throws IOException, InterruptedException {
+        System.setProperty("sun.java2d.opengl", "true");
         final URLProtocolManager manager = URLProtocolManager.getManager();
         manager.registerFactory("tcp", (final String protocol, final String sURL, final int flags) -> {
             try {
