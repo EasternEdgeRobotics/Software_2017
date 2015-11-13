@@ -23,29 +23,29 @@ public class HumbleVideoDecoder implements VideoDecoder {
      * @param filename the media resource locator to open
      * @return a VideoDecoder instance tied to the given MRL
      */
-    public static VideoDecoder make(final String filename) throws IOException, InterruptedException {
-        final Demuxer demuxer = Demuxer.make();
-        demuxer.open(filename, null, false, true, null, null);
+    public static Observable<VideoDecoder> make(final String filename) {
+        final Observable<VideoDecoder> decoderObservable = Observable.create((subscriber) -> {
+            try {
+                final Demuxer demuxer = Demuxer.make();
+                demuxer.open(filename, null, false, true, null, null);
 
-        int videoStreamId = -1;
-        Decoder videoDecoder = null;
-        for (int i = 0; i < demuxer.getNumStreams(); i++) {
-            final DemuxerStream stream = demuxer.getStream(i);
-            final Decoder decoder = stream.getDecoder();
-            if (decoder != null && decoder.getCodecType() == MediaDescriptor.Type.MEDIA_VIDEO) {
-                videoStreamId = i;
-                videoDecoder = decoder;
-                break;
+                for (int i = 0; i < demuxer.getNumStreams(); i++) {
+                    final DemuxerStream stream = demuxer.getStream(i);
+                    final Decoder decoder = stream.getDecoder();
+
+                    if (decoder != null && decoder.getCodecType() == MediaDescriptor.Type.MEDIA_VIDEO) {
+                        decoder.open(null, null);
+                        subscriber.onNext(new HumbleVideoDecoder(demuxer, decoder, i));
+                        subscriber.onCompleted();
+                        return;
+                    }
+                }
+            } catch (final IOException | InterruptedException ex) {
+                subscriber.onError(ex);
             }
-        }
+        });
 
-        if (videoStreamId == -1) {
-            return null;
-        }
-
-        videoDecoder.open(null, null);
-
-        return new HumbleVideoDecoder(demuxer, videoDecoder, videoStreamId);
+        return decoderObservable.subscribeOn(Schedulers.io());
     }
 
     private final Demuxer demuxer;
