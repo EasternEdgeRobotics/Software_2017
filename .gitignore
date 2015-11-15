@@ -1,6 +1,15 @@
 .vagrant
 .gradle
+*gradle/
+*gradlew/
+gradle
+gradle.bat
+gradlew
+gradlew.bat
 *.mp4
 *.class
+*.jar
+*.idea
+*.iml
 
 build
