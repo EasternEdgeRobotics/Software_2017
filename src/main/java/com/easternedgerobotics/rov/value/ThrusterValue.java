@@ -36,23 +36,23 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
         return new ThrusterValue(thruster);
     }
 
-    public static ThrusterValue setSpeed(
-        final ThrusterValue old,
-        final float speed
-    ) {
-        final Thruster thruster = new Thruster();
-        thruster.name = old.getName();
-        thruster.speed = speed;
-        thruster.voltage = old.getVoltage();
-        thruster.current = old.getCurrent();
-        thruster.temperature = old.getTemperature();
-        return new ThrusterValue(thruster);
-    }
-
     private final Thruster thruster;
 
     ThrusterValue(final Thruster thruster) {
         this.thruster = thruster;
+    }
+
+
+    public ThrusterValue setSpeed(
+        final float speed
+    ) {
+        return ThrusterValue.create(
+            thruster.name,
+            speed,
+            thruster.voltage,
+            thruster.current,
+            thruster.temperature
+        );
     }
 
     public String getName() {
