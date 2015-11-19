@@ -16,8 +16,8 @@ sudo apt-get autoclean
 
 [[ $(hostname) = "$1" ]] || sudo hostnamectl 'set-hostname' "$1"
 
-if [[ ! -d '.bin/gradle-2.8' ]]
+if [[ ! -d '.bin/gradle-2.9' ]]
 then
-    curl --remote-name --location --silent 'https://downloads.gradle.org/distributions/gradle-2.8-bin.zip'
-    unzip -d '.bin' 'gradle-2.8-bin.zip' && rm 'gradle-2.8-bin.zip'
+    curl --remote-name --location --silent 'https://downloads.gradle.org/distributions/gradle-2.9-bin.zip'
+    unzip -d '.bin' 'gradle-2.9-bin.zip' && rm 'gradle-2.9-bin.zip'
 fi
