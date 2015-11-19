@@ -132,7 +132,6 @@
         <module name="FinalClass" />
         <module name="HideUtilityClassConstructor" />
         <module name="InterfaceIsType" />
-        <module name="VisibilityModifier" />
 
         <module name="ArrayTypeStyle" />
         <module name="OuterTypeFilename" />
