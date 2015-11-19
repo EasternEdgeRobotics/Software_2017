@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+
+apt-get install -y isc-dhcp-server
+cat > /etc/default/isc-dhcp-server <<END
+# Defaults for isc-dhcp-server initscript
+# sourced by /etc/init.d/isc-dhcp-server
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+DHCPD_CONF=/etc/dhcp/dhcpd.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+DHCPD_PID=/var/run/dhcpd.pid
+
+# Additional options to start dhcpd with.
+#     Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#     Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACES="eth1"
+END
+
+cp /tmp/dhcpd.conf /etc/dhcp/dhcpd.conf && rm /tmp/dhcpd.conf
+service isc-dhcp-server restart
