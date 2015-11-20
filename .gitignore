@@ -9,11 +9,13 @@
 ._*
 
 *.class
+*.h264
 *.idea
 *.iml
 *.iws
 *.jar
 *.log
+*.mp4
 *.mp4
 
 /gradle/
