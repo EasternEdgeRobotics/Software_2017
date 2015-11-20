@@ -38,7 +38,7 @@ Vagrant.configure(2) do |config|
         rasprime.vm.hostname = "rasprime"
     end
 
-    config.vm.define "topside" do |topside|
+    config.vm.define "topside", primary: true do |topside|
         topside.ssh.forward_x11 = true
         topside.vm.hostname = "topside"
         if network_interfaces_available?
