@@ -35,12 +35,21 @@ Vagrant.configure(2) do |config|
 
     config.vm.define "topside" do |topside|
         topside.ssh.forward_x11 = true
-        network topside
+        topside.vm.hostname = "topside"
+        if network_interfaces_available?
+            topside.vm.network "public_network", bridge: NETWORK_INTERFACES, ip: "192.168.88.2"
+        else
+            topside.vm.network "private_network", type: "dhcp"
+        end
         topside.vm.synced_folder ".", "/home/vagrant/workspace"
-        topside.vm.provision "shell", path: "env/provision", privileged: false, args: "topside"
+        topside.vm.provision "shell", path: "env/provision", privileged: false
         topside.vm.provision "file", source: "env/gradle.properties", destination: "~/.gradle/gradle.properties"
         topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
         topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
+        topside.vm.provision "file", source: "env/dhcpd.conf", destination: "/tmp/dhcpd.conf"
+        topside.vm.provision "file", source: "env/squid.conf", destination: "/tmp/squid.conf"
+        topside.vm.provision "shell", path: "env/dhcpd", privileged: true
+        topside.vm.provision "shell", path: "env/squid", privileged: true
         topside.vm.provider "virtualbox" do |virtualbox|
             virtualbox.customize ["modifyvm", :id, "--usb", "on"]
             virtualbox.customize [

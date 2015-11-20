@@ -15,8 +15,6 @@ sudo apt-get install -y \
 sudo apt-get autoremove
 sudo apt-get autoclean
 
-[[ $(hostname) = "$1" ]] || sudo hostnamectl 'set-hostname' "$1"
-
 if [[ ! -d '.bin/gradle-2.9' ]]
 then
     curl --remote-name --location --silent 'https://downloads.gradle.org/distributions/gradle-2.9-bin.zip'
