@@ -67,7 +67,13 @@ Vagrant.configure(2) do |config|
         end
     end
 
-    config.vm.define "camera" do |camera|
-        network camera
+    (1..4).each do |i|
+        config.vm.define "picamera#{i}", autostart: false do |camera|
+            network camera
+            camera.vm.hostname = "picamera#{i}"
+            camera.vm.provider "virtualbox" do |virtualbox|
+                virtualbox.memory = "256"
+            end
+        end
     end
 end
