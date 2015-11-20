@@ -33,6 +33,11 @@ Vagrant.configure(2) do |config|
     config.vm.box = "ubuntu/vivid64"
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
+    config.vm.define "rasprime", autostart: false do |rasprime|
+        network rasprime
+        rasprime.vm.hostname = "rasprime"
+    end
+
     config.vm.define "topside" do |topside|
         topside.ssh.forward_x11 = true
         topside.vm.hostname = "topside"
@@ -60,10 +65,6 @@ Vagrant.configure(2) do |config|
                 "--productid", "0xc215"
             ]
         end
-    end
-
-    config.vm.define "rov" do |rov|
-        network rov
     end
 
     config.vm.define "camera" do |camera|
