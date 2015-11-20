@@ -3,3 +3,6 @@ machine:
     America/St_Johns
   java:
     version: oraclejdk8
+test:
+  pre:
+    - gradle check
