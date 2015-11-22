@@ -13,7 +13,11 @@ def interface_name(interface)
 end
 
 def read_available_bridged_interfaces
-    available_interfaces = %x(VBoxManage list bridgedifs)
+    if Vagrant::Util::Platform.windows?
+        available_interfaces = %x("C:/Program Files/Oracle/VirtualBox/VBoxManage.exe" list bridgedifs)
+    else
+        available_interfaces = %x(VBoxManage list bridgedifs)
+    end
     available_interfaces.split("\n\n").map { |i| interface_name i }
 end
 
