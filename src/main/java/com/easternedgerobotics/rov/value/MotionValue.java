@@ -29,53 +29,53 @@ public class MotionValue implements MutableValueCompanion<Motion> {
         final float yaw,
         final float roll
     ) {
-        final Motion motion = new Motion();
-        motion.heave = heave;
-        motion.sway = sway;
-        motion.surge = surge;
-        motion.pitch = pitch;
-        motion.yaw = yaw;
-        motion.roll = roll;
-        return new MotionValue(motion);
+        final Motion m = new Motion();
+        m.heave = heave;
+        m.sway = sway;
+        m.surge = surge;
+        m.pitch = pitch;
+        m.yaw = yaw;
+        m.roll = roll;
+        return new MotionValue(m);
     }
 
     private final Motion motion;
 
-    MotionValue(final Motion motion) {
-        this.motion = motion;
+    MotionValue(final Motion m) {
+        this.motion = m;
     }
 
-    public float getHeave() {
+    public final float getHeave() {
         return motion.heave;
     }
 
-    public float getSway() {
+    public final float getSway() {
         return motion.sway;
     }
 
-    public float getSurge() {
+    public final float getSurge() {
         return motion.surge;
     }
 
-    public float getPitch() {
+    public final float getPitch() {
         return motion.pitch;
     }
 
-    public float getYaw() {
+    public final float getYaw() {
         return motion.yaw;
     }
 
-    public float getRoll() {
+    public final float getRoll() {
         return motion.roll;
     }
 
     @Override
-    public Motion asMutable() {
+    public final Motion asMutable() {
         return motion;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format(
             "Motion={%f, %f, %f, %f, %f, %f}",
             motion.heave,

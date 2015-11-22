@@ -17,7 +17,7 @@ public class MotionPowerValue implements MutableValueCompanion<MotionPower> {
      * @param heave the scalar to linear vertical (up/down) motion
      * @param sway the scalar to linear lateral (side-to-side or Port-Starboard) motion
      * @param surge the scalar to linear longitudinal (front/back or Bow/Stern) motion
-     * @param pitch the scalar to Up/down rotation of a vessel about its lateral/Y (side-to-side or Port-Starboasrd) axis
+     * @param pitch the scalar to Up/down rotation of a vessel about its lateral/Y (side-to-side or Port-Starboard) axis
      * @param yaw the scalar to turning rotation of a vessel about its vertical/Z axis
      * @param roll the scalar to tilting rotation of a vessel about its longitudinal/X (front-back or Bow-Stern) axis
      * @return a MotionPowerValue
@@ -31,58 +31,58 @@ public class MotionPowerValue implements MutableValueCompanion<MotionPower> {
         final float yaw,
         final float roll
     ) {
-        final MotionPower motionPower = new MotionPower();
-        motionPower.global = global;
-        motionPower.heave = heave;
-        motionPower.sway = sway;
-        motionPower.surge = surge;
-        motionPower.pitch = pitch;
-        motionPower.yaw = yaw;
-        motionPower.roll = roll;
-        return new MotionPowerValue(motionPower);
+        final MotionPower mp = new MotionPower();
+        mp.global = global;
+        mp.heave = heave;
+        mp.sway = sway;
+        mp.surge = surge;
+        mp.pitch = pitch;
+        mp.yaw = yaw;
+        mp.roll = roll;
+        return new MotionPowerValue(mp);
     }
 
     private final MotionPower motionPower;
 
-    MotionPowerValue(final MotionPower motionPower) {
-        this.motionPower = motionPower;
+    MotionPowerValue(final MotionPower mp) {
+        this.motionPower = mp;
     }
 
-    public float getGloabl() {
+    public final float getGlobal() {
         return motionPower.heave;
     }
 
-    public float getHeave() {
+    public final float getHeave() {
         return motionPower.heave;
     }
 
-    public float getSway() {
+    public final float getSway() {
         return motionPower.sway;
     }
 
-    public float getSurge() {
+    public final float getSurge() {
         return motionPower.surge;
     }
 
-    public float getPitch() {
+    public final float getPitch() {
         return motionPower.pitch;
     }
 
-    public float getYaw() {
+    public final float getYaw() {
         return motionPower.yaw;
     }
 
-    public float getRoll() {
+    public final float getRoll() {
         return motionPower.roll;
     }
 
     @Override
-    public MotionPower asMutable() {
+    public final MotionPower asMutable() {
         return motionPower;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format(
             "MotionPower={%f, %f, %f, %f, %f, %f, %f}",
             motionPower.global,
