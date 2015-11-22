@@ -4,7 +4,7 @@ public class Heartbeat implements ImmutableValueCompanion<HeartbeatValue> {
     public boolean operational;
 
     @Override
-    public HeartbeatValue asImmutable() {
+    public final HeartbeatValue asImmutable() {
         return new HeartbeatValue(this);
     }
 }

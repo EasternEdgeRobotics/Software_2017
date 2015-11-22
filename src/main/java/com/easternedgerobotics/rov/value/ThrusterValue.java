@@ -27,23 +27,23 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
         final float current,
         final float temperature
     ) {
-        final Thruster thruster = new Thruster();
-        thruster.name = name;
-        thruster.speed = speed;
-        thruster.voltage = voltage;
-        thruster.current = current;
-        thruster.temperature = temperature;
-        return new ThrusterValue(thruster);
+        final Thruster t = new Thruster();
+        t.name = name;
+        t.speed = speed;
+        t.voltage = voltage;
+        t.current = current;
+        t.temperature = temperature;
+        return new ThrusterValue(t);
     }
 
     private final Thruster thruster;
 
-    ThrusterValue(final Thruster thruster) {
-        this.thruster = thruster;
+    ThrusterValue(final Thruster t) {
+        this.thruster = t;
     }
 
 
-    public ThrusterValue setSpeed(
+    public final ThrusterValue setSpeed(
         final float speed
     ) {
         return ThrusterValue.create(
@@ -55,33 +55,33 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
         );
     }
 
-    public String getName() {
+    public final String getName() {
         return thruster.name;
     }
 
-    public float getSpeed() {
+    public final float getSpeed() {
         return thruster.speed;
     }
 
-    public float getVoltage() {
+    public final float getVoltage() {
         return thruster.voltage;
     }
 
-    public float getCurrent() {
+    public final float getCurrent() {
         return thruster.current;
     }
 
-    public float getTemperature() {
+    public final float getTemperature() {
         return thruster.temperature;
     }
 
     @Override
-    public Thruster asMutable() {
+    public final Thruster asMutable() {
         return thruster;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format(
             "Thruster={%s, %f, %f, %f, %f}",
             thruster.name,

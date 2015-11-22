@@ -27,21 +27,21 @@ public class HeartbeatValue implements MutableValueCompanion<Heartbeat> {
 
     private final Heartbeat heartbeat;
 
-    HeartbeatValue(final Heartbeat heartbeat){
-        this.heartbeat = heartbeat;
+    HeartbeatValue(final Heartbeat hb) {
+        this.heartbeat = hb;
     }
 
-    public boolean isOperational(){
+    public final boolean isOperational() {
         return heartbeat.operational;
     }
 
     @Override
-    public Heartbeat asMutable() {
+    public final Heartbeat asMutable() {
         return heartbeat;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format(
             "Heartbeat={%d}",
             heartbeat.operational
