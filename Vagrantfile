@@ -1,6 +1,7 @@
 # See <https://docs.vagrantup.com/v2/networking/public_network.html>
 NETWORK_INTERFACES = [
     "en3: Thunderbolt Ethernet",
+    "Killer e2200 PCI-E Gigabit Ethernet Controller (NDIS 6.20)",
 ]
 
 def interface_name(interface)
@@ -13,7 +14,11 @@ def interface_name(interface)
 end
 
 def read_available_bridged_interfaces
-    available_interfaces = %x(VBoxManage list bridgedifs)
+    if Vagrant::Util::Platform.windows?
+        available_interfaces = %x("C:/Program Files/Oracle/VirtualBox/VBoxManage.exe" list bridgedifs)
+    else
+        available_interfaces = %x(VBoxManage list bridgedifs)
+    end
     available_interfaces.split("\n\n").map { |i| interface_name i }
 end
 
@@ -33,14 +38,28 @@ Vagrant.configure(2) do |config|
     config.vm.box = "ubuntu/vivid64"
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
-    config.vm.define "topside" do |topside|
+    config.vm.define "rasprime", autostart: false do |rasprime|
+        network rasprime
+        rasprime.vm.hostname = "rasprime"
+    end
+
+    config.vm.define "topside", primary: true do |topside|
         topside.ssh.forward_x11 = true
-        network topside
+        topside.vm.hostname = "topside"
+        if network_interfaces_available?
+            topside.vm.network "public_network", bridge: NETWORK_INTERFACES, ip: "192.168.88.2"
+        else
+            topside.vm.network "private_network", type: "dhcp"
+        end
         topside.vm.synced_folder ".", "/home/vagrant/workspace"
-        topside.vm.provision "shell", path: "env/provision", privileged: false, args: "topside"
+        topside.vm.provision "shell", path: "env/provision", privileged: false
         topside.vm.provision "file", source: "env/gradle.properties", destination: "~/.gradle/gradle.properties"
         topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
         topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
+        topside.vm.provision "file", source: "env/dhcpd.conf", destination: "/tmp/dhcpd.conf"
+        topside.vm.provision "file", source: "env/squid.conf", destination: "/tmp/squid.conf"
+        topside.vm.provision "shell", path: "env/dhcpd", privileged: true
+        topside.vm.provision "shell", path: "env/squid", privileged: true
         topside.vm.provider "virtualbox" do |virtualbox|
             virtualbox.customize ["modifyvm", :id, "--usb", "on"]
             virtualbox.customize [
@@ -53,11 +72,13 @@ Vagrant.configure(2) do |config|
         end
     end
 
-    config.vm.define "rov" do |rov|
-        network rov
-    end
-
-    config.vm.define "camera" do |camera|
-        network camera
+    (1..4).each do |i|
+        config.vm.define "picamera#{i}", autostart: false do |camera|
+            network camera
+            camera.vm.hostname = "picamera#{i}"
+            camera.vm.provider "virtualbox" do |virtualbox|
+                virtualbox.memory = "256"
+            end
+        end
     end
 end
