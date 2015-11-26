@@ -1,6 +1,7 @@
 # See <https://docs.vagrantup.com/v2/networking/public_network.html>
 NETWORK_INTERFACES = [
     "en3: Thunderbolt Ethernet",
+    "Killer e2200 PCI-E Gigabit Ethernet Controller (NDIS 6.20)",
 ]
 
 def interface_name(interface)
