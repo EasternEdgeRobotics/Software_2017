@@ -80,6 +80,9 @@
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
         <module name="CommentsIndentation"/>
         <module name="EmptyForIteratorPad" />
+        <module name="EmptyLineSeparator">
+           <property name="allowMultipleEmptyLines" value="false"/>
+        </module>
         <module name="MethodParamPad" />
         <module name="NoWhitespaceAfter" />
         <module name="NoWhitespaceBefore" />

@@ -42,7 +42,6 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
         this.thruster = t;
     }
 
-
     public final ThrusterValue setSpeed(
         final float speed
     ) {
