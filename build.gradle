@@ -15,6 +15,7 @@ dependencies {
     compile 'com.esotericsoftware:kryo:3.0.3'
     compile 'io.reactivex:rxjava:1.0.12'
     compile 'io.reactivex:rxnetty:0.4.11'
+    compile 'com.pi4j:pi4j-core:1.0'
     testCompile 'junit:junit:4.12'
 }
 
