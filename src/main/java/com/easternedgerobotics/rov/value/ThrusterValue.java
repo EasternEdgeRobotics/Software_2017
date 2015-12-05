@@ -14,6 +14,24 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
      * Creates a ThrusterValue with the given values.
      *
      * @param name the logical name of the thruster
+     * @return a ThrusterValue
+     */
+    public static ThrusterValue create(
+        final String name
+    ) {
+        final Thruster t = new Thruster();
+        t.name = name;
+        t.speed = 0;
+        t.voltage = 0;
+        t.current = 0;
+        t.temperature = 0;
+        return new ThrusterValue(t);
+    }
+
+    /**
+     * Creates a ThrusterValue with the given values.
+     *
+     * @param name the logical name of the thruster
      * @param speed the desired speed to set the thruster
      * @param voltage the voltage read from the thruster
      * @param current the current read from the thruster
