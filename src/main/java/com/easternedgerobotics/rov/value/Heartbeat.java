@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.value;
 
-public class Heartbeat implements ImmutableValueCompanion<HeartbeatValue> {
+class Heartbeat implements ImmutableValueCompanion<HeartbeatValue> {
     public boolean operational;
 
     @Override

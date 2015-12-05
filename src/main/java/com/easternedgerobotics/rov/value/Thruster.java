@@ -1,9 +1,6 @@
 package com.easternedgerobotics.rov.value;
 
-/**
- * Created by cal on 10/16/2015.
- */
-public class Thruster implements ImmutableValueCompanion<ThrusterValue> {
+class Thruster implements ImmutableValueCompanion<ThrusterValue> {
     public String name;
 
     public float speed;
