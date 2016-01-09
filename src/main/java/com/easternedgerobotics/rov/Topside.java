@@ -5,6 +5,12 @@ import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
 
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -17,9 +23,41 @@ import rx.Observable;
 
 import java.util.concurrent.TimeUnit;
 
-final class Topside {
+final class Topside extends Application {
+    Button start;
+
+    Button stop;
+
     private Topside() {
 
+    }
+
+    @Override
+    public void start(final Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Master Start");
+        start = new Button("Start");
+        stop = new Button("Stop");
+        start.setOnAction(e -> {
+            Sliders.display("Controller Settings");
+            Current.display("Current Sensors");
+            Pressure.display("Pressure Sensors");
+        });
+
+        final int spacing = 5;
+        final int width = 100;
+        final int height = 100;
+        final VBox buttons = new VBox();
+        buttons.setPadding(new Insets(2, 2, 2, 2));
+        buttons.setSpacing(spacing);
+        buttons.getChildren().addAll(start, stop);
+
+        final int minHeight = 85;
+        final int minWidth = 150;
+        final Scene window = new Scene(buttons, width, height);
+        primaryStage.setMinHeight(minHeight);
+        primaryStage.setMinWidth(minWidth);
+        primaryStage.setScene(window);
+        primaryStage.show();
     }
 
     private static final long HEARTBEAT_GAP = 100;
