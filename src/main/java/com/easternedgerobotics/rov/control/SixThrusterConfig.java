@@ -76,6 +76,27 @@ public class SixThrusterConfig {
         float starboardVert = 0;
         float portVert = 0;
 
+        // Included for debugging purposes
+       final StringJoiner sj0 = new StringJoiner(", ", "[ ", " ]")
+           .add("Surge: " + String.valueOf(motionPower.getSurge()))
+           .add("Sway: " + String.valueOf(motionPower.getSway()))
+           .add("Heave: " + String.valueOf(motionPower.getHeave()))
+           .add("Roll: " + String.valueOf(motionPower.getRoll()))
+           .add("Pitch: " + String.valueOf(motionPower.getPitch()))
+           .add("Yaw: " + String.valueOf(motionPower.getYaw()))
+       	   .add("Global: " + String.valueOf(motionPower.getGlobal()));
+       System.out.println(sj0.toString());
+
+	   // Included for debugging purposes
+	    final StringJoiner sj1 = new StringJoiner(", ", "[ ", " ]")
+	          .add("surge: " + String.valueOf(motion.getSurge()))
+	          .add("sway: " + String.valueOf(motion.getSway()))
+	          .add("heave: " + String.valueOf(motion.getHeave()))
+	          .add("roll: " + String.valueOf(motion.getRoll()))
+	          .add("pitch: " + String.valueOf(motion.getPitch()))
+	          .add("yaw: " + String.valueOf(motion.getYaw()));
+	    System.out.println(sj1.toString());
+        
         final float surge = motion.getSurge() * motionPower.getSurge() * motionPower.getGlobal();
         final float heave = motion.getHeave() * motionPower.getHeave() * motionPower.getGlobal();
         final float pitch = motion.getPitch() * motionPower.getPitch() * motionPower.getGlobal();
@@ -105,7 +126,7 @@ public class SixThrusterConfig {
         final float forwardThrustRatio = 1.182f;
 
         if (!(surge == 0 && sway == 0 && yaw == 0)) {
-            starboardFore = -surge + sway - yaw;
+            starboardFore = -surge + sway - yaw; 
             portFore = -surge - sway + yaw;
             starboardAft = surge + sway + yaw;
             portAft = surge - sway - yaw;
@@ -118,9 +139,9 @@ public class SixThrusterConfig {
             ));
 
             final float maxInputMagHorizontal = Collections.max(Arrays.asList(
-                    Math.abs(surge),
-                    Math.abs(sway),
-                    Math.abs(yaw))
+                Math.abs(surge),
+                Math.abs(sway),
+                Math.abs(yaw))
             );
 
             final float horizontalScalar = maxInputMagHorizontal / maxThrustHorizontal;
@@ -141,8 +162,8 @@ public class SixThrusterConfig {
 
 
             final float maxInputMagVertical = Collections.max(Arrays.asList(
-                    Math.abs(starboardVert),
-                    Math.abs(portVert))
+                Math.abs(starboardVert),
+                Math.abs(portVert))
             );
 
             final float verticalScalar = maxInputMagVertical / maxThrustVeritical;
@@ -153,30 +174,30 @@ public class SixThrusterConfig {
         // Positive thrust reduction.
         // Corrects for T200's higher forward efficiency
         // If only one vert is spinning positive, divide that thruster output by the thrust ratio
-        if ((starboardFore > 0 && portVert < 0) || (starboardFore < 0 && portVert > 0)) {
-            if (starboardFore > 0) {
-                starboardFore = starboardFore / forwardThrustRatio;
+        if ((starboardVert > 0 && portVert < 0) || (starboardVert < 0 && portVert > 0)) {
+            if (starboardVert > 0) {
+                starboardVert = starboardVert / forwardThrustRatio;
             } else if (portVert > 0) {
                 portVert = portVert / forwardThrustRatio;
             }
         }
+        
+        eventPublisher.emit(portAftThruster.setSpeed(portAft));
+        eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));		// We take the negative value on thrusters with counter-rotating propellers (stbd)
+        eventPublisher.emit(portForeThruster.setSpeed(portFore));
+        eventPublisher.emit(starboardForeThruster.setSpeed(-starboardFore));	// We take the negative value on thrusters with counter-rotating propellers (stbd)
+        eventPublisher.emit(portVertThruster.setSpeed(portVert));
+        eventPublisher.emit(starboardVertThruster.setSpeed(-starboardVert));	// We take the negative value on thrusters with counter-rotating propellers (stbd)
 
         // Included for debugging purposes
         final StringJoiner sj = new StringJoiner(", ", "[ ", " ]")
-            .add("portFore: " + String.valueOf(portFore))
-            .add("starboardFore: " + String.valueOf(starboardFore))
-            .add("portAft: " + String.valueOf(portAft))
-            .add("starboardAft: " + String.valueOf(starboardAft))
-            .add("starboardVert: " + String.valueOf(starboardVert))
-            .add("portVert: " + String.valueOf(portVert));
+            .add("portFore: " + String.valueOf(portForeThruster.getSpeed()))
+            .add("starboardFore: " + String.valueOf(starboardForeThruster.getSpeed()))
+            .add("portAft: " + String.valueOf(portAftThruster.getSpeed()))
+            .add("starboardAft: " + String.valueOf(starboardAftThruster.getSpeed()))
+            .add("starboardVert: " + String.valueOf(starboardVertThruster.getSpeed()))
+            .add("portVert: " + String.valueOf(portVertThruster.getSpeed()));
         System.out.println(sj.toString());
-
-        eventPublisher.emit(portAftThruster.setSpeed(portAft));
-        eventPublisher.emit(starboardAftThruster.setSpeed(starboardAft));
-        eventPublisher.emit(portForeThruster.setSpeed(portFore));
-        eventPublisher.emit(starboardForeThruster.setSpeed(starboardFore));
-        eventPublisher.emit(portVertThruster.setSpeed(portVert));
-        eventPublisher.emit(starboardVertThruster.setSpeed(starboardVert));
     }
 
     public final void updateZero() {
