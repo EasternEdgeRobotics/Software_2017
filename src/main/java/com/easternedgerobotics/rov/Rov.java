@@ -38,7 +38,7 @@ final class Rov {
 
     public static final String PORT_FORE_NAME = "PortFore";
 
-    public static final String STARBORAD_FORE_NAME = "StarboardFore";
+    public static final String STARBOARD_FORE_NAME = "StarboardFore";
 
     public static final String PORT_VERT_NAME = "PortVert";
 
@@ -50,7 +50,7 @@ final class Rov {
 
     public static final byte PORT_FORE_ADDRESS = 0x2B;
 
-    public static final byte STARBORAD_FORE_ADDRESS = 0x2C;
+    public static final byte STARBOARD_FORE_ADDRESS = 0x2C;
 
     public static final byte PORT_VERT_ADDRESS = 0x2D;
 
@@ -70,7 +70,7 @@ final class Rov {
             final ThrusterValue portAft =       ThrusterValue.create(PORT_AFT_NAME);
             final ThrusterValue starboardAft =  ThrusterValue.create(STARBOARD_AFT_NAME);
             final ThrusterValue portFore =      ThrusterValue.create(PORT_FORE_NAME);
-            final ThrusterValue starboardFore = ThrusterValue.create(STARBORAD_FORE_NAME);
+            final ThrusterValue starboardFore = ThrusterValue.create(STARBOARD_FORE_NAME);
             final ThrusterValue portVert =      ThrusterValue.create(PORT_VERT_NAME);
             final ThrusterValue starboardVert = ThrusterValue.create(STARBOARD_VERT_NAME);
 
@@ -91,7 +91,7 @@ final class Rov {
                 new Thruster(eventPublisher, portAft,       new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
                 new Thruster(eventPublisher, starboardAft,  new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
                 new Thruster(eventPublisher, portFore,      new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
-                new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBORAD_FORE_ADDRESS))),
+                new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
                 new Thruster(eventPublisher, portVert,      new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
                 new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS))),
             };
