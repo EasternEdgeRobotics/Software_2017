@@ -12,6 +12,8 @@ In brief, contributing involves the following process:
 1. ??? (Code review?)
 1. Merge changes into the `master` branch
 
+If interested, see [a complete walkthrough of adding a new feature](https://github.com/EasternEdgeRobotics/2016/wiki/Walkthrough:-Adding-a-feature) on the wiki.
+
 ## The development process
 
 All development happens on GitHub—there exists the possibility of brainstorming happening outside of GitHub, but an attempt should be made to convey all design decisions in a GitHub issue or Pull Request.
