@@ -1,6 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
 apply plugin: 'checkstyle'
 
+applicationName = 'topside'
+version = '1.0.0-SNAPSHOT'
+mainClassName = 'com.easternedgerobotics.rov.Topside'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 checkstyle {
@@ -8,7 +13,7 @@ checkstyle {
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -30,6 +35,14 @@ test {
     testLogging {
         exceptionFormat = 'full'
         showStandardStreams = true
-        events "passed", "skipped", "failed"
+        events 'passed', 'skipped', 'failed'
     }
+}
+
+multipleStartScripts {
+    mainClasses = [
+        'picamera': 'com.easternedgerobotics.rov.Picamera',
+        'rov': 'com.easternedgerobotics.rov.Picamera',
+        'topside': 'com.easternedgerobotics.rov.Picamera',
+    ]
 }
