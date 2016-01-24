@@ -53,7 +53,6 @@ Vagrant.configure(2) do |config|
         end
         topside.vm.synced_folder ".", "/home/vagrant/workspace"
         topside.vm.provision "shell", path: "env/provision", privileged: false
-        topside.vm.provision "file", source: "env/gradle.properties", destination: "~/.gradle/gradle.properties"
         topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
         topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
         topside.vm.provision "file", source: "env/dhcpd.conf", destination: "/tmp/dhcpd.conf"

@@ -1,6 +1,6 @@
+.gradle
 .vagrant
-.gradle*
-gradle*
+
 *.mp4
 *.class
 *.jar
@@ -8,3 +8,6 @@ gradle*
 *.iml
 
 build
+/gradle/
+gradlew
+gradlew.bat
