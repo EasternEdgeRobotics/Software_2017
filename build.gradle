@@ -42,7 +42,7 @@ test {
 multipleStartScripts {
     mainClasses = [
         'picamera': 'com.easternedgerobotics.rov.Picamera',
-        'rov': 'com.easternedgerobotics.rov.Picamera',
-        'topside': 'com.easternedgerobotics.rov.Picamera',
+        'rov': 'com.easternedgerobotics.rov.Rov',
+        'topside': 'com.easternedgerobotics.rov.Topside',
     ]
 }
