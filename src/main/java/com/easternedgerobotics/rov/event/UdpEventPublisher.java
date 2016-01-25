@@ -58,8 +58,9 @@ public class UdpEventPublisher implements EventPublisher {
      * address that listens on the given port.
      *
      * @param sr the serializer to use when emitting events
-     * @param broadcast the broadcast address to use when emitting events
      * @param port the port to listen for connections on
+     * @param broadcast the broadcast address to use when emitting events
+     * @param broadcastPort the port for the broadcast address
      */
     public UdpEventPublisher(
         final Serializer sr,
