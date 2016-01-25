@@ -1,6 +1,7 @@
 .gradle
 .vagrant
 
+*.log
 *.mp4
 *.class
 *.jar
