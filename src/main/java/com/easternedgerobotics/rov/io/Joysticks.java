@@ -67,7 +67,7 @@ public final class Joysticks {
         ));
     }
 
-    public static Observable<Event> events(final Controller controller) {
+    private static Observable<Event> events(final Controller controller) {
         final Observable<Event> events = Observable.create(subscriber -> {
             final EventQueue eventQueue = controller.getEventQueue();
             while (!subscriber.isUnsubscribed()) {
@@ -87,19 +87,19 @@ public final class Joysticks {
         return events.subscribeOn(Schedulers.io()).share();
     }
 
-    public static List<Component> axes(final Controller controller) {
+    private static List<Component> axes(final Controller controller) {
         return Stream.of(controller.getComponents())
             .filter(component -> component.getIdentifier() instanceof Component.Identifier.Axis)
             .collect(Collectors.toList());
     }
 
-    public static List<Component> buttons(final Controller controller) {
+    private static List<Component> buttons(final Controller controller) {
         return Stream.of(controller.getComponents())
             .filter(component -> component.getIdentifier() instanceof Component.Identifier.Button)
             .collect(Collectors.toList());
     }
 
-    public static Observable<Controller> availableControllers() {
+    private static Observable<Controller> availableControllers() {
         final Observable<Controller> controllers = Observable.create(subscriber -> {
             Stream.of(ControllerEnvironment.getDefaultEnvironment().getControllers()).forEach(subscriber::onNext);
             subscriber.onCompleted();
