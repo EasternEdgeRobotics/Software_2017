@@ -8,11 +8,49 @@ import net.java.games.input.EventQueue;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Joysticks {
+    static void load(final Path directory, final String resource) {
+        try {
+            final ClassLoader loader = Joysticks.class.getClassLoader();
+            Files.copy(
+                loader.getResourceAsStream(resource),
+                directory.resolve(resource),
+                StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static {
+        final Iterable<String> natives = Arrays.asList(
+            "jinput-dx8_64.dll",
+            "jinput-dx8.dll",
+            "jinput-raw_64.dll",
+            "jinput-raw.dll",
+            "jinput-wintab.dll",
+            "libjinput-linux64.so",
+            "libjinput-linux.so",
+            "libjinput-osx.jnilib");
+
+        try {
+            final Path tmpdir = Files.createTempDirectory("jinput");
+
+            natives.forEach(lib -> Joysticks.load(tmpdir, lib));
+            System.setProperty("net.java.games.input.librarypath", tmpdir.toString());
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Joysticks() {
 
     }
