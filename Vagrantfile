@@ -61,6 +61,7 @@ Vagrant.configure(2) do |config|
         topside.vm.provision "shell", path: "env/squid", privileged: true
         topside.vm.provider "virtualbox" do |virtualbox|
             virtualbox.linked_clone = true if Vagrant::VERSION =~ /^1.8/
+            virtualbox.memory = "2048"
             virtualbox.customize ["modifyvm", :id, "--usb", "on"]
             virtualbox.customize [
                 "usbfilter", "add", "0",
