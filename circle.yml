@@ -14,3 +14,5 @@ general:
 test:
   pre:
     - gradle check
+  override:
+    - gradle jacocoTestReport
