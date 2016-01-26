@@ -19,4 +19,14 @@ public interface EventPublisher {
      * @return an Observable that emits each value of the given type
      */
     public <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz);
+
+    /**
+     * Stops receiving and broadcasting events.
+     */
+    public void stop();
+
+    /**
+     * Block until this event publisher completes.
+     */
+    public void await() throws InterruptedException;
 }

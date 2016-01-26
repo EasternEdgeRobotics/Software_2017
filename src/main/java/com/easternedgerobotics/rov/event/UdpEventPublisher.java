@@ -108,11 +108,21 @@ public class UdpEventPublisher implements EventPublisher {
         return observable;
     }
 
+    @Override
+    public final void await() throws InterruptedException {
+        server.waitTillShutdown();
+    }
+
     /**
      * Stops receiving and broadcasting events.
      */
-    public final void stop() throws InterruptedException {
-        server.shutdown();
+    @Override
+    public final void stop() {
+        try {
+            server.shutdown();
+        } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
