@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
+apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 
 applicationName = 'topside'
@@ -10,6 +11,10 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 
 checkstyle {
     toolVersion = '6.11.2'
+}
+
+jacoco {
+    toolVersion = '0.7.5.201505241946'
 }
 
 repositories {
