@@ -77,15 +77,15 @@ public class SixThrusterConfig {
         float portVert = 0;
 
         // Included for debugging purposes
-       final StringJoiner sj0 = new StringJoiner(", ", "[ ", " ]")
-           .add("Surge: " + String.valueOf(motionPower.getSurge()))
-           .add("Sway: " + String.valueOf(motionPower.getSway()))
-           .add("Heave: " + String.valueOf(motionPower.getHeave()))
-           .add("Roll: " + String.valueOf(motionPower.getRoll()))
-           .add("Pitch: " + String.valueOf(motionPower.getPitch()))
-           .add("Yaw: " + String.valueOf(motionPower.getYaw()))
-       	   .add("Global: " + String.valueOf(motionPower.getGlobal()));
-       System.out.println(sj0.toString());
+//       final StringJoiner sj0 = new StringJoiner(", ", "[ ", " ]")
+//           .add("Surge: " + String.valueOf(motionPower.getSurge()))
+//           .add("Sway: " + String.valueOf(motionPower.getSway()))
+//           .add("Heave: " + String.valueOf(motionPower.getHeave()))
+//           .add("Roll: " + String.valueOf(motionPower.getRoll()))
+//           .add("Pitch: " + String.valueOf(motionPower.getPitch()))
+//           .add("Yaw: " + String.valueOf(motionPower.getYaw()))
+//       	   .add("Global: " + String.valueOf(motionPower.getGlobal()));
+//       System.out.println(sj0.toString());
 
 	   // Included for debugging purposes
 	    final StringJoiner sj1 = new StringJoiner(", ", "[ ", " ]")
@@ -198,6 +198,16 @@ public class SixThrusterConfig {
             .add("starboardVert: " + String.valueOf(starboardVertThruster.getSpeed()))
             .add("portVert: " + String.valueOf(portVertThruster.getSpeed()));
         System.out.println(sj.toString());
+        
+        // Included for debugging purposes
+//        final StringJoiner sj2 = new StringJoiner(", ", "[ ", " ]")
+//            .add("portFore: " + String.valueOf(portFore))
+//            .add("starboardFore: " + String.valueOf(-starboardFore))
+//            .add("portAft: " + String.valueOf(portAft))
+//            .add("starboardAft: " + String.valueOf(-starboardAft))
+//            .add("starboardVert: " + String.valueOf(-starboardVert))
+//            .add("portVert: " + String.valueOf(portVert));
+//        System.out.println(sj2.toString());
     }
 
     public final void updateZero() {

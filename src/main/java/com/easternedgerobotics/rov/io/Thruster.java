@@ -16,17 +16,27 @@ public class Thruster {
 
     private static final int READ_BUFFER_SIZE = 9;
 
-    private static final int VOLTAGE_INDEX = 0;
+    private static final int VOLTAGE_INDEX = 2;
 
-    private static final int CURRENT_INDEX = 2;
+    private static final float VOLTAGE_SCALAR = 0.0004921f;
 
-    private static final float CURRENT_SCALAR = 5.0f * 6.45f / 65536.0f;
+    private static final int CURRENT_INDEX = 6;
 
-    private static final int TEMPERATURE_INDEX = 6;
+    private static final float CURRENT_SCALAR = 0.001122f;
+    
+    private static final int CURRENT_OFFSET = 32767;
 
-    private static final float TEMPERATURE_OFFSET = 32767;
-
-    private static final float TEMPERATURE_SCALAR =  5.0f * 14.706f / 65535.0f;
+    private static final int TEMPERATURE_INDEX = 4;
+    
+    // Constants for temperature calculation
+    private static final int SERIESRESISTOR = 3300;
+    
+    private static final int THERMISTORNOMINAL = 10000;
+    
+    private static final int BCOEFFICIENT = 3900;
+    
+    private static final int TEMPERATURENOMINAL = 25;
+    //
 
     private final byte[] zeroBuffer = new byte[] {0x00, 0x00};
 
@@ -35,6 +45,8 @@ public class Thruster {
     private ThrusterValue thrusterValue;
 
     private EventPublisher eventPublisher;
+    
+    private boolean initialized;
 
     public Thruster(final EventPublisher event, final ThrusterValue thruster, final Device dev) {
 
@@ -43,6 +55,8 @@ public class Thruster {
         eventPublisher = event;
 
         thrusterValue = thruster;
+        
+        initialized = false;
 
         eventPublisher.valuesOfType(ThrusterValue.class).subscribe(t -> {
             if (thrusterValue.getName().equals(t.getName())) {
@@ -54,7 +68,10 @@ public class Thruster {
     public final void write() throws IOException {
         final short speed = (short) (thrusterValue.getSpeed() * Short.MAX_VALUE);
         final byte[] writeBuffer = ByteBuffer.allocate(2).putShort(speed).array();
-        device.write(WRITE_ADDRESS, zeroBuffer);
+        if (!initialized){
+        	device.write(WRITE_ADDRESS, zeroBuffer);
+        	initialized = true;
+        }
         device.write(WRITE_ADDRESS, writeBuffer);
     }
 
@@ -65,9 +82,9 @@ public class Thruster {
     public final void read() throws IOException {
         final byte[] readBuffer = device.read(READ_ADDRESS, READ_BUFFER_SIZE);
 
-        final float voltage = parseShort(readBuffer, VOLTAGE_INDEX);
-        final float current = parseShort(readBuffer, CURRENT_INDEX) * CURRENT_SCALAR;
-        final float temperature = (parseShort(readBuffer, TEMPERATURE_INDEX) - TEMPERATURE_OFFSET) * TEMPERATURE_SCALAR;
+        final float voltage = parseShort(readBuffer, VOLTAGE_INDEX) * VOLTAGE_SCALAR;
+        final float current = (parseShort(readBuffer, CURRENT_INDEX) - CURRENT_OFFSET) * CURRENT_SCALAR;
+        final float temperature = calculateTemperature(parseShort(readBuffer, TEMPERATURE_INDEX));
 
         eventPublisher.emit(ThrusterValue.create(
             thrusterValue.getName(),
@@ -83,5 +100,25 @@ public class Thruster {
     // LSB located at offset + 1.
     private short parseShort(final byte[] bytes, final int offset) {
         return (short) (((bytes[offset]) << BYTE_SIZE) | bytes[offset + 1]);
+    }
+    
+    // Pulled from blueESC documentation
+    // http://docs.bluerobotics.com/bluesc/
+    private float calculateTemperature(short temp_raw){
+    	float steinhart;
+    	if (temp_raw == 0){
+    		steinhart = 0;
+    	}
+    	else{
+			float resistance = SERIESRESISTOR/(65535/temp_raw-1);
+			
+			steinhart = resistance / THERMISTORNOMINAL;  		// (R/Ro)
+			steinhart = (float) Math.log(steinhart);     		// ln(R/Ro)
+			steinhart /= BCOEFFICIENT;                   		// 1/B * ln(R/Ro)
+			steinhart += 1.0f / (TEMPERATURENOMINAL + 273.15); 	// + (1/To)
+			steinhart = 1.0f / steinhart;                		// Invert
+			steinhart -= 273.15;                         		// convert to C
+    	}
+		return steinhart;
     }
 }
