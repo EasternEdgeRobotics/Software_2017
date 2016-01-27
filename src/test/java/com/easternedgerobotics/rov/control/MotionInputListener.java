@@ -19,11 +19,11 @@ public class MotionInputListener implements ActionListener {
 	JTextField heave;
 	JTextField yaw;
 	JTextField roll;
-	private ThrusterControlTestView view;
+	private TestView view;
 	private EventPublisher eventPublisher;
 	
 	public MotionInputListener(JTextField surge, JTextField sway, JTextField heave, JTextField yaw,
-						 JTextField roll, ThrusterControlTestModel model, ThrusterControlTestView view){
+						 JTextField roll, TestModel model, TestView view){
 		this.surge = surge;
 		this.sway = sway;
 		this.heave = heave;

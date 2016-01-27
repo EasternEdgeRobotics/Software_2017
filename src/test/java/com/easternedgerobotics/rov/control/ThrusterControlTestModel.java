@@ -4,21 +4,13 @@ import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.event.io.KryoSerializer;
-import com.easternedgerobotics.rov.io.I2CSim;
-import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.ThrusterValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
-
-import rx.Observable;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /* ******
  * Model for testing thruster control. Creates six thrusters and puts them in the sixThrusterConfig.
  */
-final class ThrusterControlTestModel {
+final class ThrusterControlTestModel implements TestModel {
 
     // Rov configuration
 
@@ -81,14 +73,17 @@ final class ThrusterControlTestModel {
         }
     }
     
+    @Override
     public EventPublisher getEventPublisher(){
     	return eventPublisher;
     }
-    
+
+    @Override
     public void update(){
     	thrusterConfig.update();
     }
-    
+
+    @Override
     public void updateZero(){
     	thrusterConfig.updateZero();
     }
