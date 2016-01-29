@@ -1,11 +1,10 @@
 package com.easternedgerobotics.rov.control;
 
-import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.event.io.KryoSerializer;
-import com.easternedgerobotics.rov.value.ThrusterValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
+import com.easternedgerobotics.rov.value.ThrusterValue;
 
 /* ******
  * Model for testing thruster control. Creates six thrusters and puts them in the sixThrusterConfig.
@@ -74,18 +73,18 @@ final class ThrusterControlTestModel implements TestModel {
     }
     
     @Override
-    public EventPublisher getEventPublisher(){
-    	return eventPublisher;
+    public EventPublisher getEventPublisher() {
+        return eventPublisher;
     }
 
     @Override
-    public void update(){
-    	thrusterConfig.update();
+    public void update() {
+        thrusterConfig.update();
     }
 
     @Override
-    public void updateZero(){
-    	thrusterConfig.updateZero();
+    public void updateZero() {
+        thrusterConfig.updateZero();
     }
 
 }

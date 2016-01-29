@@ -4,10 +4,10 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 
 public interface TestModel {
 
-	public EventPublisher getEventPublisher();
-	
-	public void update();
-	
-	public void updateZero();
-	
+    public EventPublisher getEventPublisher();
+    
+    public void update();
+    
+    public void updateZero();
+    
 }

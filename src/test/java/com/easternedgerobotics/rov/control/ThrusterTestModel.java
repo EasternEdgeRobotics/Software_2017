@@ -1,15 +1,14 @@
 package com.easternedgerobotics.rov.control;
 
-import java.io.IOException;
-
-import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.event.io.KryoSerializer;
-import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.value.ThrusterValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
+import com.easternedgerobotics.rov.value.ThrusterValue;
+
+import java.io.IOException;
+
 
 /* ******
  * Model for testing thruster control. Creates six thrusters and puts them in the sixThrusterConfig.
@@ -108,59 +107,52 @@ final class ThrusterTestModel implements TestModel {
     }
     
     @Override
-    public EventPublisher getEventPublisher(){
-    	return eventPublisher;
+    public EventPublisher getEventPublisher() {
+        return eventPublisher;
     }
 
     @Override
-    public void update(){
-    	try{
-	    	thrusterConfig.update();
-	        for (Thruster thruster : thrusters) {
-	            thruster.write();
-	            thruster.read();
-	        }
-    	}
-    	catch (IOException e){
-    		e.printStackTrace();
-    	}
+    public void update() {
+        try {
+            thrusterConfig.update();
+            for (Thruster thruster : thrusters) {
+                thruster.write();
+                thruster.read();
+            }
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void updateZero(){
-    	try{
-	    	thrusterConfig.updateZero();
-	        for (Thruster thruster : thrusters) {
-	            thruster.writeZero();
-	            thruster.read();
-	        }
-		}
-		catch (IOException e){
-			e.printStackTrace();
-		}
+    public void updateZero() {
+        try {
+            thrusterConfig.updateZero();
+            for (Thruster thruster : thrusters) {
+                thruster.writeZero();
+                thruster.read();
+            }
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
     
-    public I2CSim getI2CSim(String name){
-    	I2CSim d = null;
-    	if (name == ThrusterTestModel.PORT_AFT_NAME){
-    		d = portAftDevice;
-    	}
-    	else if (name == ThrusterTestModel.PORT_FORE_NAME){
-    		d = portForeDevice;
-    	}
-    	else if (name == ThrusterTestModel.PORT_VERT_NAME){
-    		d = portVertDevice;
-    	}
-    	else if (name == ThrusterTestModel.STARBOARD_AFT_NAME){
-    		d = stbdAftDevice;
-    	}
-    	else if (name == ThrusterTestModel.STARBOARD_FORE_NAME){
-    		d = stbdForeDevice;
-    	}
-    	else if (name == ThrusterTestModel.STARBOARD_VERT_NAME){
-    		d = stbdVertDevice;
-    	}
-    	return d;
+    public I2CSim getI2CSim(final String name) {
+        I2CSim d = null;
+        if (name == ThrusterTestModel.PORT_AFT_NAME) {
+            d = portAftDevice;
+        } else if (name == ThrusterTestModel.PORT_FORE_NAME) {
+            d = portForeDevice;
+        } else if (name == ThrusterTestModel.PORT_VERT_NAME) {
+            d = portVertDevice;
+        } else if (name == ThrusterTestModel.STARBOARD_AFT_NAME) {
+            d = stbdAftDevice;
+        } else if (name == ThrusterTestModel.STARBOARD_FORE_NAME) {
+            d = stbdForeDevice;
+        } else if (name == ThrusterTestModel.STARBOARD_VERT_NAME) {
+            d = stbdVertDevice;
+        }
+        return d;
     }
 
 }
