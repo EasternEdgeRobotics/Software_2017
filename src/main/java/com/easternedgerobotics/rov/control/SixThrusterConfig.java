@@ -170,7 +170,7 @@ public class SixThrusterConfig {
                 portVert = portVert / forwardThrustRatio;
             }
         }
-        
+
         // We take the negative value on thrusters with counter-rotating propellers (stbd)
         eventPublisher.emit(portAftThruster.setSpeed(portAft));
         eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));

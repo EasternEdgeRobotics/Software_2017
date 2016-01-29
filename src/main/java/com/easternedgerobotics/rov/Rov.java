@@ -127,7 +127,6 @@ final class Rov {
                 }
             });
 
-
         } catch (final UnsatisfiedLinkError | IllegalArgumentException | IOException e) {
             e.printStackTrace();
         }
