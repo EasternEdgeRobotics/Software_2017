@@ -7,7 +7,7 @@ import com.easternedgerobotics.rov.value.ThrusterValue;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.StringJoiner;
+// import java.util.StringJoiner;
 
 public class SixThrusterConfig {
 
@@ -77,25 +77,14 @@ public class SixThrusterConfig {
         float portVert = 0;
 
         // Included for debugging purposes
-//       final StringJoiner sj0 = new StringJoiner(", ", "[ ", " ]")
-//           .add("Surge: " + String.valueOf(motionPower.getSurge()))
-//           .add("Sway: " + String.valueOf(motionPower.getSway()))
-//           .add("Heave: " + String.valueOf(motionPower.getHeave()))
-//           .add("Roll: " + String.valueOf(motionPower.getRoll()))
-//           .add("Pitch: " + String.valueOf(motionPower.getPitch()))
-//           .add("Yaw: " + String.valueOf(motionPower.getYaw()))
-//       	   .add("Global: " + String.valueOf(motionPower.getGlobal()));
-//       System.out.println(sj0.toString());
-
-	   // Included for debugging purposes
-	    final StringJoiner sj1 = new StringJoiner(", ", "[ ", " ]")
-	          .add("surge: " + String.valueOf(motion.getSurge()))
-	          .add("sway: " + String.valueOf(motion.getSway()))
-	          .add("heave: " + String.valueOf(motion.getHeave()))
-	          .add("roll: " + String.valueOf(motion.getRoll()))
-	          .add("pitch: " + String.valueOf(motion.getPitch()))
-	          .add("yaw: " + String.valueOf(motion.getYaw()));
-	    System.out.println(sj1.toString());
+        // final StringJoiner sj1 = new StringJoiner(", ", "[ ", " ]")
+        //     .add("surge: " + String.valueOf(motion.getSurge()))
+        //     .add("sway: " + String.valueOf(motion.getSway()))
+        //     .add("heave: " + String.valueOf(motion.getHeave()))
+        //     .add("roll: " + String.valueOf(motion.getRoll()))
+        //     .add("pitch: " + String.valueOf(motion.getPitch()))
+        //     .add("yaw: " + String.valueOf(motion.getYaw()));
+        // System.out.println(sj1.toString());
         
         final float surge = motion.getSurge() * motionPower.getSurge() * motionPower.getGlobal();
         final float heave = motion.getHeave() * motionPower.getHeave() * motionPower.getGlobal();
@@ -182,32 +171,24 @@ public class SixThrusterConfig {
             }
         }
         
+        // We take the negative value on thrusters with counter-rotating propellers (stbd)
         eventPublisher.emit(portAftThruster.setSpeed(portAft));
-        eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));		// We take the negative value on thrusters with counter-rotating propellers (stbd)
+        eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));
         eventPublisher.emit(portForeThruster.setSpeed(portFore));
-        eventPublisher.emit(starboardForeThruster.setSpeed(-starboardFore));	// We take the negative value on thrusters with counter-rotating propellers (stbd)
+        eventPublisher.emit(starboardForeThruster.setSpeed(-starboardFore));
         eventPublisher.emit(portVertThruster.setSpeed(portVert));
-        eventPublisher.emit(starboardVertThruster.setSpeed(-starboardVert));	// We take the negative value on thrusters with counter-rotating propellers (stbd)
+        eventPublisher.emit(starboardVertThruster.setSpeed(-starboardVert));
 
-        // Included for debugging purposes
-        final StringJoiner sj = new StringJoiner(", ", "[ ", " ]")
-            .add("portFore: " + String.valueOf(portForeThruster.getSpeed()))
-            .add("starboardFore: " + String.valueOf(starboardForeThruster.getSpeed()))
-            .add("portAft: " + String.valueOf(portAftThruster.getSpeed()))
-            .add("starboardAft: " + String.valueOf(starboardAftThruster.getSpeed()))
-            .add("starboardVert: " + String.valueOf(starboardVertThruster.getSpeed()))
-            .add("portVert: " + String.valueOf(portVertThruster.getSpeed()));
-        System.out.println(sj.toString());
         
         // Included for debugging purposes
-//        final StringJoiner sj2 = new StringJoiner(", ", "[ ", " ]")
-//            .add("portFore: " + String.valueOf(portFore))
-//            .add("starboardFore: " + String.valueOf(-starboardFore))
-//            .add("portAft: " + String.valueOf(portAft))
-//            .add("starboardAft: " + String.valueOf(-starboardAft))
-//            .add("starboardVert: " + String.valueOf(-starboardVert))
-//            .add("portVert: " + String.valueOf(portVert));
-//        System.out.println(sj2.toString());
+        // final StringJoiner sj2 = new StringJoiner(", ", "[ ", " ]")
+        //            .add("portFore: " + String.valueOf(portFore))
+        //            .add("starboardFore: " + String.valueOf(-starboardFore))
+        //            .add("portAft: " + String.valueOf(portAft))
+        //            .add("starboardAft: " + String.valueOf(-starboardAft))
+        //            .add("starboardVert: " + String.valueOf(-starboardVert))
+        //            .add("portVert: " + String.valueOf(portVert));
+        // System.out.println(sj2.toString());
     }
 
     public final void updateZero() {

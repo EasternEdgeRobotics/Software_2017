@@ -127,9 +127,6 @@ final class Rov {
                 }
             });
 
-            // Stop program from exiting
-            System.out.println("Press enter to quit");
-            System.in.read();
 
         } catch (final UnsatisfiedLinkError | IllegalArgumentException | IOException e) {
             e.printStackTrace();

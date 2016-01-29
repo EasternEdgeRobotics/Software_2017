@@ -36,6 +36,8 @@ public class Thruster {
     private static final int BCOEFFICIENT = 3900;
     
     private static final int TEMPERATURENOMINAL = 25;
+    
+    private static final float CELSIUSCONVERSION = 273.15f;
     //
 
     private final byte[] zeroBuffer = new byte[] {0x00, 0x00};
@@ -68,9 +70,9 @@ public class Thruster {
     public final void write() throws IOException {
         final short speed = (short) (thrusterValue.getSpeed() * Short.MAX_VALUE);
         final byte[] writeBuffer = ByteBuffer.allocate(2).putShort(speed).array();
-        if (!initialized){
-        	device.write(WRITE_ADDRESS, zeroBuffer);
-        	initialized = true;
+        if (!initialized) {
+            device.write(WRITE_ADDRESS, zeroBuffer);
+            initialized = true;
         }
         device.write(WRITE_ADDRESS, writeBuffer);
     }
@@ -104,21 +106,20 @@ public class Thruster {
     
     // Pulled from blueESC documentation
     // http://docs.bluerobotics.com/bluesc/
-    private float calculateTemperature(short temp_raw){
-    	float steinhart;
-    	if (temp_raw == 0){
-    		steinhart = 0;
-    	}
-    	else{
-			float resistance = SERIESRESISTOR/(65535/temp_raw-1);
-			
-			steinhart = resistance / THERMISTORNOMINAL;  		// (R/Ro)
-			steinhart = (float) Math.log(steinhart);     		// ln(R/Ro)
-			steinhart /= BCOEFFICIENT;                   		// 1/B * ln(R/Ro)
-			steinhart += 1.0f / (TEMPERATURENOMINAL + 273.15); 	// + (1/To)
-			steinhart = 1.0f / steinhart;                		// Invert
-			steinhart -= 273.15;                         		// convert to C
-    	}
-		return steinhart;
+    private float calculateTemperature(final short tempRaw) {
+        float steinhart;
+        if (tempRaw == 0) {
+            steinhart = 0;
+        } else {
+            final float resistance = SERIESRESISTOR / (65535 / tempRaw - 1);
+            
+            steinhart = resistance / THERMISTORNOMINAL;
+            steinhart = (float) Math.log(steinhart);
+            steinhart /= BCOEFFICIENT;
+            steinhart += 1.0f / (TEMPERATURENOMINAL + CELSIUSCONVERSION);
+            steinhart = 1.0f / steinhart;
+            steinhart -= CELSIUSCONVERSION;
+        }
+        return steinhart;
     }
 }
