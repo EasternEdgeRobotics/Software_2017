@@ -58,8 +58,9 @@ public class UdpEventPublisher implements EventPublisher {
      * address that listens on the given port.
      *
      * @param sr the serializer to use when emitting events
-     * @param broadcast the broadcast address to use when emitting events
      * @param port the port to listen for connections on
+     * @param broadcast the broadcast address to use when emitting events
+     * @param broadcastPort the port for the broadcast address
      */
     public UdpEventPublisher(
         final Serializer sr,
@@ -107,11 +108,21 @@ public class UdpEventPublisher implements EventPublisher {
         return observable;
     }
 
+    @Override
+    public final void await() throws InterruptedException {
+        server.waitTillShutdown();
+    }
+
     /**
      * Stops receiving and broadcasting events.
      */
-    public final void stop() throws InterruptedException {
-        server.shutdown();
+    @Override
+    public final void stop() {
+        try {
+            server.shutdown();
+        } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
