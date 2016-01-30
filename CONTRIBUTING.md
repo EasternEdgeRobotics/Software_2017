@@ -9,6 +9,10 @@ In brief, contributing involves the following process:
 1. ??? (Make changes?)
 1. Push the changes to GitHub
 1. [Open a Pull Request](https://help.github.com/articles/creating-a-pull-request/)
+1. ??? (Code review?)
+1. Merge changes into the `master` branch
+
+If interested, see [a complete walkthrough of adding a new feature](https://github.com/EasternEdgeRobotics/2016/wiki/Walkthrough:-Adding-a-feature) on the wiki.
 
 ## The development process
 
@@ -30,8 +34,8 @@ Issue should be used liberally. Example usage:
 
 (See also: "`master` should be stable" above for information about branches.)
 
-Pull Requests are the means by which branches are merged into `master`. Open a Pull Request and describe what changes are being introduced.
+Pull Requests (PR) are the means by which branches are merged into `master`. Open a Pull Request and describe what changes are being introduced. When a PR is submitted or updated with more commits, [CircleCI](https://circleci.com/gh/EasternEdgeRobotics/2016) will run "tests" against just the most recent of them and update the PR to reflect whether it passed or failed. You can run the same "tests" locally via `gradle check` and `gradle test`.
 
 ### Style Guide
 
-To be described—try to keep with the style of the document.
+The project uses [Checkstyle](http://checkstyle.sourceforge.net) to enforce some Java practices and certain formatting styles. These checks will be run automatically before Pull Requests are merged into `master` and can be run locally via `gradle check`.
