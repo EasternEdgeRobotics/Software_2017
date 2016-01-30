@@ -6,7 +6,7 @@ import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.ThrusterValue;
 
-/* ******
+/**
  * Model for testing thruster control. Creates six thrusters and puts them in the sixThrusterConfig.
  */
 final class ThrusterControlTestModel implements TestModel {
@@ -24,21 +24,21 @@ final class ThrusterControlTestModel implements TestModel {
     public static final String PORT_VERT_NAME = "PortVert";
 
     public static final String STARBOARD_VERT_NAME = "StarboardVert";
-    
+
     private ThrusterValue portAft;
-    
+
     private ThrusterValue starboardAft;
-    
+
     private ThrusterValue portFore;
-    
+
     private ThrusterValue starboardFore;
-    
+
     private ThrusterValue portVert;
-    
+
     private ThrusterValue starboardVert;
-    
+
     private EventPublisher eventPublisher;
-    
+
     private SixThrusterConfig thrusterConfig;
 
     public ThrusterControlTestModel(final String broadcast, final int port) {
@@ -63,7 +63,7 @@ final class ThrusterControlTestModel implements TestModel {
                 portVert,
                 starboardVert
             );
-            
+
             // Set all power levels to 1 so motion values are unaffected
             eventPublisher.emit(MotionPowerValue.create(1, 1, 1, 1, 1, 1, 1));
 
@@ -71,7 +71,7 @@ final class ThrusterControlTestModel implements TestModel {
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public EventPublisher getEventPublisher() {
         return eventPublisher;

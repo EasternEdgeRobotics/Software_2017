@@ -8,28 +8,34 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 
-
-/* ******
- * Publishes motion values based on user input in the Thruster Control Test View. 
+/**
+ * Publishes motion values based on user input in the Thruster Control Test View.
  */
 public class MotionInputListener implements ActionListener {
 
     JTextField surge;
-    
+
     JTextField sway;
-    
+
     JTextField heave;
-    
+
     JTextField yaw;
-    
+
     JTextField roll;
-    
+
     private TestView view;
-    
+
     private EventPublisher eventPublisher;
-    
-    public MotionInputListener(final JTextField surgeField, final JTextField swayField, final JTextField heaveField,
-            final JTextField yawField, final JTextField rollField, final TestModel model, final TestView testView) {
+
+    public MotionInputListener(
+        final JTextField surgeField,
+        final JTextField swayField,
+        final JTextField heaveField,
+        final JTextField yawField,
+        final JTextField rollField,
+        final TestModel model,
+        final TestView testView
+    ) {
         this.surge = surgeField;
         this.sway = swayField;
         this.heave = heaveField;
@@ -49,5 +55,4 @@ public class MotionInputListener implements ActionListener {
         eventPublisher.emit(HeartbeatValue.create(true));
         view.refresh();
     }
-
 }

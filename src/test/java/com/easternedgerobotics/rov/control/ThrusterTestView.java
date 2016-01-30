@@ -12,38 +12,38 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-/* *****
+/**
  * A small GUI for sending motion values (joystick) and receiving thruster values.
  * Run the main to launch the GUI.
  */
 public class ThrusterTestView extends JFrame implements TestView {
 
     public static final long SLEEP_DURATION = 10L;
-    
+
     private static final long MAX_HEARTBEAT_GAP = 500L;
-    
+
     private final String broadcast = "localhost";
-    
+
     private final int port = 8000;
-    
+
     private static final int GRID_WIDTH = 3;
-    
+
     private static final int GRID_HEIGHT = 4;
-    
+
     private static final int FRAME_WIDTH = 500;
-    
+
     private static final int FRAME_HEIGHT = 100;
-    
+
     // Client connection state
     private boolean isOperational = false;
-    
+
     private long lastClientUpdate = System.currentTimeMillis();
-    
+
     private ThrusterTestModel model;
-    
+
     public ThrusterTestView() {
         model = new ThrusterTestModel(broadcast, port);
-        
+
         setLayout(new GridLayout(GRID_HEIGHT, GRID_WIDTH));
 
         final JTextField surgeInput = new JTextField(1);
@@ -66,7 +66,7 @@ public class ThrusterTestView extends JFrame implements TestView {
         add(yawInput);
         add(rollInput);
         add(inputSubmit);
-        
+
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -98,12 +98,12 @@ public class ThrusterTestView extends JFrame implements TestView {
             }
         });
     }
-    
+
     @Override
     public void refresh() {
-        
+
     }
-    
+
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

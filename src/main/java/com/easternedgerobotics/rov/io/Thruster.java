@@ -23,22 +23,21 @@ public class Thruster {
     private static final int CURRENT_INDEX = 6;
 
     private static final float CURRENT_SCALAR = 0.001122f;
-    
+
     private static final int CURRENT_OFFSET = 32767;
 
     private static final int TEMPERATURE_INDEX = 4;
-    
+
     // Constants for temperature calculation
     private static final int SERIESRESISTOR = 3300;
-    
+
     private static final int THERMISTORNOMINAL = 10000;
-    
+
     private static final int BCOEFFICIENT = 3900;
-    
+
     private static final int TEMPERATURENOMINAL = 25;
-    
+
     private static final float CELSIUSCONVERSION = 273.15f;
-    //
 
     private final byte[] zeroBuffer = new byte[] {0x00, 0x00};
 
@@ -47,17 +46,13 @@ public class Thruster {
     private ThrusterValue thrusterValue;
 
     private EventPublisher eventPublisher;
-    
+
     private boolean initialized;
 
-    public Thruster(final EventPublisher event, final ThrusterValue thruster, final Device dev) {
-
-        device = dev;
-
+    public Thruster(final EventPublisher event, final ThrusterValue thruster, final Device device) {
+        this.device = device;
         eventPublisher = event;
-
         thrusterValue = thruster;
-        
         initialized = false;
 
         eventPublisher.valuesOfType(ThrusterValue.class).subscribe(t -> {
@@ -103,7 +98,7 @@ public class Thruster {
     private short parseShort(final byte[] bytes, final int offset) {
         return (short) (((bytes[offset]) << BYTE_SIZE) | bytes[offset + 1]);
     }
-    
+
     // Pulled from blueESC documentation
     // http://docs.bluerobotics.com/bluesc/
     private float calculateTemperature(final short tempRaw) {
@@ -112,7 +107,7 @@ public class Thruster {
             steinhart = 0;
         } else {
             final float resistance = SERIESRESISTOR / (65535 / tempRaw - 1);
-            
+
             steinhart = resistance / THERMISTORNOMINAL;
             steinhart = (float) Math.log(steinhart);
             steinhart /= BCOEFFICIENT;

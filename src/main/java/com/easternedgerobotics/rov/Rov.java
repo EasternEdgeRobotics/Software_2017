@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 final class Rov {
-
     // Rov configuration
     public static final long SLEEP_DURATION = 10L;
 

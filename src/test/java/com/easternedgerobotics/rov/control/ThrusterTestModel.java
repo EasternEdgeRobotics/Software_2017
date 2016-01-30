@@ -9,8 +9,7 @@ import com.easternedgerobotics.rov.value.ThrusterValue;
 
 import java.io.IOException;
 
-
-/* ******
+/**
  * Model for testing thruster control. Creates six thrusters and puts them in the sixThrusterConfig.
  */
 final class ThrusterTestModel implements TestModel {
@@ -40,23 +39,23 @@ final class ThrusterTestModel implements TestModel {
     public static final byte PORT_VERT_ADDRESS = 0x2D;
 
     public static final byte STARBOARD_VERT_ADDRESS = 0x2E;
-    
+
     private I2CSim portAftDevice;
-    
+
     private I2CSim portForeDevice;
-    
+
     private I2CSim portVertDevice;
-    
+
     private I2CSim stbdAftDevice;
-    
+
     private I2CSim stbdForeDevice;
-    
+
     private I2CSim stbdVertDevice;
-    
+
     private EventPublisher eventPublisher;
-    
+
     private SixThrusterConfig thrusterConfig;
-    
+
     private Thruster[] thrusters;
 
     public ThrusterTestModel(final String broadcast, final int port) {
@@ -81,14 +80,14 @@ final class ThrusterTestModel implements TestModel {
                 portVert,
                 starboardVert
             );
-            
+
             portAftDevice = new I2CSim(PORT_AFT_ADDRESS);
             portForeDevice = new I2CSim(PORT_FORE_ADDRESS);
             portVertDevice = new I2CSim(PORT_VERT_ADDRESS);
             stbdAftDevice = new I2CSim(STARBOARD_AFT_ADDRESS);
             stbdForeDevice = new I2CSim(STARBOARD_FORE_ADDRESS);
             stbdVertDevice = new I2CSim(STARBOARD_VERT_ADDRESS);
-            
+
             thrusters = new Thruster[] {
                 new Thruster(eventPublisher, portAft,       portAftDevice),
                 new Thruster(eventPublisher, starboardAft,  stbdAftDevice),
@@ -97,7 +96,7 @@ final class ThrusterTestModel implements TestModel {
                 new Thruster(eventPublisher, portVert,      portVertDevice),
                 new Thruster(eventPublisher, starboardVert, stbdVertDevice),
             };
-            
+
             // Set all power levels to 1 so motion values are unaffected
             eventPublisher.emit(MotionPowerValue.create(1, 1, 1, 1, 1, 1, 1));
 
@@ -105,7 +104,7 @@ final class ThrusterTestModel implements TestModel {
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public EventPublisher getEventPublisher() {
         return eventPublisher;
@@ -136,7 +135,7 @@ final class ThrusterTestModel implements TestModel {
             e.printStackTrace();
         }
     }
-    
+
     public I2CSim getI2CSim(final String name) {
         I2CSim d = null;
         if (name == ThrusterTestModel.PORT_AFT_NAME) {
