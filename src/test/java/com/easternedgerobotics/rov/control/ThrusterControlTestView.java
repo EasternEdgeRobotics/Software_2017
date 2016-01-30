@@ -12,62 +12,62 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-/* *****
+/**
  * A small GUI for sending motion values (joystick) and receiving thruster values.
  * Run the main to launch the GUI.
  */
 public class ThrusterControlTestView extends JFrame implements TestView {
 
     public static final long SLEEP_DURATION = 10L;
-    
+
     private static final long MAX_HEARTBEAT_GAP = 500L;
-    
+
     private final String broadcast = "localhost";
-    
+
     private final int port = 8000;
-    
+
     private static final int GRID_WIDTH = 3;
-    
+
     private static final int GRID_HEIGHT = 8;
-    
+
     private static final int FRAME_WIDTH = 500;
-    
+
     private static final int FRAME_HEIGHT = 200;
-    
+
     // Client connection state
     private boolean isOperational = false;
-    
+
     private long lastClientUpdate = System.currentTimeMillis();
-    
+
     private ThrusterControlTestModel model;
-    
+
     private final JLabel portForeOutput = new JLabel();
-    
+
     private final JLabel portAftOutput = new JLabel();
-    
+
     private final JLabel portVertOutput = new JLabel();
-    
+
     private final JLabel stbdForeOutput = new JLabel();
-    
+
     private final JLabel stbdAftOutput = new JLabel();
-    
+
     private final JLabel stbdVertOutput = new JLabel();
-    
+
     private ThrusterValueListener portForeListener;
-    
+
     private ThrusterValueListener portAftListener;
-    
+
     private ThrusterValueListener portVertListener;
-    
+
     private ThrusterValueListener stbdForeListener;
-    
+
     private ThrusterValueListener stbdAftListener;
-    
+
     private ThrusterValueListener stbdVertListener;
-    
+
     public ThrusterControlTestView() {
         model = new ThrusterControlTestModel(broadcast, port);
-        
+
         setLayout(new GridLayout(GRID_HEIGHT, GRID_WIDTH));
 
         portForeListener = new ThrusterValueListener(model, ThrusterControlTestModel.PORT_FORE_NAME);
@@ -109,7 +109,7 @@ public class ThrusterControlTestView extends JFrame implements TestView {
         add(yawInput);
         add(rollInput);
         add(inputSubmit);
-        
+
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -141,7 +141,7 @@ public class ThrusterControlTestView extends JFrame implements TestView {
             }
         });
     }
-    
+
     @Override
     public final void refresh() {
         portForeOutput.setText(String.valueOf(portForeListener.getOutput()));
@@ -151,7 +151,7 @@ public class ThrusterControlTestView extends JFrame implements TestView {
         stbdAftOutput.setText(String.valueOf(stbdAftListener.getOutput()));
         stbdVertOutput.setText(String.valueOf(stbdVertListener.getOutput()));
     }
-    
+
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

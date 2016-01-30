@@ -7,7 +7,6 @@ import com.easternedgerobotics.rov.value.ThrusterValue;
 
 import java.util.Arrays;
 import java.util.Collections;
-// import java.util.StringJoiner;
 
 public class SixThrusterConfig {
 
@@ -29,15 +28,16 @@ public class SixThrusterConfig {
 
     private EventPublisher eventPublisher;
 
-    public SixThrusterConfig(final EventPublisher e,
-                             final ThrusterValue portAft,
-                             final ThrusterValue starboardAft,
-                             final ThrusterValue portFore,
-                             final ThrusterValue starboardFore,
-                             final ThrusterValue portVert,
-                             final ThrusterValue starboardVert
+    public SixThrusterConfig(
+        final EventPublisher eventPublisher,
+        final ThrusterValue portAft,
+        final ThrusterValue starboardAft,
+        final ThrusterValue portFore,
+        final ThrusterValue starboardFore,
+        final ThrusterValue portVert,
+        final ThrusterValue starboardVert
     ) {
-        eventPublisher = e;
+        this.eventPublisher = eventPublisher;
 
         portAftThruster = portAft;
         starboardAftThruster = starboardAft;
@@ -76,16 +76,6 @@ public class SixThrusterConfig {
         float starboardVert = 0;
         float portVert = 0;
 
-        // Included for debugging purposes
-        // final StringJoiner sj1 = new StringJoiner(", ", "[ ", " ]")
-        //     .add("surge: " + String.valueOf(motion.getSurge()))
-        //     .add("sway: " + String.valueOf(motion.getSway()))
-        //     .add("heave: " + String.valueOf(motion.getHeave()))
-        //     .add("roll: " + String.valueOf(motion.getRoll()))
-        //     .add("pitch: " + String.valueOf(motion.getPitch()))
-        //     .add("yaw: " + String.valueOf(motion.getYaw()));
-        // System.out.println(sj1.toString());
-        
         final float surge = motion.getSurge() * motionPower.getSurge() * motionPower.getGlobal();
         final float heave = motion.getHeave() * motionPower.getHeave() * motionPower.getGlobal();
         final float pitch = motion.getPitch() * motionPower.getPitch() * motionPower.getGlobal();
@@ -115,7 +105,7 @@ public class SixThrusterConfig {
         final float forwardThrustRatio = 1.182f;
 
         if (!(surge == 0 && sway == 0 && yaw == 0)) {
-            starboardFore = -surge + sway - yaw; 
+            starboardFore = -surge + sway - yaw;
             portFore = -surge - sway + yaw;
             starboardAft = surge + sway + yaw;
             portAft = surge - sway - yaw;
@@ -170,7 +160,7 @@ public class SixThrusterConfig {
                 portVert = portVert / forwardThrustRatio;
             }
         }
-        
+
         // We take the negative value on thrusters with counter-rotating propellers (stbd)
         eventPublisher.emit(portAftThruster.setSpeed(portAft));
         eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));
@@ -178,17 +168,6 @@ public class SixThrusterConfig {
         eventPublisher.emit(starboardForeThruster.setSpeed(-starboardFore));
         eventPublisher.emit(portVertThruster.setSpeed(portVert));
         eventPublisher.emit(starboardVertThruster.setSpeed(-starboardVert));
-
-        
-        // Included for debugging purposes
-        // final StringJoiner sj2 = new StringJoiner(", ", "[ ", " ]")
-        //            .add("portFore: " + String.valueOf(portFore))
-        //            .add("starboardFore: " + String.valueOf(-starboardFore))
-        //            .add("portAft: " + String.valueOf(portAft))
-        //            .add("starboardAft: " + String.valueOf(-starboardAft))
-        //            .add("starboardVert: " + String.valueOf(-starboardVert))
-        //            .add("portVert: " + String.valueOf(portVert));
-        // System.out.println(sj2.toString());
     }
 
     public final void updateZero() {
