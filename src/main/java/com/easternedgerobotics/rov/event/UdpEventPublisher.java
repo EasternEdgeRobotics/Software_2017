@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.event;
 
+import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.event.io.Serializer;
 import com.easternedgerobotics.rov.value.ImmutableValueCompanion;
 import com.easternedgerobotics.rov.value.MutableValueCompanion;
@@ -52,6 +53,16 @@ public class UdpEventPublisher implements EventPublisher {
      * The UDP server.
      */
     private final UdpServer<DatagramPacket, DatagramPacket> server;
+
+    /**
+     * Constructs an EventPublisher that broadcasts event to the given brodcast
+     * address on the default port.
+     *
+     * @param broadcast the broadcast address to use when emitting events.
+     */
+    public UdpEventPublisher(final String broadcast) {
+        this(new KryoSerializer(), DEFAULT_PORT, broadcast, DEFAULT_PORT);
+    }
 
     /**
      * Constructs an EventPublisher with the given serializer and broadcast

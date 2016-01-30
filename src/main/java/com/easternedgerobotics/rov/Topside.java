@@ -2,6 +2,8 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
+import com.easternedgerobotics.rov.io.Joystick;
+import com.easternedgerobotics.rov.io.Joysticks;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,13 +51,11 @@ public final class Topside {
                 System.exit(0);
             }
 
-            final EventPublisher eventPublisher = new UdpEventPublisher(
-                new KryoSerializer(),
-                UdpEventPublisher.DEFAULT_PORT,
-                arguments.getOptionValue("b"),
-                UdpEventPublisher.DEFAULT_PORT);
+            final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final HeartbeatController hearbeatController = new HeartbeatController(
                 eventPublisher, Observable.interval(HEARTBEAT_GAP, TimeUnit.MILLISECONDS));
+            final Observable<Joystick> joystick = Joysticks.logitechExtreme3dPro();
+            joystick.flatMap(Joystick::axes).subscribe(new JoystickObserver(eventPublisher));
 
             hearbeatController.start();
 
