@@ -1,6 +1,7 @@
 - hosts: captain
   become: yes
   become_method: sudo
+  gather_facts: no
   tasks:
     - name: Install htop
       apt: name=htop state=latest

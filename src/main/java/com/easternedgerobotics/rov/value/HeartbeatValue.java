@@ -43,7 +43,7 @@ public class HeartbeatValue implements MutableValueCompanion<Heartbeat> {
     @Override
     public final String toString() {
         return String.format(
-            "Heartbeat={%d}",
+            "Heartbeat={%b}",
             heartbeat.operational
         );
     }

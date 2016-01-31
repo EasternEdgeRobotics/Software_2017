@@ -3,15 +3,14 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
-import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.ThrusterValue;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -19,62 +18,65 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
+import org.pmw.tinylog.Logger;
 import rx.Observable;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 final class Rov {
-    // Rov configuration
-    public static final long SLEEP_DURATION = 10L;
+    private static final long MAX_HEARTBEAT_GAP = 5;
 
-    private static final long MAX_HEARTBEAT_GAP = 500L;
+    private static final long SLEEP_DURATION = 10L;
 
-    public static final String PORT_AFT_NAME = "PortAft";
+    private static final String PORT_AFT_NAME = "PortAft";
 
-    public static final String STARBOARD_AFT_NAME = "StarboardAft";
+    private static final String STARBOARD_AFT_NAME = "StarboardAft";
 
-    public static final String PORT_FORE_NAME = "PortFore";
+    private static final String PORT_FORE_NAME = "PortFore";
 
-    public static final String STARBOARD_FORE_NAME = "StarboardFore";
+    private static final String STARBOARD_FORE_NAME = "StarboardFore";
 
-    public static final String PORT_VERT_NAME = "PortVert";
+    private static final String PORT_VERT_NAME = "PortVert";
 
-    public static final String STARBOARD_VERT_NAME = "StarboardVert";
+    private static final String STARBOARD_VERT_NAME = "StarboardVert";
 
-    public static final byte PORT_AFT_ADDRESS = 0x29;
+    private static final byte PORT_AFT_ADDRESS = 0x2A;
 
-    public static final byte STARBOARD_AFT_ADDRESS = 0x2A;
+    private static final byte STARBOARD_AFT_ADDRESS = 0x2C;
 
-    public static final byte PORT_FORE_ADDRESS = 0x2B;
+    private static final byte PORT_FORE_ADDRESS = 0x2D;
 
-    public static final byte STARBOARD_FORE_ADDRESS = 0x2C;
+    private static final byte STARBOARD_FORE_ADDRESS = 0x2E;
 
-    public static final byte PORT_VERT_ADDRESS = 0x2D;
+    private static final byte PORT_VERT_ADDRESS = 0x2F;
 
-    public static final byte STARBOARD_VERT_ADDRESS = 0x2E;
+    private static final byte STARBOARD_VERT_ADDRESS = 0x2B;
 
-    // Client connection state
-    private boolean isOperational = false;
+    private final SixThrusterConfig thrusterConfig;
 
-    private long lastClientUpdate = System.currentTimeMillis();
+    private final List<Thruster> thrusters;
 
-    private Rov(final String broadcast, final int port) {
+    private final EventPublisher eventPublisher;
+
+    private Rov(final EventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+
         try {
-            // Set up event publisher
-            final EventPublisher eventPublisher = new UdpEventPublisher(new KryoSerializer(), port, broadcast, port);
+            final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 
-            // Create initial thruster values
-            final ThrusterValue portAft =       ThrusterValue.create(PORT_AFT_NAME);
-            final ThrusterValue starboardAft =  ThrusterValue.create(STARBOARD_AFT_NAME);
-            final ThrusterValue portFore =      ThrusterValue.create(PORT_FORE_NAME);
+            final ThrusterValue portAft = ThrusterValue.create(PORT_AFT_NAME);
+            final ThrusterValue starboardAft = ThrusterValue.create(STARBOARD_AFT_NAME);
+            final ThrusterValue portFore = ThrusterValue.create(PORT_FORE_NAME);
             final ThrusterValue starboardFore = ThrusterValue.create(STARBOARD_FORE_NAME);
-            final ThrusterValue portVert =      ThrusterValue.create(PORT_VERT_NAME);
+            final ThrusterValue portVert = ThrusterValue.create(PORT_VERT_NAME);
             final ThrusterValue starboardVert = ThrusterValue.create(STARBOARD_VERT_NAME);
 
-            // Create control which creates next-step thruster values
-            final SixThrusterConfig thrusterConfig = new SixThrusterConfig(eventPublisher,
+            this.thrusterConfig = new SixThrusterConfig(
+                eventPublisher,
                 portAft,
                 starboardAft,
                 portFore,
@@ -83,72 +85,54 @@ final class Rov {
                 starboardVert
             );
 
-            // Create devices which sends thruster values
-            final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
-
-            final Thruster[] thrusters =  {
-                new Thruster(eventPublisher, portAft,       new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
-                new Thruster(eventPublisher, starboardAft,  new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
-                new Thruster(eventPublisher, portFore,      new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
+            this.thrusters = Collections.unmodifiableList(Arrays.asList(
+                new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
+                new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
+                new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
                 new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
-                new Thruster(eventPublisher, portVert,      new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
-                new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS))),
-            };
-
-            // Subscribe to the client heartbeats
-            eventPublisher.valuesOfType(HeartbeatValue.class).subscribe(heartbeatValue -> {
-                isOperational = heartbeatValue.isOperational();
-                lastClientUpdate = System.currentTimeMillis();
-            });
-
-            // thread to update controls and devices with
-            final Observable<Boolean> operationalObserver = Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
-                .map(l -> (System.currentTimeMillis() - lastClientUpdate > MAX_HEARTBEAT_GAP) && isOperational);
-
-            // define on and off conditions for the rov
-            operationalObserver.subscribe(operational -> {
-                try {
-                    if (operational) {
-                        thrusterConfig.update();
-                        for (Thruster thruster : thrusters) {
-                            thruster.write();
-                            thruster.read();
-                        }
-                    } else {
-                        thrusterConfig.updateZero();
-                        for (Thruster thruster : thrusters) {
-                            thruster.writeZero();
-                            thruster.read();
-                        }
-                    }
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-
-        } catch (final UnsatisfiedLinkError | IllegalArgumentException | IOException e) {
-            e.printStackTrace();
+                new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
+                new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
+            ));
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
+
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS).subscribe(this::thrustersUpdate);
+    }
+
+    public void shutdown() {
+        Logger.info("Shutting down ROV");
+        thrusterConfig.updateZero();
+        thrusters.forEach(thruster -> {
+            try {
+                thruster.writeZero();
+            } catch (final IOException ex) {
+                Logger.error(ex);
+            }
+        });
+        eventPublisher.stop();
+    }
+
+    private void thrustersUpdate(final long tick) {
+        thrusterConfig.update();
+        thrusters.forEach(thruster -> {
+            try {
+                thruster.write();
+            } catch (final IOException ex) {
+                Logger.error(ex);
+            }
+        });
     }
 
     public static void main(final String[] args) throws InterruptedException {
         final String app = "rov";
         final HelpFormatter formatter = new HelpFormatter();
-
         final Option broadcast = Option.builder("b")
             .longOpt("broadcast")
             .hasArg()
             .argName("ADDRESS")
             .desc("use ADDRESS to broadcast messages")
             .required()
-            .build();
-        final Option port = Option.builder("p")
-            .longOpt("port")
-            .hasArg()
-            .argName("PORT")
-            .type(Integer.class)
-            .desc("listen on PORT for broadcast messages")
             .build();
         final Option help = Option.builder()
             .longOpt("help")
@@ -157,7 +141,6 @@ final class Rov {
 
         final Options options = new Options();
         options.addOption(broadcast);
-        options.addOption(port);
         options.addOption(help);
 
         try {
@@ -168,10 +151,20 @@ final class Rov {
                 System.exit(0);
             }
 
-            new Rov(arguments.getOptionValue("b"), Integer.parseInt(arguments.getOptionValue("p")));
+            final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
+            final Rov rov = new Rov(eventPublisher);
 
+            eventPublisher.valuesOfType(HeartbeatValue.class)
+                .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+                .subscribe(new RovStatusController(rov));
+
+            final float safeAirRatio = 0.1f;
+            eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
+
+            Logger.info("Waiting");
+            eventPublisher.await();
         } catch (final ParseException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.event;
 
+import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.event.io.Serializer;
 import com.easternedgerobotics.rov.value.ImmutableValueCompanion;
 import com.easternedgerobotics.rov.value.MutableValueCompanion;
@@ -54,12 +55,23 @@ public class UdpEventPublisher implements EventPublisher {
     private final UdpServer<DatagramPacket, DatagramPacket> server;
 
     /**
+     * Constructs an EventPublisher that broadcasts event to the given brodcast
+     * address on the default port.
+     *
+     * @param broadcast the broadcast address to use when emitting events.
+     */
+    public UdpEventPublisher(final String broadcast) {
+        this(new KryoSerializer(), DEFAULT_PORT, broadcast, DEFAULT_PORT);
+    }
+
+    /**
      * Constructs an EventPublisher with the given serializer and broadcast
      * address that listens on the given port.
      *
      * @param sr the serializer to use when emitting events
-     * @param broadcast the broadcast address to use when emitting events
      * @param port the port to listen for connections on
+     * @param broadcast the broadcast address to use when emitting events
+     * @param broadcastPort the port for the broadcast address
      */
     public UdpEventPublisher(
         final Serializer sr,
@@ -107,11 +119,21 @@ public class UdpEventPublisher implements EventPublisher {
         return observable;
     }
 
+    @Override
+    public final void await() throws InterruptedException {
+        server.waitTillShutdown();
+    }
+
     /**
      * Stops receiving and broadcasting events.
      */
-    public final void stop() throws InterruptedException {
-        server.shutdown();
+    @Override
+    public final void stop() {
+        try {
+            server.shutdown();
+        } catch (final InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
