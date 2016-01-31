@@ -45,7 +45,7 @@ public class LogitechExtremeJoystick implements Joystick {
      * Each emitted value contains a complete view of the joystick in
      * the following order:
      * <p>
-     * <pre><code>(x, y, rx, ry, z, t)</code></pre>
+     * <pre><code>(x, y, rx, z, t)</code></pre>
      *
      * @return the stream of axis values.
      */
