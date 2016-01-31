@@ -16,11 +16,12 @@ final class JoystickObserver implements Observer<JoystickAxesValue> {
     @Override
     public void onNext(final JoystickAxesValue joystickAxesValue) {
         final float roll = 0;
+        final float pitch = 0;
         eventPublisher.emit(MotionValue.create(
-            joystickAxesValue.getAxisValue(4),
+            joystickAxesValue.getAxisValue(3),
             joystickAxesValue.getAxisValue(0),
             joystickAxesValue.getAxisValue(1),
-            joystickAxesValue.getAxisValue(3),
+            pitch,
             joystickAxesValue.getAxisValue(2),
             roll
         ));
