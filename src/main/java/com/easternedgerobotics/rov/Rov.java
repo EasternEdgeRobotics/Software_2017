@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 final class Rov {
-    private static final long MAX_HEARTBEAT_GAP = 500;
+    private static final long MAX_HEARTBEAT_GAP = 5;
 
     private static final long SLEEP_DURATION = 10L;
 
@@ -155,7 +155,7 @@ final class Rov {
             final Rov rov = new Rov(eventPublisher);
 
             eventPublisher.valuesOfType(HeartbeatValue.class)
-                .timeout(MAX_HEARTBEAT_GAP, TimeUnit.MILLISECONDS)
+                .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
                 .subscribe(new RovStatusController(rov));
 
             final float safeAirRatio = 0.1f;
