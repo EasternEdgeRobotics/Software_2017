@@ -6,6 +6,7 @@ import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.ThrusterValue;
 
 import com.pi4j.io.i2c.I2CBus;
@@ -156,6 +157,9 @@ final class Rov {
             eventPublisher.valuesOfType(HeartbeatValue.class)
                 .timeout(MAX_HEARTBEAT_GAP, TimeUnit.MILLISECONDS)
                 .subscribe(new RovStatusController(rov));
+
+            final float safeAirRatio = 0.1f;
+            eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
 
             Logger.info("Waiting");
             eventPublisher.await();
