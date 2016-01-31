@@ -49,7 +49,7 @@ public class MotionPowerValue implements MutableValueCompanion<MotionPower> {
     }
 
     public final float getGlobal() {
-        return motionPower.heave;
+        return motionPower.global;
     }
 
     public final float getHeave() {
