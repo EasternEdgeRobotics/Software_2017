@@ -77,7 +77,4 @@ Vagrant.configure(2) do |config|
     config.vm.synced_folder ".", "/home/vagrant/workspace"
     config.vm.synced_folder ".", "/vagrant", disabled: true
     config.vm.box = "ubuntu/vivid64"
-    config.vm.provider "virtualbox" do |virtualbox|
-        virtualbox.linked_clone = true
-    end
 end
