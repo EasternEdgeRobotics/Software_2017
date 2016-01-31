@@ -26,61 +26,58 @@ def network_interfaces_available?
     (read_available_bridged_interfaces & NETWORK_INTERFACES).any?
 end
 
-def network(config)
+def network(config, ip: nil)
     if network_interfaces_available?
-        config.vm.network "public_network", bridge: NETWORK_INTERFACES
+        config.vm.network "public_network", bridge: NETWORK_INTERFACES, ip: ip
     else
         config.vm.network "private_network", type: "dhcp"
     end
 end
 
 Vagrant.configure(2) do |config|
-    config.vm.box = "ubuntu/vivid64"
-    config.vm.synced_folder ".", "/vagrant", disabled: true
+    config.vm.define "topside", autostart: false do |topside|
+        network topside, ip: "192.168.88.2"
+
+        topside.ssh.forward_x11 = true
+    end
+
+    config.vm.define "captain", autostart: false do |captain|
+        network captain, ip: "192.168.88.3"
+
+        captain.vm.provision "shell",
+            privileged: false,
+            name: "Install Ansible",
+            inline: %(
+                sudo apt-get -y install cowsay
+                sudo apt-add-repository -y ppa:ansible/ansible
+                sudo apt-get update
+                sudo apt-get -y install ansible
+            )
+
+        captain.vm.provider "virtualbox" do |virtualbox|
+            virtualbox.memory = "2048"
+        end
+    end
 
     config.vm.define "rasprime", autostart: false do |rasprime|
         network rasprime
-        rasprime.vm.hostname = "rasprime"
     end
 
-    config.vm.define "topside", primary: true do |topside|
-        topside.ssh.forward_x11 = true
-        topside.vm.hostname = "topside"
-        if network_interfaces_available?
-            topside.vm.network "public_network", bridge: NETWORK_INTERFACES, ip: "192.168.88.2"
-        else
-            topside.vm.network "private_network", type: "dhcp"
-        end
-        topside.vm.synced_folder ".", "/home/vagrant/workspace"
-        topside.vm.provision "shell", path: "env/provision", privileged: false
-        topside.vm.provision "file", source: "env/inputrc", destination: "~/.inputrc"
-        topside.vm.provision "file", source: "env/profile", destination: "~/.bash_profile"
-        topside.vm.provision "file", source: "env/dhcpd.conf", destination: "/tmp/dhcpd.conf"
-        topside.vm.provision "file", source: "env/squid.conf", destination: "/tmp/squid.conf"
-        topside.vm.provision "shell", path: "env/dhcpd", privileged: true
-        topside.vm.provision "shell", path: "env/squid", privileged: true
-        topside.vm.provider "virtualbox" do |virtualbox|
-            virtualbox.linked_clone = true if Vagrant::VERSION =~ /^1.8/
-            virtualbox.memory = "2048"
-            virtualbox.customize ["modifyvm", :id, "--usb", "on"]
-            virtualbox.customize [
-                "usbfilter", "add", "0",
-                "--target", :id,
-                "--name", "Logitech Extreme 3D Pro Joystick",
-                "--vendorid", "0x046d",
-                "--productid", "0xc215"
-            ]
-        end
-    end
-
-    (1..4).each do |i|
+    (1..2).each do |i|
         config.vm.define "picamera#{i}", autostart: false do |camera|
             network camera
-            camera.vm.hostname = "picamera#{i}"
+
             camera.vm.provider "virtualbox" do |virtualbox|
-                virtualbox.linked_clone = true if Vagrant::VERSION =~ /^1.8/
                 virtualbox.memory = "256"
             end
         end
+    end
+
+    # All machines
+    config.vm.synced_folder ".", "/home/vagrant/workspace"
+    config.vm.synced_folder ".", "/vagrant", disabled: true
+    config.vm.box = "ubuntu/wily64"
+    config.vm.provider "virtualbox" do |virtualbox|
+        virtualbox.linked_clone = true
     end
 end
