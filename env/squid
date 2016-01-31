@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-apt-get install -y 'squid3'
-cp /tmp/squid.conf /etc/squid3/squid.conf
-service squid3 restart

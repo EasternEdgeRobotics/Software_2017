@@ -1,0 +1,15 @@
+- hosts: rasprime
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  vars:
+    proxy:
+      http_proxy: http://192.168.88.3:3128
+      https_proxy: http://192.168.88.3:3128
+  tasks:
+    - name: Install htop
+      apt: name=htop state=latest
+      environment: "{{proxy}}"
+    - name: Install Java 8 Runtime
+      apt: name=openjdk-8-jre state=latest
+      environment: "{{proxy}}"
