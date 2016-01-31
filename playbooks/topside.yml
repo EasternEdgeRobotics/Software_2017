@@ -1,0 +1,26 @@
+- hosts: topside
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  vars:
+    proxy:
+      http_proxy: http://192.168.88.3:3128
+      https_proxy: http://192.168.88.3:3128
+  tasks:
+    - name: Install htop
+      apt: name=htop state=latest
+      environment: "{{proxy}}"
+    - name: Install Java 8 Runtime
+      apt: name=openjdk-8-jre state=latest
+      environment: "{{proxy}}"
+    - name: Install DHCP Server
+      apt: name=isc-dhcp-server state=latest
+      environment: "{{proxy}}"
+    - name: Configure DHCP Service
+      copy: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
+    - name: Configure DHCP Server
+      copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
+      notify: Restart DHCP Server
+  handlers:
+    - name: Restart DHCP Server
+      service: name=isc-dhcp-server state=restarted

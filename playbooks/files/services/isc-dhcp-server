@@ -1,9 +1,3 @@
-#!/usr/bin/env bash
-
-set -e
-
-apt-get install -y isc-dhcp-server
-cat > /etc/default/isc-dhcp-server <<END
 # Defaults for isc-dhcp-server initscript
 # sourced by /etc/init.d/isc-dhcp-server
 
@@ -19,8 +13,4 @@ OPTIONS=""
 
 # On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
 #     Separate multiple interfaces with spaces, e.g. "eth0 eth1".
-INTERFACES="eth1"
-END
-
-cp /tmp/dhcpd.conf /etc/dhcp/dhcpd.conf && rm /tmp/dhcpd.conf
-service isc-dhcp-server restart
+INTERFACES="enp2s0"
