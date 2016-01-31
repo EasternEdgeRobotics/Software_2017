@@ -120,8 +120,8 @@ public class SixThrusterConfig {
             final float maxInputMagHorizontal = Collections.max(Arrays.asList(
                 Math.abs(surge),
                 Math.abs(sway),
-                Math.abs(yaw))
-            );
+                Math.abs(yaw)
+            ));
 
             final float horizontalScalar = maxInputMagHorizontal / maxThrustHorizontal;
             starboardFore *= horizontalScalar;
