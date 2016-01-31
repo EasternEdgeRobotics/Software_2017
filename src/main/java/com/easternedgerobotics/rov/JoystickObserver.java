@@ -14,6 +14,7 @@ final class JoystickObserver implements Observer<JoystickAxesValue> {
     }
 
     @Override
+    @SuppressWarnings({"checkstyle:magicnumber"})
     public void onNext(final JoystickAxesValue joystickAxesValue) {
         final float roll = 0;
         final float pitch = 0;
