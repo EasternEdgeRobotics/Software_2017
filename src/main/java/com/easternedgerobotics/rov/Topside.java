@@ -52,12 +52,12 @@ public final class Topside {
             }
 
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
-            final HeartbeatController hearbeatController = new HeartbeatController(
+            final HeartbeatController heartbeatController = new HeartbeatController(
                 eventPublisher, Observable.interval(HEARTBEAT_GAP, TimeUnit.MILLISECONDS));
             final Observable<Joystick> joystick = Joysticks.logitechExtreme3dPro();
             joystick.flatMap(Joystick::axes).subscribe(new JoystickObserver(eventPublisher));
 
-            hearbeatController.start();
+            heartbeatController.start();
 
             Logger.info("Waiting");
             eventPublisher.await();
