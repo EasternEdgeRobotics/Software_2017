@@ -134,7 +134,7 @@ public class SixThrusterConfig {
             starboardVert = heave - roll;
             portVert = heave + roll;
 
-            final float maxThrustVeritical = Collections.max(Arrays.asList(
+            final float maxThrustVertical = Collections.max(Arrays.asList(
                 Math.abs(starboardVert),
                 Math.abs(portVert)
             ));
@@ -145,7 +145,7 @@ public class SixThrusterConfig {
                 Math.abs(portVert))
             );
 
-            final float verticalScalar = maxInputMagVertical / maxThrustVeritical;
+            final float verticalScalar = maxInputMagVertical / maxThrustVertical;
             starboardVert *= verticalScalar;
             portVert *= verticalScalar;
         }
