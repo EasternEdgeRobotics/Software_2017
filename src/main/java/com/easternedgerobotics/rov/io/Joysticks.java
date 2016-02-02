@@ -100,11 +100,6 @@ public final class Joysticks {
     }
 
     private static Observable<Controller> availableControllers() {
-        final Observable<Controller> controllers = Observable.create(subscriber -> {
-            Stream.of(ControllerEnvironment.getDefaultEnvironment().getControllers()).forEach(subscriber::onNext);
-            subscriber.onCompleted();
-        });
-
-        return controllers;
+        return Observable.defer(() -> Observable.from(ControllerEnvironment.getDefaultEnvironment().getControllers()));
     }
 }
