@@ -10,7 +10,7 @@ public interface EventPublisher {
      *
      * @param value the value to emit
      */
-    public <T extends MutableValueCompanion> void emit(final T value);
+    <T extends MutableValueCompanion> void emit(final T value);
 
     /**
      * Returns an @{link rx.Observable} of the values of the given type.
@@ -18,15 +18,15 @@ public interface EventPublisher {
      * @param clazz the class type to filter values by
      * @return an Observable that emits each value of the given type
      */
-    public <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz);
+    <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz);
 
     /**
      * Stops receiving and broadcasting events.
      */
-    public void stop();
+    void stop();
 
     /**
      * Block until this event publisher completes.
      */
-    public void await() throws InterruptedException;
+    void await() throws InterruptedException;
 }

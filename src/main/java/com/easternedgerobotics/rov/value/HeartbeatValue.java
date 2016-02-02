@@ -1,16 +1,6 @@
 package com.easternedgerobotics.rov.value;
 
 public class HeartbeatValue implements MutableValueCompanion<Heartbeat> {
-
-    /**
-     * Creates a HeartbeatValue with the operational value off.
-     *
-     * @return a zero HeartbeatValue
-     */
-    public static HeartbeatValue zero() {
-        return new HeartbeatValue(new Heartbeat());
-    }
-
     /**
      * Creates a HeartbeatValue with the given values.
      *
