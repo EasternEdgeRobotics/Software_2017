@@ -2,15 +2,6 @@ package com.easternedgerobotics.rov.value;
 
 public class ThrusterValue implements MutableValueCompanion<Thruster> {
     /**
-     * Creates a ThrusterValue with the all the values zeroed out.
-     *
-     * @return a zero ThrusterValue
-     */
-    public static ThrusterValue zero() {
-        return new ThrusterValue(new Thruster());
-    }
-
-    /**
      * Creates a ThrusterValue with the given values.
      *
      * @param name the logical name of the thruster
