@@ -2,7 +2,7 @@ package com.easternedgerobotics.rov.value;
 
 public class ThrusterValue implements MutableValueCompanion<Thruster> {
     /**
-     * Creates a ThrusterValue with the given values.
+     * Creates a ThrusterValue with the given name.
      *
      * @param name the logical name of the thruster
      * @return a ThrusterValue
@@ -10,13 +10,7 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
     public static ThrusterValue create(
         final String name
     ) {
-        final Thruster t = new Thruster();
-        t.name = name;
-        t.speed = 0;
-        t.voltage = 0;
-        t.current = 0;
-        t.temperature = 0;
-        return new ThrusterValue(t);
+        return create(name, 0, 0, 0, 0);
     }
 
     /**
