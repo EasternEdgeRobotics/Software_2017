@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.value;
 
+import java.util.Objects;
+
 public class ThrusterValue implements MutableValueCompanion<Thruster> {
     /**
      * Creates a ThrusterValue with the given name.
@@ -103,5 +105,22 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
             thruster.current,
             thruster.temperature
         );
+    }
+
+    @Override
+    public final boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ThrusterValue that = (ThrusterValue) o;
+        return Objects.equals(thruster, that.thruster);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(thruster);
     }
 }
