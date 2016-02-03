@@ -14,6 +14,17 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
     }
 
     /**
+     * Creates a ThrusterValue with the given name and speed.
+     *
+     * @param name the logical name of the thruster.
+     * @param speed the speed of the thruster.
+     * @return a ThrusterValue
+     */
+    public static ThrusterValue create(final String name, final float speed) {
+        return create(name, speed, 0, 0, 0);
+    }
+
+    /**
      * Creates a ThrusterValue with the given values.
      *
      * @param name the logical name of the thruster
