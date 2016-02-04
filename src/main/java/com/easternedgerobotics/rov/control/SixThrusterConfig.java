@@ -162,12 +162,12 @@ public class SixThrusterConfig {
         }
 
         // We take the negative value on thrusters with counter-rotating propellers (stbd)
-        eventPublisher.emit(portAftThruster.setSpeed(portAft));
-        eventPublisher.emit(starboardAftThruster.setSpeed(-starboardAft));
-        eventPublisher.emit(portForeThruster.setSpeed(portFore));
-        eventPublisher.emit(starboardForeThruster.setSpeed(-starboardFore));
-        eventPublisher.emit(portVertThruster.setSpeed(portVert));
-        eventPublisher.emit(starboardVertThruster.setSpeed(-starboardVert));
+        eventPublisher.emit(portAftThruster.setSpeed(absIfZero(portAft)));
+        eventPublisher.emit(starboardAftThruster.setSpeed(absIfZero(-starboardAft)));
+        eventPublisher.emit(portForeThruster.setSpeed(absIfZero(portFore)));
+        eventPublisher.emit(starboardForeThruster.setSpeed(absIfZero(-starboardFore)));
+        eventPublisher.emit(portVertThruster.setSpeed(absIfZero(portVert)));
+        eventPublisher.emit(starboardVertThruster.setSpeed(absIfZero(-starboardVert)));
     }
 
     public final void updateZero() {
@@ -177,5 +177,15 @@ public class SixThrusterConfig {
         eventPublisher.emit(starboardForeThruster.setSpeed(0));
         eventPublisher.emit(portVertThruster.setSpeed(0));
         eventPublisher.emit(starboardVertThruster.setSpeed(0));
+    }
+
+    @SuppressWarnings({"checkstyle:magicnumber"})
+    private float absIfZero(final float value) {
+        // noinspection ConstantConditions
+        if ((value == 0.0f) || (value == -0.0f)) {
+            return 0f;
+        }
+
+        return value;
     }
 }
