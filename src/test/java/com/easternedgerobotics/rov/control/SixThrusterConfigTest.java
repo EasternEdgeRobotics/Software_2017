@@ -108,8 +108,8 @@ public class SixThrusterConfigTest {
                     ThrusterValue.create("SA",  0.000000f),
                     ThrusterValue.create("PF",  0.000000f),
                     ThrusterValue.create("SF",  0.000000f),
-                    ThrusterValue.create("PV",  0.419000f),
-                    ThrusterValue.create("SV", -0.800000f)
+                    ThrusterValue.create("PV",  0.800000f),
+                    ThrusterValue.create("SV", -0.419000f)
                 )
             },
             {
@@ -119,8 +119,8 @@ public class SixThrusterConfigTest {
                     ThrusterValue.create("SA", -1.000000f),
                     ThrusterValue.create("PF", -0.444444f),
                     ThrusterValue.create("SF",  0.666667f),
-                    ThrusterValue.create("PV", -0.800000f),
-                    ThrusterValue.create("SV", -0.225600f)
+                    ThrusterValue.create("PV",  0.225600f),
+                    ThrusterValue.create("SV",  0.800000f)
                 )
             }
         });

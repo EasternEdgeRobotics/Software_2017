@@ -97,7 +97,7 @@ public class SixThrusterConfig {
          * Sway is positive right
          * Heave is positive up
          * Yaw is positive counterclockwise about z-axis (i.e. left turn)
-         * Roll is positive counterclockwise about y-axis (i.e. roll right)
+         * Roll is positive counterclockwise about y-axis (i.e. roll left)
          * Pitch is positive counterclockwise about x-axis (i.e. pitch up)
          **/
 
@@ -131,8 +131,8 @@ public class SixThrusterConfig {
         }
 
         if (!(heave == 0 && roll == 0)) {
-            starboardVert = heave - roll;
-            portVert = heave + roll;
+            starboardVert = heave + roll;
+            portVert = heave - roll;
 
             final float maxThrustVertical = Collections.max(Arrays.asList(
                 Math.abs(starboardVert),
