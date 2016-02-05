@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.value;
 
+import java.util.Objects;
+
 public class MotionValue implements MutableValueCompanion<Motion> {
     /**
      * Creates a MotionValue with the all the values zeroed out.
@@ -85,5 +87,22 @@ public class MotionValue implements MutableValueCompanion<Motion> {
             motion.yaw,
             motion.roll
         );
+    }
+
+    @Override
+    public final boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final MotionValue that = (MotionValue) o;
+        return Objects.equals(motion, that.motion);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(motion);
     }
 }
