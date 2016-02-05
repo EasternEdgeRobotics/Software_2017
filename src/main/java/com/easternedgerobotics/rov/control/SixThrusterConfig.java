@@ -78,7 +78,6 @@ public class SixThrusterConfig {
 
         final float surge = motion.getSurge() * motionPower.getSurge() * motionPower.getGlobal();
         final float heave = motion.getHeave() * motionPower.getHeave() * motionPower.getGlobal();
-        final float pitch = motion.getPitch() * motionPower.getPitch() * motionPower.getGlobal();
         final float roll = motion.getRoll() * motionPower.getRoll() * motionPower.getGlobal();
         final float yaw = motion.getYaw() * motionPower.getYaw() * motionPower.getGlobal();
         final float sway = motion.getSway() * motionPower.getSway() * motionPower.getGlobal();
@@ -98,7 +97,6 @@ public class SixThrusterConfig {
          * Heave is positive up
          * Yaw is positive counterclockwise about z-axis (i.e. left turn)
          * Roll is positive counterclockwise about y-axis (i.e. roll left)
-         * Pitch is positive counterclockwise about x-axis (i.e. pitch up)
          **/
 
         // Ratio of T200 (max forward thrust)/(max reverse thrust)
