@@ -23,7 +23,7 @@ public final class Joysticks {
             final ClassLoader loader = Joysticks.class.getClassLoader();
             Files.copy(
                 loader.getResourceAsStream(resource),
-                directory.resolve(resource),
+                directory.resolve(resource.replace(".jnilib", ".dylib")),
                 StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             throw new RuntimeException(e);
