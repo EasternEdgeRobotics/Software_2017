@@ -141,8 +141,8 @@ public class SixThrusterConfig {
 
 
             final float maxInputMagVertical = Collections.max(Arrays.asList(
-                Math.abs(starboardVert),
-                Math.abs(portVert))
+                Math.abs(heave),
+                Math.abs(roll))
             );
 
             final float verticalScalar = maxInputMagVertical / maxThrustVertical;
