@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,9 +57,9 @@ public final class Joysticks {
     }
 
     public static Observable<Joystick> logitechExtreme3dPro() {
-        final String name = "Logitech Logitech Extreme 3D";
+        final String name = ".*Logitech.*Extreme.*3D.*";
         final Observable<Controller> joystick = availableControllers()
-            .first(controller -> controller.getName().equals(name));
+            .first(controller -> Pattern.matches(name, controller.getName()));
 
         return joystick.map(js -> new LogitechExtremeJoystick(
             events(js),
