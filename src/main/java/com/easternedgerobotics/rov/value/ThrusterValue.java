@@ -1,17 +1,10 @@
 package com.easternedgerobotics.rov.value;
 
+import java.util.Objects;
+
 public class ThrusterValue implements MutableValueCompanion<Thruster> {
     /**
-     * Creates a ThrusterValue with the all the values zeroed out.
-     *
-     * @return a zero ThrusterValue
-     */
-    public static ThrusterValue zero() {
-        return new ThrusterValue(new Thruster());
-    }
-
-    /**
-     * Creates a ThrusterValue with the given values.
+     * Creates a ThrusterValue with the given name.
      *
      * @param name the logical name of the thruster
      * @return a ThrusterValue
@@ -19,13 +12,18 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
     public static ThrusterValue create(
         final String name
     ) {
-        final Thruster t = new Thruster();
-        t.name = name;
-        t.speed = 0;
-        t.voltage = 0;
-        t.current = 0;
-        t.temperature = 0;
-        return new ThrusterValue(t);
+        return create(name, 0, 0, 0, 0);
+    }
+
+    /**
+     * Creates a ThrusterValue with the given name and speed.
+     *
+     * @param name the logical name of the thruster.
+     * @param speed the speed of the thruster.
+     * @return a ThrusterValue
+     */
+    public static ThrusterValue create(final String name, final float speed) {
+        return create(name, speed, 0, 0, 0);
     }
 
     /**
@@ -107,5 +105,22 @@ public class ThrusterValue implements MutableValueCompanion<Thruster> {
             thruster.current,
             thruster.temperature
         );
+    }
+
+    @Override
+    public final boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ThrusterValue that = (ThrusterValue) o;
+        return Objects.equals(thruster, that.thruster);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(thruster);
     }
 }

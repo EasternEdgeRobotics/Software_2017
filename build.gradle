@@ -30,6 +30,7 @@ dependencies {
     compile 'net.java.jinput:jinput:2.0.6'
     compile 'org.tinylog:tinylog:1.0.3'
     testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
 }
 
 allprojects {
