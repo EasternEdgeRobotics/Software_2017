@@ -1,12 +1,17 @@
 - hosts: topside
   become: yes
   become_method: sudo
-  gather_facts: no
   vars:
     proxy:
       http_proxy: http://192.168.88.3:3128
       https_proxy: http://192.168.88.3:3128
   tasks:
+    - set_fact:
+          ssh_connection_ip: "{{ ansible_env['SSH_CONNECTION'].split()[2] }}"
+    - set_fact:
+          ssh_interface: "{{ item }}"
+      when: hostvars[inventory_hostname]['ansible_' ~ item]['ipv4']['address'] == ssh_connection_ip
+      with_items: ansible_interfaces
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"
@@ -18,7 +23,7 @@
       apt: name=isc-dhcp-server state=latest
       environment: "{{proxy}}"
     - name: Configure DHCP Service
-      copy: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
+      template: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
     - name: Configure DHCP Server
       copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
       notify: Restart DHCP Server
