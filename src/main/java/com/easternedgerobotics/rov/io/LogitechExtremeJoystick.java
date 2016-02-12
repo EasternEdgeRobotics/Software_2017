@@ -1,15 +1,22 @@
 package com.easternedgerobotics.rov.io;
 
-import com.easternedgerobotics.rov.value.JoystickAxesValue;
+import com.easternedgerobotics.rov.value.MotionValue;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-
 import rx.Observable;
 
 import java.util.List;
 
 public class LogitechExtremeJoystick implements Joystick {
+    public static final int AXIS_INDEX_HEAVE = 4;
+
+    public static final int AXIS_INDEX_SWAY = 0;
+
+    public static final int AXIS_INDEX_SURGE = 1;
+
+    public static final int AXIS_INDEX_YAW = 3;
+
     private final Observable<Event> events;
 
     private final List<Component> axes;
@@ -21,7 +28,7 @@ public class LogitechExtremeJoystick implements Joystick {
         final List<Component> axes,
         final List<Component> buttons
     ) {
-        this.events = events;
+        this.events = events.share();
         this.axes = axes;
         this.buttons = buttons;
     }
@@ -40,26 +47,33 @@ public class LogitechExtremeJoystick implements Joystick {
     }
 
     /**
-     * Returns the Observable stream of axis values.
+     * Returns the Observable stream of joystick motion.
      *
-     * Each emitted value contains a complete view of the joystick in
-     * the following order:
-     * <p>
-     * <pre><code>(x, y, rx, z, t)</code></pre>
-     *
-     * @return the stream of axis values.
+     * @return a stream of motion values.
      */
     @Override
-    public final Observable<JoystickAxesValue> axes() {
-        final Observable<Event> axisEvents = events.filter(
-            event -> event.getComponent().getIdentifier() instanceof Component.Identifier.Axis);
+    public final Observable<MotionValue> axes() {
+        final Observable<Boolean> joystickTrigger = button(1).startWith(false);
 
-        return axisEvents.map(event -> {
-            final float[] values = new float[axes.size()];
-            for (int i = 0; i < values.length; i++) {
-                values[i] = axes.get(i).getPollData();
-            }
-            return JoystickAxesValue.create(values);
-        });
+        return Observable.switchOnNext(
+            joystickTrigger.map(press ->
+                events.filter(this::isAxisEvent).map(e -> createMotionValue(press))));
+    }
+
+    private boolean isAxisEvent(final Event event) {
+        return event.getComponent().getIdentifier() instanceof Component.Identifier.Axis;
+    }
+
+    private MotionValue createMotionValue(final boolean rolling) {
+        final float heave = axes.get(AXIS_INDEX_HEAVE).getPollData();
+        final float sway = axes.get(AXIS_INDEX_SWAY).getPollData();
+        final float surge = axes.get(AXIS_INDEX_SURGE).getPollData();
+        final float yaw = axes.get(AXIS_INDEX_YAW).getPollData();
+
+        if (rolling) {
+            return MotionValue.create(heave, 0, surge, 0, yaw, sway);
+        }
+
+        return MotionValue.create(heave, sway, surge, 0, yaw, 0);
     }
 }

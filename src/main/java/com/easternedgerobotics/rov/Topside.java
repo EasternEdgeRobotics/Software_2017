@@ -55,7 +55,7 @@ public final class Topside {
             final HeartbeatController heartbeatController = new HeartbeatController(
                 eventPublisher, Observable.interval(HEARTBEAT_GAP, TimeUnit.MILLISECONDS));
             final Observable<Joystick> joystick = Joysticks.logitechExtreme3dPro();
-            joystick.flatMap(Joystick::axes).subscribe(new JoystickObserver(eventPublisher));
+            joystick.flatMap(Joystick::axes).subscribe(eventPublisher::emit);
 
             heartbeatController.start();
 
