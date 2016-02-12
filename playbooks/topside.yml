@@ -12,6 +12,7 @@
       environment: "{{proxy}}"
     - name: Install Java 8 Runtime
       apt: name=openjdk-8-jre state=latest
+      tags: java
       environment: "{{proxy}}"
     - name: Install DHCP Server
       apt: name=isc-dhcp-server state=latest

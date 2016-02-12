@@ -9,10 +9,13 @@
       apt: name=nmap state=latest
     - name: Install OpenJDK 8
       apt: name=openjdk-8-jdk state=latest
+      tags: java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
+      tags: java
     - name: Install Gradle
       apt: name=gradle-2.11 state=latest
+      tags: java
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
     - name: Configure Squid Proxy
