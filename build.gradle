@@ -4,6 +4,9 @@ apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 
+applicationDefaultJvmArgs = [
+    '-Xloggc:gc.log', '-XX:+PrintGCDetails', '-XX:+PrintGCDateStamps', '-XX:+PrintTenuringDistribution'
+]
 applicationName = 'topside'
 version = '1.0.0-SNAPSHOT'
 mainClassName = 'com.easternedgerobotics.rov.Topside'
