@@ -19,6 +19,7 @@ class MultipleStartScripts implements Plugin<Project> {
                 def taskName = script + 'StartScripts'
 
                 project.tasks.create(name: taskName, type: CreateStartScripts) {
+                    defaultJvmOpts = project.applicationDefaultJvmArgs
                     mainClassName = fullyQualifiedClassName
                     applicationName = script
                     outputDir = new File(project.buildDir, 'scripts')
