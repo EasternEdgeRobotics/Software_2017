@@ -7,7 +7,7 @@ dependencies:
   pre:
     - sudo add-apt-repository -y ppa:cwchien/gradle
     - sudo apt-get update
-    - sudo apt-get install gradle-2.10
+    - sudo apt-get install gradle-2.11
 general:
   artifacts:
     - build/reports
