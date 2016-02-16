@@ -12,7 +12,7 @@
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
     - name: Install Gradle
-      apt: name=gradle-2.10 state=latest
+      apt: name=gradle-2.11 state=latest
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
     - name: Configure Squid Proxy
