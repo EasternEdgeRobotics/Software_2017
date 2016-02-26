@@ -76,5 +76,5 @@ Vagrant.configure(2) do |config|
     # All machines
     config.vm.synced_folder ".", "/home/vagrant/workspace"
     config.vm.synced_folder ".", "/vagrant", disabled: true
-    config.vm.box = "ubuntu/vivid64"
+    config.vm.box = "ubuntu/wily64"
 end
