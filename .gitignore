@@ -8,7 +8,7 @@
 *.idea
 *.iml
 
-build
 /gradle/
+build
 gradlew
 gradlew.bat
