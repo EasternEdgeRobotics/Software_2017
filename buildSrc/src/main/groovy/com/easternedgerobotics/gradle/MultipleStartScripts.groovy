@@ -24,6 +24,9 @@ class MultipleStartScripts implements Plugin<Project> {
                     applicationName = script
                     outputDir = new File(project.buildDir, 'scripts')
                     classpath = project.tasks[JavaPlugin.JAR_TASK_NAME].outputs.files + project.configurations.runtime
+                    doLast {
+                        windowsScript.delete()
+                    }
                 }
 
                 project.applicationDistribution.into('bin') {
