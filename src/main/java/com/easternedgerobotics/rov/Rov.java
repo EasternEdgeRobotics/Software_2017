@@ -7,7 +7,7 @@ import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
-import com.easternedgerobotics.rov.value.ThrusterValue;
+import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
@@ -68,12 +68,12 @@ final class Rov {
         try {
             final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 
-            final ThrusterValue portAft = ThrusterValue.create(PORT_AFT_NAME);
-            final ThrusterValue starboardAft = ThrusterValue.create(STARBOARD_AFT_NAME);
-            final ThrusterValue portFore = ThrusterValue.create(PORT_FORE_NAME);
-            final ThrusterValue starboardFore = ThrusterValue.create(STARBOARD_FORE_NAME);
-            final ThrusterValue portVert = ThrusterValue.create(PORT_VERT_NAME);
-            final ThrusterValue starboardVert = ThrusterValue.create(STARBOARD_VERT_NAME);
+            final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
+            final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
+            final ThrusterSpeedValue portFore = ThrusterSpeedValue.create(PORT_FORE_NAME);
+            final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
+            final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
+            final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
 
             this.thrusterConfig = new SixThrusterConfig(
                 eventPublisher,

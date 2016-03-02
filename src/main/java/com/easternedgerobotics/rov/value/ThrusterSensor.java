@@ -4,10 +4,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class Thruster implements ImmutableValueCompanion<ThrusterValue> {
+class ThrusterSensor implements ImmutableValueCompanion<ThrusterSensorValue> {
     public String name;
-
-    public float speed;
 
     public float voltage;
 
@@ -16,8 +14,8 @@ class Thruster implements ImmutableValueCompanion<ThrusterValue> {
     public float temperature;
 
     @Override
-    public final ThrusterValue asImmutable() {
-        return new ThrusterValue(this);
+    public final ThrusterSensorValue asImmutable() {
+        return new ThrusterSensorValue(this);
     }
 
     @Override
@@ -28,20 +26,19 @@ class Thruster implements ImmutableValueCompanion<ThrusterValue> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Thruster thruster = (Thruster) o;
+        final ThrusterSensor thruster = (ThrusterSensor) o;
         final float epsilon = 0.0001f;
         final Function<Float, Predicate<Float>> withinReason = a ->
             b -> (Float.compare(a, b) == 0 || Math.abs(a - b) < epsilon);
         return (
-               withinReason.apply(current).test(thruster.current)
-            && withinReason.apply(speed).test(thruster.speed)
-            && withinReason.apply(temperature).test(thruster.temperature)
-            && withinReason.apply(voltage).test(thruster.voltage)
-            && Objects.equals(name, thruster.name));
+            withinReason.apply(current).test(thruster.current)
+                && withinReason.apply(temperature).test(thruster.temperature)
+                && withinReason.apply(voltage).test(thruster.voltage)
+                && Objects.equals(name, thruster.name));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, speed, voltage, current, temperature);
+        return Objects.hash(name, voltage, current, temperature);
     }
 }

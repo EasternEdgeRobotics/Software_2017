@@ -1,7 +1,8 @@
 package com.easternedgerobotics.rov.io;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.value.ThrusterValue;
+import com.easternedgerobotics.rov.value.ThrusterSensorValue;
+import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -43,19 +44,19 @@ public class Thruster {
 
     private Device device;
 
-    private ThrusterValue thrusterValue;
+    private ThrusterSpeedValue thrusterValue;
 
     private EventPublisher eventPublisher;
 
     private boolean initialized;
 
-    public Thruster(final EventPublisher event, final ThrusterValue thruster, final Device device) {
+    public Thruster(final EventPublisher event, final ThrusterSpeedValue thruster, final Device device) {
         this.device = device;
         eventPublisher = event;
         thrusterValue = thruster;
         initialized = false;
 
-        eventPublisher.valuesOfType(ThrusterValue.class).subscribe(t -> {
+        eventPublisher.valuesOfType(ThrusterSpeedValue.class).subscribe(t -> {
             if (thrusterValue.getName().equals(t.getName())) {
                 thrusterValue = t;
             }
@@ -83,9 +84,8 @@ public class Thruster {
         final float current = (parseShort(readBuffer, CURRENT_INDEX) - CURRENT_OFFSET) * CURRENT_SCALAR;
         final float temperature = calculateTemperature(parseShort(readBuffer, TEMPERATURE_INDEX));
 
-        eventPublisher.emit(ThrusterValue.create(
+        eventPublisher.emit(ThrusterSensorValue.create(
             thrusterValue.getName(),
-            thrusterValue.getSpeed(),
             voltage,
             current,
             temperature
