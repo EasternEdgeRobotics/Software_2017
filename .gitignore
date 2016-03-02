@@ -1,12 +1,17 @@
+.classpath
 .gradle
+.metadata
+.project
+.settings
 .vagrant
 
-*.log
-*.mp4
 *.class
-*.jar
 *.idea
 *.iml
+*.iws
+*.jar
+*.log
+*.mp4
 
 /gradle/
 build
