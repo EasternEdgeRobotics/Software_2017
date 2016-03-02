@@ -3,24 +3,24 @@ package com.easternedgerobotics.rov.control;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ThrusterValue;
+import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
 
-    private ThrusterValue portAftThruster;
+    private ThrusterSpeedValue portAftThruster;
 
-    private ThrusterValue starboardAftThruster;
+    private ThrusterSpeedValue starboardAftThruster;
 
-    private ThrusterValue portForeThruster;
+    private ThrusterSpeedValue portForeThruster;
 
-    private ThrusterValue starboardForeThruster;
+    private ThrusterSpeedValue starboardForeThruster;
 
-    private ThrusterValue portVertThruster;
+    private ThrusterSpeedValue portVertThruster;
 
-    private ThrusterValue starboardVertThruster;
+    private ThrusterSpeedValue starboardVertThruster;
 
     private MotionPowerValue motionPower = MotionPowerValue.zero();
 
@@ -30,12 +30,12 @@ public class SixThrusterConfig {
 
     public SixThrusterConfig(
         final EventPublisher eventPublisher,
-        final ThrusterValue portAft,
-        final ThrusterValue starboardAft,
-        final ThrusterValue portFore,
-        final ThrusterValue starboardFore,
-        final ThrusterValue portVert,
-        final ThrusterValue starboardVert
+        final ThrusterSpeedValue portAft,
+        final ThrusterSpeedValue starboardAft,
+        final ThrusterSpeedValue portFore,
+        final ThrusterSpeedValue starboardFore,
+        final ThrusterSpeedValue portVert,
+        final ThrusterSpeedValue starboardVert
     ) {
         this.eventPublisher = eventPublisher;
 
@@ -45,22 +45,6 @@ public class SixThrusterConfig {
         starboardForeThruster = starboardFore;
         portVertThruster = portVert;
         starboardVertThruster = starboardVert;
-
-        eventPublisher.valuesOfType(ThrusterValue.class).subscribe(thrusterValue -> {
-            if (thrusterValue.getName().equals(portAftThruster.getName())) {
-                portAftThruster = thrusterValue;
-            } else if (thrusterValue.getName().equals(starboardAftThruster.getName())) {
-                starboardAftThruster = thrusterValue;
-            } else if (thrusterValue.getName().equals(portForeThruster.getName())) {
-                portForeThruster = thrusterValue;
-            } else if (thrusterValue.getName().equals(starboardForeThruster.getName())) {
-                starboardForeThruster = thrusterValue;
-            } else if (thrusterValue.getName().equals(portVertThruster.getName())) {
-                portVertThruster = thrusterValue;
-            } else if (thrusterValue.getName().equals(starboardVertThruster.getName())) {
-                starboardVertThruster = thrusterValue;
-            }
-        });
 
         eventPublisher.valuesOfType(MotionValue.class).subscribe(m -> motion = m);
 
