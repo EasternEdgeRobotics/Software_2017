@@ -13,3 +13,6 @@
     - name: Install Java 8 Runtime
       apt: name=openjdk-8-jre state=latest
       environment: "{{proxy}}"
+    - name: Install Python serial module
+      apt: name=python-serial state=latest
+      environment: "{{proxy}}"
