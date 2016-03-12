@@ -7,6 +7,9 @@
       http_proxy: http://192.168.88.3:3128
       https_proxy: http://192.168.88.3:3128
   tasks:
+    - name: Install I2C Tools
+      apt: name=i2c-tools state=latest
+      environment: "{{proxy}}"
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"
