@@ -62,40 +62,36 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private Rov(final EventPublisher eventPublisher) {
+    private Rov(final EventPublisher eventPublisher) throws IOException {
         this.eventPublisher = eventPublisher;
 
-        try {
-            final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 
-            final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
-            final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
-            final ThrusterSpeedValue portFore = ThrusterSpeedValue.create(PORT_FORE_NAME);
-            final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
-            final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
-            final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
+        final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
+        final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
+        final ThrusterSpeedValue portFore = ThrusterSpeedValue.create(PORT_FORE_NAME);
+        final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
+        final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
+        final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
 
-            this.thrusterConfig = new SixThrusterConfig(
-                eventPublisher,
-                portAft,
-                starboardAft,
-                portFore,
-                starboardFore,
-                portVert,
-                starboardVert
-            );
+        this.thrusterConfig = new SixThrusterConfig(
+            eventPublisher,
+            portAft,
+            starboardAft,
+            portFore,
+            starboardFore,
+            portVert,
+            starboardVert
+        );
 
-            this.thrusters = Collections.unmodifiableList(Arrays.asList(
-                new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
-                new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
-                new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
-                new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
-                new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
-                new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
-            ));
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.thrusters = Collections.unmodifiableList(Arrays.asList(
+            new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
+            new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
+            new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
+            new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
+            new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
+            new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
+        ));
 
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS).subscribe(this::thrustersUpdate);
     }
@@ -124,7 +120,7 @@ final class Rov {
         });
     }
 
-    public static void main(final String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException, IOException {
         final String app = "rov";
         final HelpFormatter formatter = new HelpFormatter();
         final Option broadcast = Option.builder("b")
