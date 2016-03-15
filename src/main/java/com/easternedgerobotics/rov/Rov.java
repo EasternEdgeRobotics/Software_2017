@@ -92,8 +92,6 @@ final class Rov {
             new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
             new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
         ));
-
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS).subscribe(this::thrustersUpdate);
     }
 
     public void shutdown() {
@@ -107,6 +105,22 @@ final class Rov {
             }
         });
         eventPublisher.stop();
+    }
+
+    /**
+     * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
+     * if communication with the topside is lost or the received heartbeat value indicates a non-operational
+     * status and will shutdown.
+     */
+    public void init() {
+        final Observable<Boolean> shutdown = eventPublisher.valuesOfType(HeartbeatValue.class)
+            .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .map(HeartbeatValue::isOperational)
+            .filter(operational -> !operational);
+
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
+            .takeUntil(shutdown)
+            .subscribe(this::thrustersUpdate, RuntimeException::new, this::shutdown);
     }
 
     private void thrustersUpdate(final long tick) {
@@ -141,9 +155,7 @@ final class Rov {
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final Rov rov = new Rov(eventPublisher);
 
-            eventPublisher.valuesOfType(HeartbeatValue.class)
-                .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
-                .subscribe(new RovStatusController(rov));
+            rov.init();
 
             final float safeAirRatio = 0.1f;
             eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
