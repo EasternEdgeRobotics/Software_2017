@@ -22,6 +22,7 @@ import org.pmw.tinylog.Logger;
 import rx.Observable;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -164,7 +165,8 @@ final class Rov {
             Logger.info("Waiting");
             eventPublisher.await();
         } catch (final ParseException e) {
-            Logger.error(e);
+            formatter.printUsage(new PrintWriter(System.err, true), 120, app, options);
+            System.exit(1);
         }
     }
 }

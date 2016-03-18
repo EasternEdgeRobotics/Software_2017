@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
 
+import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
 public final class Topside {
@@ -62,7 +63,8 @@ public final class Topside {
             Logger.info("Waiting");
             eventPublisher.await();
         } catch (final ParseException e) {
-            Logger.error(e);
+            formatter.printUsage(new PrintWriter(System.err, true), 120, app, options);
+            System.exit(1);
         }
     }
 }
