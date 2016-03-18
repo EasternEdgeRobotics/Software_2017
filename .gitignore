@@ -21,3 +21,4 @@ build
 gradlew
 gradlew.bat
 local.properties
+playbooks/*.retry
