@@ -10,8 +10,8 @@
           ssh_connection_ip: "{{ ansible_env['SSH_CONNECTION'].split()[2] }}"
     - set_fact:
           ssh_interface: "{{ item }}"
-      when: hostvars[inventory_hostname]['ansible_' ~ item]['ipv4']['address'] == ssh_connection_ip
-      with_items: ansible_interfaces
+      when: "{{ hostvars[inventory_hostname]['ansible_' ~ item]['ipv4']['address'] == ssh_connection_ip }}"
+      with_items: "{{ ansible_interfaces }}"
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"
