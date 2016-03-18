@@ -15,7 +15,6 @@ import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
 
-import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
 public final class Topside {
@@ -35,22 +34,13 @@ public final class Topside {
             .desc("use ADDRESS to broadcast messages")
             .required()
             .build();
-        final Option help = Option.builder()
-            .longOpt("help")
-            .desc("display this help text and exit")
-            .build();
 
         final Options options = new Options();
         options.addOption(broadcast);
-        options.addOption(help);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
-            if (arguments.hasOption("help")) {
-                formatter.printHelp(app, options, true);
-                System.exit(0);
-            }
 
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final HeartbeatController heartbeatController = new HeartbeatController(
@@ -63,7 +53,7 @@ public final class Topside {
             Logger.info("Waiting");
             eventPublisher.await();
         } catch (final ParseException e) {
-            formatter.printUsage(new PrintWriter(System.err, true), 120, app, options);
+            formatter.printHelp(app, options, true);
             System.exit(1);
         }
     }

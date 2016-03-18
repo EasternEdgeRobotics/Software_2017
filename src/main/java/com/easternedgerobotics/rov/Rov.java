@@ -22,7 +22,6 @@ import org.pmw.tinylog.Logger;
 import rx.Observable;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -135,22 +134,13 @@ final class Rov {
             .desc("use ADDRESS to broadcast messages")
             .required()
             .build();
-        final Option help = Option.builder()
-            .longOpt("help")
-            .desc("display this help text and exit")
-            .build();
 
         final Options options = new Options();
         options.addOption(broadcast);
-        options.addOption(help);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
-            if (arguments.hasOption("help")) {
-                formatter.printHelp(app, options, true);
-                System.exit(0);
-            }
 
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final Rov rov = new Rov(eventPublisher);
@@ -165,7 +155,7 @@ final class Rov {
             Logger.info("Waiting");
             eventPublisher.await();
         } catch (final ParseException e) {
-            formatter.printUsage(new PrintWriter(System.err, true), 120, app, options);
+            formatter.printHelp(app, options, true);
             System.exit(1);
         }
     }
