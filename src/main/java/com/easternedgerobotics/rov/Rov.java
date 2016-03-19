@@ -62,42 +62,36 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private Rov(final EventPublisher eventPublisher) {
+    private Rov(final EventPublisher eventPublisher) throws IOException {
         this.eventPublisher = eventPublisher;
 
-        try {
-            final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 
-            final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
-            final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
-            final ThrusterSpeedValue portFore = ThrusterSpeedValue.create(PORT_FORE_NAME);
-            final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
-            final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
-            final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
+        final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
+        final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
+        final ThrusterSpeedValue portFore = ThrusterSpeedValue.create(PORT_FORE_NAME);
+        final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
+        final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
+        final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
 
-            this.thrusterConfig = new SixThrusterConfig(
-                eventPublisher,
-                portAft,
-                starboardAft,
-                portFore,
-                starboardFore,
-                portVert,
-                starboardVert
-            );
+        this.thrusterConfig = new SixThrusterConfig(
+            eventPublisher,
+            portAft,
+            starboardAft,
+            portFore,
+            starboardFore,
+            portVert,
+            starboardVert
+        );
 
-            this.thrusters = Collections.unmodifiableList(Arrays.asList(
-                new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
-                new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
-                new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
-                new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
-                new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
-                new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
-            ));
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS).subscribe(this::thrustersUpdate);
+        this.thrusters = Collections.unmodifiableList(Arrays.asList(
+            new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
+            new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
+            new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
+            new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
+            new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
+            new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
+        ));
     }
 
     public void shutdown() {
@@ -113,6 +107,22 @@ final class Rov {
         eventPublisher.stop();
     }
 
+    /**
+     * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
+     * if communication with the topside is lost or the received heartbeat value indicates a non-operational
+     * status and will shutdown.
+     */
+    public void init() {
+        final Observable<Boolean> shutdown = eventPublisher.valuesOfType(HeartbeatValue.class)
+            .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .map(HeartbeatValue::isOperational)
+            .filter(operational -> !operational);
+
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
+            .takeUntil(shutdown)
+            .subscribe(this::thrustersUpdate, RuntimeException::new, this::shutdown);
+    }
+
     private void thrustersUpdate(final long tick) {
         thrusterConfig.update();
         thrusters.forEach(thruster -> {
@@ -124,7 +134,7 @@ final class Rov {
         });
     }
 
-    public static void main(final String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException, IOException {
         final String app = "rov";
         final HelpFormatter formatter = new HelpFormatter();
         final Option broadcast = Option.builder("b")
@@ -145,9 +155,7 @@ final class Rov {
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final Rov rov = new Rov(eventPublisher);
 
-            eventPublisher.valuesOfType(HeartbeatValue.class)
-                .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
-                .subscribe(new RovStatusController(rov));
+            rov.init();
 
             final float safeAirRatio = 0.1f;
             eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
