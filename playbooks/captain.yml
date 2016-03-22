@@ -14,7 +14,7 @@
       apt_repository: repo='ppa:cwchien/gradle'
       tags: java
     - name: Install Gradle
-      apt: name=gradle-2.11 state=latest
+      apt: name=gradle-2.12 state=latest
       tags: java
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
