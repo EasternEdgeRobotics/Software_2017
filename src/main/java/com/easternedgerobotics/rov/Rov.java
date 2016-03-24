@@ -94,7 +94,7 @@ final class Rov {
         ));
     }
 
-    public void shutdown() {
+    private void shutdown() {
         Logger.info("Shutting down ROV");
         thrusterConfig.updateZero();
         thrusters.forEach(thruster -> {
@@ -112,7 +112,7 @@ final class Rov {
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
      * status and will shutdown.
      */
-    public void init() {
+    private void init() {
         final Observable<Boolean> shutdown = eventPublisher.valuesOfType(HeartbeatValue.class)
             .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
             .map(HeartbeatValue::isOperational)
