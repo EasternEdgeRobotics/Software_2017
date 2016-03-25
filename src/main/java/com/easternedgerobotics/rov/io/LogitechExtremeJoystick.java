@@ -9,13 +9,13 @@ import rx.Observable;
 import java.util.List;
 
 public class LogitechExtremeJoystick implements Joystick {
-    public static final int AXIS_INDEX_HEAVE = 4;
+    public static final int AXIS_INDEX_HEAVE = 3;
 
     public static final int AXIS_INDEX_SWAY = 0;
 
     public static final int AXIS_INDEX_SURGE = 1;
 
-    public static final int AXIS_INDEX_YAW = 3;
+    public static final int AXIS_INDEX_YAW = 2;
 
     private final Observable<Event> events;
 
@@ -66,12 +66,12 @@ public class LogitechExtremeJoystick implements Joystick {
 
     private MotionValue createMotionValue(final boolean rolling) {
         final float heave = axes.get(AXIS_INDEX_HEAVE).getPollData();
-        final float sway = axes.get(AXIS_INDEX_SWAY).getPollData();
+        final float sway = -axes.get(AXIS_INDEX_SWAY).getPollData();
         final float surge = axes.get(AXIS_INDEX_SURGE).getPollData();
         final float yaw = axes.get(AXIS_INDEX_YAW).getPollData();
 
         if (rolling) {
-            return MotionValue.create(heave, 0, surge, 0, yaw, sway);
+            return MotionValue.create(heave, 0, surge, 0, yaw, -sway);
         }
 
         return MotionValue.create(heave, sway, surge, 0, yaw, 0);
