@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov;
 
-public final class Picamera {
+final class Picamera {
     private Picamera() {
 
     }

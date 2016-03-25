@@ -17,7 +17,7 @@ import rx.Observable;
 
 import java.util.concurrent.TimeUnit;
 
-public final class Topside {
+final class Topside {
     private Topside() {
 
     }
