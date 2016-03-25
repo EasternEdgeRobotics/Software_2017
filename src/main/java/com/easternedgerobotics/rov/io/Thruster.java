@@ -29,7 +29,6 @@ public class Thruster {
 
     private static final int TEMPERATURE_INDEX = 4;
 
-    // Constants for temperature calculation
     private static final int SERIESRESISTOR = 3300;
 
     private static final int THERMISTORNOMINAL = 10000;
@@ -92,15 +91,23 @@ public class Thruster {
         ));
     }
 
-    // reads a short from two consecutive bytes.
-    // MSB located at offset.
-    // LSB located at offset + 1.
+    /**
+     * Reads a short from two consecutive bytes.
+     *
+     * @param bytes an array of two or more bytes, two of which represent a short value
+     * @param offset the offset of the sort to read
+     * @return the short representation of {@code bytes[offset]} and {@code bytes[offset + 1]}
+     */
     private short parseShort(final byte[] bytes, final int offset) {
         return (short) (((bytes[offset]) << BYTE_SIZE) | bytes[offset + 1]);
     }
 
-    // Pulled from blueESC documentation
-    // http://docs.bluerobotics.com/bluesc/
+    /**
+     * See <a href="http://docs.bluerobotics.com/bluesc/">BlueESC documentation</a>.
+     *
+     * @param tempRaw the raw temperature value from the thruster
+     * @return the parsed temperature
+     */
     private float calculateTemperature(final short tempRaw) {
         float steinhart;
         if (tempRaw == 0) {
