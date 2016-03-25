@@ -55,7 +55,7 @@ public class UdpEventPublisher implements EventPublisher {
     private final UdpServer<DatagramPacket, DatagramPacket> server;
 
     /**
-     * Constructs an EventPublisher that broadcasts event to the given brodcast
+     * Constructs an EventPublisher that broadcasts event to the given broadcast
      * address on the default port.
      *
      * @param broadcast the broadcast address to use when emitting events.
