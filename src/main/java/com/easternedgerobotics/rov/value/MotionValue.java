@@ -18,7 +18,7 @@ public class MotionValue implements MutableValueCompanion<Motion> {
      * @param heave the linear vertical (up/down) motion
      * @param sway the linear lateral (side-to-side or Port-Starboard) motion
      * @param surge the linear longitudinal (front/back or Bow/Stern) motion
-     * @param pitch the Up/down rotation of a vessel about its lateral/Y (side-to-side or Port-Starboasrd) axis
+     * @param pitch the Up/down rotation of a vessel about its lateral/Y (side-to-side or Port-Starboard) axis
      * @param yaw the turning rotation of a vessel about its vertical/Z axis
      * @param roll the tilting rotation of a vessel about its longitudinal/X (front-back or Bow-Stern) axis
      * @return a MotionValue
