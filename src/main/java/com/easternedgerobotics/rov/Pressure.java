@@ -1,6 +1,5 @@
 package com.easternedgerobotics.rov;
 
-import java.util.prefs.Preferences;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
