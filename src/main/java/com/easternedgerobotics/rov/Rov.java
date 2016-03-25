@@ -129,7 +129,7 @@ final class Rov {
             try {
                 thruster.write();
             } catch (final IOException ex) {
-                Logger.error(ex);
+                Logger.debug(ex);
             }
         });
     }
