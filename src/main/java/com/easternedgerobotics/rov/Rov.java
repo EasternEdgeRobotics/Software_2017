@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 final class Rov {
     private static final long MAX_HEARTBEAT_GAP = 5;
 
-    private static final long SLEEP_DURATION = 10L;
+    private static final long SLEEP_DURATION = 100;
 
     private static final String PORT_AFT_NAME = "PortAft";
 
@@ -129,7 +129,7 @@ final class Rov {
             try {
                 thruster.write();
             } catch (final IOException ex) {
-                Logger.error(ex);
+                Logger.debug(ex);
             }
         });
     }

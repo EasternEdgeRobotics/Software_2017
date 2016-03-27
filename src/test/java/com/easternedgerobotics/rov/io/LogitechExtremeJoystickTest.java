@@ -53,7 +53,6 @@ public class LogitechExtremeJoystickTest {
         final List<Component> joystickAxes = joystickAxes(new float[][] {
             {1, 2, 3, 4, 5, 6},
             {1, 2, 3, 4, 5, 6},
-            {0, 0, 0, 0, 0, 0},
             {1, 2, 3, 4, 5, 6},
             {1, 2, 3, 4, 5, 6},
         });
@@ -80,12 +79,12 @@ public class LogitechExtremeJoystickTest {
         joystickSubscriber.assertNoErrors();
         joystickSubscriber.assertValueCount(6);
         joystickSubscriber.assertReceivedOnNext(Arrays.asList(
-            MotionValue.create(1, 1, 1, 0, 1, 0),
-            MotionValue.create(2, 2, 2, 0, 2, 0),
-            MotionValue.create(3, 0, 3, 0, 3, 3),
-            MotionValue.create(4, 0, 4, 0, 4, 4),
-            MotionValue.create(5, 0, 5, 0, 5, 5),
-            MotionValue.create(6, 6, 6, 0, 6, 0)
+            MotionValue.create(1, -1, 1, 0, 1, 0),
+            MotionValue.create(2, -2, 2, 0, 2, 0),
+            MotionValue.create(3,  0, 3, 0, 3, 3),
+            MotionValue.create(4,  0, 4, 0, 4, 4),
+            MotionValue.create(5,  0, 5, 0, 5, 5),
+            MotionValue.create(6, -6, 6, 0, 6, 0)
         ));
     }
 
