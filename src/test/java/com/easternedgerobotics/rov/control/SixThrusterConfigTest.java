@@ -5,6 +5,7 @@ import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -134,6 +135,7 @@ public class SixThrusterConfigTest {
         this.expectedThrusterValues = expectedThrusterValues;
     }
 
+    @Ignore("This test needs to be verified for correctness")
     @Test
     public final void updateSixThrustersWithMotionAndFullPowerDoesEmitCorrectThrusterValue() {
         final EventPublisher eventPublisher = Mockito.mock(EventPublisher.class);
