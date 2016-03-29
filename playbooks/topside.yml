@@ -12,6 +12,12 @@
           ssh_interface: "{{ item }}"
       when: "{{ hostvars[inventory_hostname]['ansible_' ~ item].get('ipv4', {}).get('address') == ssh_connection_ip }}"
       with_items: "{{ ansible_interfaces }}"
+    - name: Add MPV repo for Ubuntu 15.10
+      apt_repository: repo='ppa:mc3man/ffmpeg-test1'
+      environment: "{{proxy}}"
+    - name: Install MPV
+      apt: name=mpv state=latest
+      environment: "{{proxy}}"
     - name: Install video drivers
       apt: name=mesa-vdpau-drivers state=latest
       environment: "{{proxy}}"
