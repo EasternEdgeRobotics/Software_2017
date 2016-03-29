@@ -24,6 +24,8 @@
       environment: "{{proxy}}"
     - name: Configure DHCP Service
       template: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
+    - name: Configure DHCP Auto-restart
+      template: src=files/etc/network/if-up.d/dhcp-server dest=/etc/network/if-up.d/dhcp-server mode=755 owner=root group=root
     - name: Configure DHCP Server
       copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
       notify: Restart DHCP Server
