@@ -5,7 +5,7 @@ apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 
 applicationDefaultJvmArgs = [
-    '-Xloggc:gc.log', '-XX:+PrintGCDetails', '-XX:+PrintGCDateStamps', '-XX:+PrintTenuringDistribution'
+    '-Xloggc:gc.log', '-XX:+PrintGCApplicationStoppedTime', '-XX:+PrintGCTimeStamps'
 ]
 applicationName = 'topside'
 version = '1.0.0-SNAPSHOT'
