@@ -160,7 +160,7 @@ final class Rov {
             final float safeAirRatio = 0.1f;
             eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
 
-            Logger.info("Waiting");
+            Logger.info("Started");
             eventPublisher.await();
         } catch (final ParseException e) {
             formatter.printHelp(app, options, true);
