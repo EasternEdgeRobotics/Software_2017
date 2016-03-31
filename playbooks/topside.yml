@@ -10,8 +10,17 @@
           ssh_connection_ip: "{{ ansible_env['SSH_CONNECTION'].split()[2] }}"
     - set_fact:
           ssh_interface: "{{ item }}"
-      when: "{{ hostvars[inventory_hostname]['ansible_' ~ item]['ipv4']['address'] == ssh_connection_ip }}"
+      when: "{{ hostvars[inventory_hostname]['ansible_' ~ item].get('ipv4', {}).get('address') == ssh_connection_ip }}"
       with_items: "{{ ansible_interfaces }}"
+    - name: Add MPV repo for Ubuntu 15.10
+      apt_repository: repo='ppa:mc3man/ffmpeg-test1'
+      environment: "{{proxy}}"
+    - name: Install MPV
+      apt: name=mpv state=latest
+      environment: "{{proxy}}"
+    - name: Install video drivers
+      apt: name=mesa-vdpau-drivers state=latest
+      environment: "{{proxy}}"
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"
@@ -24,6 +33,8 @@
       environment: "{{proxy}}"
     - name: Configure DHCP Service
       template: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
+    - name: Configure DHCP Auto-restart
+      template: src=files/etc/network/if-up.d/dhcp-server dest=/etc/network/if-up.d/dhcp-server mode=755 owner=root group=root
     - name: Configure DHCP Server
       copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
       notify: Restart DHCP Server
