@@ -54,66 +54,6 @@ public final class Controller {
         but9.setMaxWidth(Double.MAX_VALUE);
         but10.setMaxWidth(Double.MAX_VALUE);
         but11.setMaxWidth(Double.MAX_VALUE);
-        //        if(button0 == true) {
-        //            Button0.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button0.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button1 == true) {
-        //            Button1.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button1.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button2 == true) {
-        //            Button2.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button2.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button3 == true) {
-        //            Button3.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button3.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button4 == true) {
-        //            Button4.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button4.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button5 == true) {
-        //            Button5.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button5.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button6 == true) {
-        //            Button6.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button6.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button7 == true) {
-        //            Button7.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button7.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button8 == true) {
-        //            Button8.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button8.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button9 == true) {
-        //            Button9.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button9.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button10 == true) {
-        //            Button10.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button10.setStyle("-fx-base: #F8F8FF;");
-        //        }
-        //        if(button11 == true) {
-        //            Button11.setStyle("-fx-base: #DC143C;");
-        //        }else{
-        //            Button11.setStyle("-fx-base: #F8F8FF;");
-        //        }
 
         but0.setDisable(true);
         but1.setDisable(true);
