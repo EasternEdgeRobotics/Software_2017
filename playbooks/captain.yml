@@ -20,6 +20,7 @@
       tags: java
     - name: Install JDK 9 Preview
       unarchive: src=/tmp/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no
+      tags: java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
       tags: java

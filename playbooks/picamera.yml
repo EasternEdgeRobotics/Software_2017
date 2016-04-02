@@ -15,8 +15,10 @@
         dest: "/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz"
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
       environment: "{{ proxy }}"
+      tags: java
     - name: Install JDK 9 Preview
       unarchive: src=/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no
+      tags: java
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"

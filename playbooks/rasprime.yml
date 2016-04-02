@@ -15,8 +15,10 @@
         dest: "/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz"
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
       environment: "{{ proxy }}"
+      tags: java
     - name: Install JDK 9 Preview
       unarchive: src=/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no
+      tags: java
     - name: Install I2C Tools
       apt: name=i2c-tools state=latest
       environment: "{{proxy}}"
@@ -26,6 +28,7 @@
     - name: Install Java 8 Runtime
       apt: name=openjdk-8-jre state=latest
       environment: "{{proxy}}"
+      tags: java
     - name: Install Python serial module
       apt: name=python-serial state=latest
       environment: "{{proxy}}"
