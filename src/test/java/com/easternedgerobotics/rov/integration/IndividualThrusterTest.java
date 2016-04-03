@@ -9,7 +9,9 @@ import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
+import org.hamcrest.CoreMatchers;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,9 @@ public class IndividualThrusterTest {
 
     @Test
     public final void individualThruster() throws InterruptedException, IOException {
+        Assume.assumeThat(
+            "This test requires a Raspberry Pi", System.getProperty("os.arch"), CoreMatchers.is("arm"));
+
         final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
         final ThrusterSpeedValue portFore = ThrusterSpeedValue.create("???");
         final Thruster thruster = new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(address)));
