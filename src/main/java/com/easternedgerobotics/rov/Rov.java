@@ -48,13 +48,13 @@ final class Rov {
 
     private static final byte STARBOARD_AFT_ADDRESS = 0x2C;
 
-    private static final byte PORT_FORE_ADDRESS = 0x2D;
+    private static final byte PORT_FORE_ADDRESS = 0x31;
 
     private static final byte STARBOARD_FORE_ADDRESS = 0x2E;
 
     private static final byte PORT_VERT_ADDRESS = 0x2F;
 
-    private static final byte STARBOARD_VERT_ADDRESS = 0x2B;
+    private static final byte STARBOARD_VERT_ADDRESS = 0x30;
 
     private final SixThrusterConfig thrusterConfig;
 
