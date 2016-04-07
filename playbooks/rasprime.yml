@@ -17,7 +17,7 @@
       environment: "{{ proxy }}"
       tags: java
     - name: Install JDK 9 Preview
-      unarchive: src=/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no
+      unarchive: src=/tmp/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
       tags: java
     - name: Install I2C Tools
       apt: name=i2c-tools state=latest

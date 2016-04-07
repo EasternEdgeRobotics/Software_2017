@@ -19,7 +19,7 @@
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
       tags: java
     - name: Install JDK 9 Preview
-      unarchive: src=/tmp/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no
+      unarchive: src=/tmp/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
       tags: java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
