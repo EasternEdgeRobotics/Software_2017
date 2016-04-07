@@ -62,6 +62,10 @@ public class Thruster {
             .subscribe(value -> thrusterValue = value);
     }
 
+    /**
+     * Write the latest {@code ThrusterSpeedValue} for this thruster to the device.
+     * @throws IOException
+     */
     public final void write() throws IOException {
         final short speed = (short) (thrusterValue.getSpeed() * Short.MAX_VALUE);
         final byte[] writeBuffer = ByteBuffer.allocate(2).putShort(speed).array();
@@ -72,6 +76,10 @@ public class Thruster {
         device.write(WRITE_ADDRESS, writeBuffer, 0, writeBuffer.length);
     }
 
+    /**
+     * Write zero to the thruster.
+     * @throws IOException
+     */
     public final void writeZero() throws IOException {
         device.write(WRITE_ADDRESS, zeroBuffer, 0, zeroBuffer.length);
     }
