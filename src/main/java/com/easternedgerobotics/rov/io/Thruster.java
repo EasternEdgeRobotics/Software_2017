@@ -4,6 +4,8 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.ThrusterSensorValue;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
+import com.pi4j.io.i2c.I2CDevice;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -41,7 +43,7 @@ public class Thruster {
 
     private final byte[] zeroBuffer = new byte[] {0x00, 0x00};
 
-    private Device device;
+    private I2CDevice device;
 
     private ThrusterSpeedValue thrusterValue;
 
@@ -49,7 +51,7 @@ public class Thruster {
 
     private boolean initialized;
 
-    public Thruster(final EventPublisher event, final ThrusterSpeedValue thruster, final Device device) {
+    public Thruster(final EventPublisher event, final ThrusterSpeedValue thruster, final I2CDevice device) {
         this.device = device;
         eventPublisher = event;
         thrusterValue = thruster;
@@ -64,18 +66,19 @@ public class Thruster {
         final short speed = (short) (thrusterValue.getSpeed() * Short.MAX_VALUE);
         final byte[] writeBuffer = ByteBuffer.allocate(2).putShort(speed).array();
         if (!initialized) {
-            device.write(WRITE_ADDRESS, zeroBuffer);
+            device.write(WRITE_ADDRESS, zeroBuffer, 0, zeroBuffer.length);
             initialized = true;
         }
-        device.write(WRITE_ADDRESS, writeBuffer);
+        device.write(WRITE_ADDRESS, writeBuffer, 0, writeBuffer.length);
     }
 
     public final void writeZero() throws IOException {
-        device.write(WRITE_ADDRESS, zeroBuffer);
+        device.write(WRITE_ADDRESS, zeroBuffer, 0, zeroBuffer.length);
     }
 
     public final void read() throws IOException {
-        final byte[] readBuffer = device.read(READ_ADDRESS, READ_BUFFER_SIZE);
+        final byte[] readBuffer = new byte[READ_BUFFER_SIZE];
+        device.read(READ_ADDRESS, readBuffer, 0, readBuffer.length);
 
         final float voltage = parseShort(readBuffer, VOLTAGE_INDEX) * VOLTAGE_SCALAR;
         final float current = (parseShort(readBuffer, CURRENT_INDEX) - CURRENT_OFFSET) * CURRENT_SCALAR;

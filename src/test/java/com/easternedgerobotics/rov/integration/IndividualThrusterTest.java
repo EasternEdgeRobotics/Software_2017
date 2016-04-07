@@ -2,7 +2,6 @@ package com.easternedgerobotics.rov.integration;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
-import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.test.CarelessConsumer;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
@@ -70,7 +69,7 @@ public class IndividualThrusterTest {
 
         final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
         final ThrusterSpeedValue portFore = ThrusterSpeedValue.create("???");
-        final Thruster thruster = new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(address)));
+        final Thruster thruster = new Thruster(eventPublisher, portFore, bus.getDevice(address));
         final CarelessConsumer<ThrusterSpeedValue> consumer = val -> thruster.write();
 
         eventPublisher.valuesOfType(ThrusterSpeedValue.class).subscribe(consumer::accept);

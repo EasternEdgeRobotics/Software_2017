@@ -3,7 +3,6 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
-import com.easternedgerobotics.rov.io.I2C;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
@@ -85,12 +84,12 @@ final class Rov {
         );
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
-            new Thruster(eventPublisher, portAft, new I2C(bus.getDevice(PORT_AFT_ADDRESS))),
-            new Thruster(eventPublisher, starboardAft, new I2C(bus.getDevice(STARBOARD_AFT_ADDRESS))),
-            new Thruster(eventPublisher, portFore, new I2C(bus.getDevice(PORT_FORE_ADDRESS))),
-            new Thruster(eventPublisher, starboardFore, new I2C(bus.getDevice(STARBOARD_FORE_ADDRESS))),
-            new Thruster(eventPublisher, portVert, new I2C(bus.getDevice(PORT_VERT_ADDRESS))),
-            new Thruster(eventPublisher, starboardVert, new I2C(bus.getDevice(STARBOARD_VERT_ADDRESS)))
+            new Thruster(eventPublisher, portAft, bus.getDevice(PORT_AFT_ADDRESS)),
+            new Thruster(eventPublisher, starboardAft, bus.getDevice(STARBOARD_AFT_ADDRESS)),
+            new Thruster(eventPublisher, portFore, bus.getDevice(PORT_FORE_ADDRESS)),
+            new Thruster(eventPublisher, starboardFore, bus.getDevice(STARBOARD_FORE_ADDRESS)),
+            new Thruster(eventPublisher, portVert, bus.getDevice(PORT_VERT_ADDRESS)),
+            new Thruster(eventPublisher, starboardVert, bus.getDevice(STARBOARD_VERT_ADDRESS))
         ));
     }
 
