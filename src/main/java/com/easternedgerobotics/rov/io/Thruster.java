@@ -55,11 +55,9 @@ public class Thruster {
         thrusterValue = thruster;
         initialized = false;
 
-        eventPublisher.valuesOfType(ThrusterSpeedValue.class).subscribe(t -> {
-            if (thrusterValue.getName().equals(t.getName())) {
-                thrusterValue = t;
-            }
-        });
+        eventPublisher.valuesOfType(ThrusterSpeedValue.class)
+            .filter(value -> thrusterValue.getName().equals(value.getName()))
+            .subscribe(value -> thrusterValue = value);
     }
 
     public final void write() throws IOException {
