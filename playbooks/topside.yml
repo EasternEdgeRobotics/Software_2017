@@ -28,6 +28,10 @@
       apt: name=openjdk-8-jre state=latest
       tags: java
       environment: "{{proxy}}"
+    - name: Install OpenJFX 8
+      apt: name=openjfx state=latest
+      tags: java
+      environment: "{{proxy}}"
     - name: Install DHCP Server
       apt: name=isc-dhcp-server state=latest
       environment: "{{proxy}}"
