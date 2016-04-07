@@ -1,0 +1,10 @@
+[Unit]
+Description=Eastern Edge Robotics Control Software
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStart=/opt/topside-1.0.0-SNAPSHOT/bin/rov --broadcast 192.168.88.255
+
+[Install]
+WantedBy=multi-user.target
