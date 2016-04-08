@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Name=Control Software
+Exec=/opt/topside-1.0.0-SNAPSHOT/bin/topside
+Path=/opt/topside-1.0.0-SNAPSHOT
+Terminal=false
+Type=Application
+Categories=Application

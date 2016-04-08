@@ -1,0 +1,27 @@
+- hosts: topside:rasprime:picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  tasks:
+    - name: Make opt directory
+      file: path=/opt state=directory mode=0755
+    - name: Copy Control Software
+      unarchive: src=../build/distributions/topside-1.0.0-SNAPSHOT.zip dest=/opt
+
+- hosts: rasprime:picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  tasks:
+    - name: Copy unit file for systemd
+      copy: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
+      notify: Reload systemd
+  handlers:
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+- hosts: topside
+  gather_facts: no
+  tasks:
+    - name: Make a pretty launcher for da NOOBS
+      copy: src=files/Launcher.desktop dest=~/Desktop mode=700

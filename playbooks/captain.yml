@@ -15,11 +15,11 @@
         url: "http://www.java.net/download/java/jdk9/archive/111/binaries/jdk-9-ea+111_linux-x64_bin.tar.gz"
         validate_certs: no
         checksum: "sha1:cb6271781b34c7e2548244b21c43eb2ce2bbfd9d"
-        dest: "/tmp/jdk-9-ea+111_linux-x64_bin.tar.gz"
+        dest: "/opt/jdk-9-ea+111_linux-x64_bin.tar.gz"
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
       tags: java
     - name: Install JDK 9 Preview
-      unarchive: src=/tmp/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no
+      unarchive: src=/opt/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
       tags: java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
