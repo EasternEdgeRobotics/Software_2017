@@ -14,7 +14,7 @@
   gather_facts: no
   tasks:
     - name: Copy unit file for systemd
-      copy: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
+      template: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
       notify: Reload systemd
   handlers:
     - name: Reload systemd
