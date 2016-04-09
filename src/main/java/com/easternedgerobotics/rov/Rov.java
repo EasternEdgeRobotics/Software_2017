@@ -5,7 +5,6 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
-import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
 import com.pi4j.io.i2c.I2CBus;
@@ -155,9 +154,6 @@ final class Rov {
             final Rov rov = new Rov(eventPublisher);
 
             rov.init();
-
-            final float safeAirRatio = 0.1f;
-            eventPublisher.emit(MotionPowerValue.create(safeAirRatio, 1, 1, 1, 1, 1, 1));
 
             Logger.info("Started");
             eventPublisher.await();
