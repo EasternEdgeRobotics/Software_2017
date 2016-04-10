@@ -126,6 +126,7 @@ final class Rov {
         thrusters.forEach(thruster -> {
             try {
                 thruster.write();
+                thruster.read();
             } catch (final IOException ex) {
                 Logger.debug(ex);
             }
