@@ -98,8 +98,10 @@ final class Rov {
      * status and will shutdown.
      */
     private void init() {
+        Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final Observable<HeartbeatValue> timeout = Observable.just(HeartbeatValue.create(false))
             .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
 
         final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
