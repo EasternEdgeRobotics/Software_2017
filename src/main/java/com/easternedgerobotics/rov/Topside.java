@@ -2,97 +2,63 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
+import com.easternedgerobotics.rov.fx.MainView;
+import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
+import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
 
+import com.google.inject.Binder;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
-import rx.Observable;
 
-import java.util.concurrent.TimeUnit;
+public final class Topside extends Application {
+    private EventPublisher eventPublisher;
 
-final class Topside extends Application {
-    Button start;
+    private Injector injector;
 
-    Button stop;
+    @Override
+    public void init() {
+        eventPublisher = new UdpEventPublisher("192.168.88.255");
+        injector = Guice.createInjector(
+            binder -> binder.bind(EventPublisher.class).toProvider(() -> eventPublisher).in(Singleton.class),
+            Binder::requireAtInjectOnConstructors);
 
-    private Topside() {
+        Joysticks.logitechExtreme3dPro().flatMap(Joystick::axes)
+            .subscribe(eventPublisher::emit, Logger::error);
 
+        Logger.info("Initialised");
     }
 
     @Override
-    public void start(final Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Master Start");
-        start = new Button("Start");
-        stop = new Button("Stop");
-        start.setOnAction(e -> {
-            Sliders.display("Controller Settings");
-            Current.display("Current Sensors");
-            Pressure.display("Pressure Sensors");
-        });
+    public void start(final Stage stage) {
+        Logger.info("Starting");
+        final ViewLoader viewLoader = injector.getInstance(ViewLoader.class);
 
-        final int spacing = 5;
-        final int width = 100;
-        final int height = 100;
-        final VBox buttons = new VBox();
-        buttons.setPadding(new Insets(2, 2, 2, 2));
-        buttons.setSpacing(spacing);
-        buttons.getChildren().addAll(start, stop);
+        viewLoader.loadIntoStage(MainView.class, stage);
+        stage.setTitle("Control Software");
+        stage.show();
 
-        final int minHeight = 85;
-        final int minWidth = 150;
-        final Scene window = new Scene(buttons, width, height);
-        primaryStage.setMinHeight(minHeight);
-        primaryStage.setMinWidth(minWidth);
-        primaryStage.setScene(window);
-        primaryStage.show();
+        final Stage thrusterStage = viewLoader.load(ThrusterPowerSlidersView.class);
+        thrusterStage.setTitle("Thruster Power");
+        thrusterStage.initOwner(stage);
+        thrusterStage.show();
+
+        Logger.info("Started");
     }
 
-    private static final long HEARTBEAT_GAP = 100;
+    @Override
+    public void stop() {
+        Logger.info("Stopping");
+        eventPublisher.stop();
+        Logger.info("Stopped");
+    }
 
-    public static void main(final String[] args) throws InterruptedException {
-        final String app = "topside";
-        final HelpFormatter formatter = new HelpFormatter();
-        final Option broadcast = Option.builder("b")
-            .longOpt("broadcast")
-            .hasArg()
-            .argName("ADDRESS")
-            .desc("use ADDRESS to broadcast messages")
-            .required()
-            .build();
-
-        final Options options = new Options();
-        options.addOption(broadcast);
-
-        try {
-            final CommandLineParser parser = new DefaultParser();
-            final CommandLine arguments = parser.parse(options, args);
-
-            final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
-            final HeartbeatController heartbeatController = new HeartbeatController(
-                eventPublisher, Observable.interval(HEARTBEAT_GAP, TimeUnit.MILLISECONDS));
-            final Observable<Joystick> joystick = Joysticks.logitechExtreme3dPro();
-            joystick.flatMap(Joystick::axes).subscribe(eventPublisher::emit, Logger::error);
-
-            heartbeatController.start();
-
-            Logger.info("Waiting");
-            eventPublisher.await();
-        } catch (final ParseException e) {
-            formatter.printHelp(app, options, true);
-            System.exit(1);
-        }
+    public static void main(final String[] args) {
+        launch(args);
     }
 }
