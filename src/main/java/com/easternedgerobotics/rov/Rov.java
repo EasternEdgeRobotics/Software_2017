@@ -92,36 +92,27 @@ final class Rov {
         ));
     }
 
-    private void shutdown() {
-        Logger.info("Shutting down ROV");
-        thrusterConfig.updateZero();
-        thrusters.forEach(thruster -> {
-            try {
-                thruster.writeZero();
-            } catch (final IOException ex) {
-                Logger.error(ex);
-            }
-        });
-        eventPublisher.stop();
-    }
-
     /**
      * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
      * status and will shutdown.
      */
     private void init() {
-        final Observable<Boolean> shutdown = eventPublisher.valuesOfType(HeartbeatValue.class)
-            .timeout(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
-            .map(HeartbeatValue::isOperational)
-            .filter(operational -> !operational);
+        Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
+        final Observable<HeartbeatValue> timeout = Observable.just(HeartbeatValue.create(false))
+            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
+            .concatWith(Observable.never());
+
+        final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
 
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
-            .takeUntil(shutdown)
-            .subscribe(this::thrustersUpdate, RuntimeException::new, this::shutdown);
+            .withLatestFrom(
+                heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
+            .subscribe(this::beat, RuntimeException::new);
     }
 
-    private void thrustersUpdate(final long tick) {
+    private void thrustersUpdate() {
         thrusterConfig.update();
         thrusters.forEach(thruster -> {
             try {
@@ -130,6 +121,25 @@ final class Rov {
                 Logger.debug(ex);
             }
         });
+    }
+
+    private void softShutdown() {
+        thrusterConfig.updateZero();
+        thrusters.forEach(thruster -> {
+            try {
+                thruster.writeZero();
+            } catch (final IOException ex) {
+                Logger.debug(ex);
+            }
+        });
+    }
+
+    private void beat(final HeartbeatValue heartbeat) {
+        if (heartbeat.isOperational()) {
+            thrustersUpdate();
+        } else {
+            softShutdown();
+        }
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
