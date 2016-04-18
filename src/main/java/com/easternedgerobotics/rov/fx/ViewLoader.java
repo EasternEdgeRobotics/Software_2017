@@ -1,32 +1,33 @@
 package com.easternedgerobotics.rov.fx;
 
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.WeakHashMap;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 
-/**
- * A @{code ViewLoader} is responsible for loading a view, its corresponding controller, and wiring the two together.
- */
 public class ViewLoader {
-    private final Injector injector;
+    @FunctionalInterface
+    private interface Reflection<T> {
+        T reflect() throws Exception;
+    }
 
-    /**
-     * Constructs a @{code ViewLoader} with the specified @{link Injector}.
-     * @param injector the injector to use when injecting views and controllers
-     */
-    @Inject
-    public ViewLoader(final Injector injector) {
-        this.injector = injector;
+    private final Map<Class<?>, Object> dependencies;
+
+    public ViewLoader(final Map<Class<?>, Object> dependencies) {
+        this.dependencies = new WeakHashMap<>(dependencies);
     }
 
     /**
      * Loads the view into the specified stage.
      * <p>
-     * This method creates and modifies @{link Stage} and @{link Scene} objects. As such, it
+     * This method creates and modifies {@link Stage} and {@link Scene} objects. As such, it
      * must be called on the JavaFX Application Thread.
      *
      * @param viewClass the view class
@@ -34,18 +35,23 @@ public class ViewLoader {
      * @param <T> the type of the view
      */
     public final <T extends View> void loadIntoStage(final Class<T> viewClass, final Stage stage) {
-        final Pair<View, ViewController> view = makeCarelessly(viewClass);
+        final Pair<View, ViewController> view = makeView(viewClass, dependencies);
         final ViewController viewController = view.getValue();
         final Scene scene = new Scene(view.getKey().getParent());
         stage.setScene(scene);
-        stage.setOnShown(x -> viewController.onCreate());
-        stage.setOnHidden(x -> viewController.onDestroy());
+        stage.setOnShown(event -> {
+            viewController.onCreate();
+            stage.sizeToScene();
+        });
+        stage.setOnHidden(event -> {
+            viewController.onDestroy();
+        });
     }
 
     /**
      * Loads the view into the a new stage.
      * <p>
-     * This method creates and modifies @{link Stage} and @{link Scene} objects. As such, it
+     * This method creates and modifies {@link Stage} and {@link Scene} objects. As such, it
      * must be called on the JavaFX Application Thread.
      *
      * @param viewClass the view class
@@ -61,22 +67,92 @@ public class ViewLoader {
     /**
      * Creates the view and its controller.
      * @param viewClass the view class
+     * @param dependencies the dependencies to use when constructing the view and its controller
      * @param <T> the view type
      * @return the instantiated view and its controller
-     * @throws ClassNotFoundException if the view controller for the given view cannot be found
      */
-    private <T extends View> Pair<View, ViewController> make(final Class<T> viewClass) throws ClassNotFoundException {
-        final Module viewModule = binder -> binder.bind(viewClass).asEagerSingleton();
-        final Injector viewInjector = injector.createChildInjector(viewModule);
-        final ViewController viewController = (ViewController) viewInjector.getInstance(
-            Class.forName(viewClass.getName() + "Controller"));
-        return new Pair<>(viewInjector.getInstance(viewClass), viewController);
+    @SuppressWarnings("unchecked")
+    private <T extends View> Pair<View, ViewController> makeView(
+        final Class<T> viewClass,
+        final Map<Class<?>, Object> dependencies
+    ) {
+        final Map<Class<?>, Object> subtreeDependencies = new WeakHashMap<>(dependencies);
+        final Class<?> viewControllerClass = carelessly(() -> Class.forName(viewClass.getName() + "Controller"));
+        final View view = (View) subtreeDependencies.computeIfAbsent(viewClass, k -> make(viewClass, dependencies));
+        final ViewController viewController = (ViewController) subtreeDependencies.computeIfAbsent(
+            viewControllerClass, k -> make(k, subtreeDependencies));
+        return new Pair<>(view, viewController);
     }
 
-    private <T extends View> Pair<View, ViewController> makeCarelessly(final Class<T> viewClass) {
+    /**
+     * Creates an object of the given class.
+     * @param clazz the object class
+     * @param dependencies the dependencies to use when constructing the object
+     * @param <T> the object type
+     * @return the instantiated object
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T make(final Class<T> clazz, final Map<Class<?>, Object> dependencies) {
+        final CompositeViewController viewController = new CompositeViewController();
+        final Constructor<?>[] constructors = clazz.getConstructors();
+        final Optional<Constructor<?>> constructor = Arrays.stream(constructors).filter(this::isInjectable).findFirst();
+
+        if (!constructor.isPresent()) {
+            throw new RuntimeException(
+                String.format("Could not find a public @javax.inject.Inject annotated constructor for %s", clazz));
+        }
+
+        final Constructor<?> ctor = constructor.get();
+        final Stream<Object> args = Arrays.stream(ctor.getParameters()).map(parameter -> {
+            final Class<?> type = parameter.getType();
+            if (dependencies.containsKey(type)) {
+                return dependencies.get(type);
+            }
+            if (View.class.isAssignableFrom(type)) {
+                final Pair<View, ViewController> pair = makeView((Class<? extends View>) type, dependencies);
+                viewController.add(pair.getValue());
+
+                return pair.getKey();
+            }
+            throw new RuntimeException(String.format("%s could not be resolved while constructing %s", type, clazz));
+        });
+
+        return carelessly(() -> {
+            final Object instance = ctor.newInstance(args.toArray());
+            if (instance instanceof View) {
+                return (T) instance;
+            } else {
+                viewController.add((ViewController) instance);
+                return (T) viewController.collapse();
+            }
+        });
+    }
+
+    /**
+     * Returns whether or not the given constructor is marked for injection.
+     * <p>
+     * This checks for the presence of the {@link Inject} annotation.
+     * @param constructor the constructor to check
+     * @return whether or not the given constructor is marked for injection
+     */
+    private boolean isInjectable(final Constructor<?> constructor) {
+        return constructor.isAnnotationPresent(Inject.class);
+    }
+
+    /**
+     * Invoke the given function carelessly.
+     * <p>
+     * All exceptions are upgraded to runtime exceptions.
+     * @param fn the function to invoke
+     * @param <T> the return type of the function
+     * @return the result of the given function
+     */
+    private <T> T carelessly(final Reflection<T> fn) {
         try {
-            return make(viewClass);
-        } catch (final ClassNotFoundException e) {
+            return fn.reflect();
+        } catch (final RuntimeException e) {
+            throw e;
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }

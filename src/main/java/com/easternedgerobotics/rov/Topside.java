@@ -9,25 +9,25 @@ import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
 
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 
+import java.util.HashMap;
+
 public final class Topside extends Application {
     private EventPublisher eventPublisher;
 
-    private Injector injector;
+    private ViewLoader viewLoader;
 
     @Override
     public void init() {
         eventPublisher = new UdpEventPublisher("192.168.88.255");
-        injector = Guice.createInjector(
-            binder -> binder.bind(EventPublisher.class).toProvider(() -> eventPublisher).in(Singleton.class),
-            Binder::requireAtInjectOnConstructors);
+        viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
+            {
+                put(EventPublisher.class, eventPublisher);
+            }
+        });
 
         final ExponentialMotionScale scale = new ExponentialMotionScale();
         Joysticks.logitechExtreme3dPro().flatMap(Joystick::axes)
@@ -40,7 +40,6 @@ public final class Topside extends Application {
     @Override
     public void start(final Stage stage) {
         Logger.info("Starting");
-        final ViewLoader viewLoader = injector.getInstance(ViewLoader.class);
 
         viewLoader.loadIntoStage(MainView.class, stage);
         stage.setTitle("Control Software");
