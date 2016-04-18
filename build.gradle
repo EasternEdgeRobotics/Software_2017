@@ -31,6 +31,7 @@ dependencies {
     compile 'io.reactivex:rxjava:1.0.12'
     compile 'io.reactivex:rxjavafx:0.0.5'
     compile 'io.reactivex:rxnetty:0.4.11'
+    compile 'javax.inject:javax.inject:1'
     compile 'net.java.jinput:jinput:2.0.6'
     compile 'org.tinylog:tinylog:1.0.3'
     testCompile 'junit:junit:4.12'
