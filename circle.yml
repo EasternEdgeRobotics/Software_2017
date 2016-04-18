@@ -1,4 +1,6 @@
 machine:
+  environment:
+    TERM: dumb
   timezone:
     America/St_Johns
   java:
