@@ -4,6 +4,7 @@ import javafx.beans.value.ObservableValue;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("unused")
 public class SliderViewController implements ViewController {
     private final SliderView view;
 

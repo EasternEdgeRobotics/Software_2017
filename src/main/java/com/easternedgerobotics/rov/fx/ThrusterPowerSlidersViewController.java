@@ -10,6 +10,7 @@ import rx.subscriptions.CompositeSubscription;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("unused")
 public class ThrusterPowerSlidersViewController implements ViewController {
     /**
      * The event publisher instance.
