@@ -31,6 +31,10 @@ public class ExponentialMotionScale implements Function<MotionValue, MotionValue
      * @return the scaled value
      */
     private static float scale(final float x) {
+        if (x < 0) {
+            return -scale(-x);
+        }
+
         return (float) ((Math.exp(x) - 1) / (Math.E - 1));
     }
 }
