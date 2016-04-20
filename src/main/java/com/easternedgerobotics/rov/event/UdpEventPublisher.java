@@ -34,7 +34,7 @@ public class UdpEventPublisher implements EventPublisher {
     private final Serializer serializer;
 
     /**
-     * The @{link rx.subjects.Subject} used to pass values along to
+     * The {@link rx.subjects.Subject} used to pass values along to
      * subscribers.
      */
     private final PublishSubject<Object> subject;
@@ -97,7 +97,7 @@ public class UdpEventPublisher implements EventPublisher {
     }
 
     /**
-     * Returns an @{link rx.Observable} of the values of the given type.
+     * Returns an {@link Observable} of the values of the given type.
      *
      * @param clazz the class type to filter values by
      * @return an Observable that emits each value of the given type

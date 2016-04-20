@@ -136,10 +136,10 @@ public class LogitechExtremeJoystickTest {
      * data. For example, the 0th float array given will correspond to the 0th axis'
      * poll data.
      * <p>
-     * See @{see Joystick#logitechExtreme3dPro} for the order of the axes on the joystick.
+     * See {@see Joystick#logitechExtreme3dPro} for the order of the axes on the joystick.
      *
      * @param values an array of float arrays representing the poll data for the axes.
-     * @return axis @{link net.java.games.input.Component}s returning the given data for their poll data.
+     * @return axis {@link Component}s returning the given data for their poll data.
      */
     private List<Component> joystickAxes(final float[][] values) {
         return Arrays.stream(values).map(this::axisWithPollValues).collect(Collectors.toList());

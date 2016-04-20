@@ -13,7 +13,7 @@ public interface EventPublisher {
     <T extends MutableValueCompanion> void emit(final T value);
 
     /**
-     * Returns an @{link rx.Observable} of the values of the given type.
+     * Returns an {@link rx.Observable} of the values of the given type.
      *
      * @param clazz the class type to filter values by
      * @return an Observable that emits each value of the given type
