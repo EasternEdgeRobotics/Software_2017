@@ -9,17 +9,17 @@
   tasks:
     - name: Download JDK 9 Preview
       get_url:
-        url: "http://www.java.net/download/java/jdk9/archive/111/binaries/jdk-9-ea+111_linux-arm32-vfp-hflt_bin.tar.gz"
+        url: "http://download.java.net/java/jdk9/archive/115/binaries/jdk-9-ea+115_linux-arm32-vfp-hflt_bin.tar.gz"
         validate_certs: no
-        checksum: "sha1:e344b5e8b883a1eff0c094e4cd05fe5ec373bb23"
-        dest: "/opt/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz"
+        checksum: "sha1:bb663c9841f07e09d405a98e0e1b58e3e60acd6c"
+        dest: "/opt/jdk-9-ea+115_linux-arm32-vfp-hflt_bin.tar.gz"
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
       environment: "{{ proxy }}"
       tags:
         - optional
         - java
     - name: Install JDK 9 Preview
-      unarchive: src=/opt/jdk-9-ea+109_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
+      unarchive: src=/opt/jdk-9-ea+115_linux-arm32-vfp-hflt_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
       tags:
         - optional
         - java
