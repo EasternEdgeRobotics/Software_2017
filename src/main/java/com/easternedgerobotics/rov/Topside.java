@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
@@ -28,7 +29,9 @@ public final class Topside extends Application {
             binder -> binder.bind(EventPublisher.class).toProvider(() -> eventPublisher).in(Singleton.class),
             Binder::requireAtInjectOnConstructors);
 
+        final ExponentialMotionScale scale = new ExponentialMotionScale();
         Joysticks.logitechExtreme3dPro().flatMap(Joystick::axes)
+            .map(scale::apply)
             .subscribe(eventPublisher::emit, Logger::error);
 
         Logger.info("Initialised");
