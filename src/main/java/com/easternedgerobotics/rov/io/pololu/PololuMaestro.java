@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov.io.pololu;
 import com.pi4j.io.serial.Serial;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.BitSet;
 
 /**
@@ -31,6 +32,12 @@ public class PololuMaestro {
      */
     @SuppressWarnings({"checkstyle:magicnumber"})
     private static final byte COMMAND_GET_ERRORS = 0xA1 & COMMAND_MASK;
+
+    /**
+     * The Get Position command byte with its most significant bit cleared.
+     */
+    @SuppressWarnings({"checkstyle:magicnumber"})
+    private static final byte COMMAND_GET_POSITION = 0x90 & COMMAND_MASK;
 
     /**
      * The serial instance used to communicate with the Maestro.
@@ -85,5 +92,18 @@ public class PololuMaestro {
         serial.write(new byte[]{START_BYTE, device, COMMAND_GET_ERRORS});
         final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
         return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
+    }
+
+    /**
+     * Returns the position value of the given channel.
+     * @param channel the channel number
+     * @return the position value of the given channel
+     */
+    @SuppressWarnings({"checkstyle:magicnumber"})
+    public final short getPosition(final byte channel) {
+        serial.write(new byte[]{START_BYTE, device, COMMAND_GET_POSITION, channel});
+        final ByteBuffer response = ByteBuffer.allocate(4).putChar(serial.read()).putChar(serial.read());
+        return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(
+            new byte[]{response.get(1), response.get(3)}).getShort(0);
     }
 }
