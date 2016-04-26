@@ -4,8 +4,8 @@ Description=Eastern Edge Robotics Control Software
 [Service]
 User={{ ansible_user }}
 TimeoutStartSec=0
-Restart=always
-ExecStart=/opt/topside-1.0.0/bin/rov --broadcast 192.168.88.255
+Restart=on-failure
+ExecStart=/opt/topside-1.0.0/bin/{{ entry_point }} --broadcast 192.168.88.255
 
 [Install]
 WantedBy=multi-user.target

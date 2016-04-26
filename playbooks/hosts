@@ -4,7 +4,10 @@
 192.168.88.3 ansible_user=vagrant ansible_ssh_pass=vagrant
 
 [topside]
+192.168.88.2 ansible_user=eedge ansible_ssh_pass=eedge ansible_sudo_pass=eedge
 
 [rasprime]
+192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=rov
 
 [picamera]
+192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera

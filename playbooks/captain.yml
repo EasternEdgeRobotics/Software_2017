@@ -12,21 +12,29 @@
       tags: java
     - name: Download JDK 9 Preview
       get_url:
-        url: "http://www.java.net/download/java/jdk9/archive/111/binaries/jdk-9-ea+111_linux-x64_bin.tar.gz"
+        url: "http://download.java.net/java/jdk9/archive/115/binaries/jdk-9-ea+115_linux-x64_bin.tar.gz"
         validate_certs: no
-        checksum: "sha1:cb6271781b34c7e2548244b21c43eb2ce2bbfd9d"
-        dest: "/opt/jdk-9-ea+111_linux-x64_bin.tar.gz"
+        checksum: "sha1:82b71db9fcadfc5c3aac5d6d622c28f886c2f5f8"
+        dest: "/opt/jdk-9-ea+115_linux-x64_bin.tar.gz"
         headers: "Cookie: oraclelicense=accept-securebackup-cookie"
-      tags: java
+      tags:
+        - optional
+        - java
     - name: Install JDK 9 Preview
-      unarchive: src=/opt/jdk-9-ea+111_linux-x64_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
-      tags: java
+      unarchive: src=/opt/jdk-9-ea+115_linux-x64_bin.tar.gz dest=/opt copy=no creates=/opt/jdk-9/bin/jshell
+      tags:
+        - optional
+        - java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
-      tags: java
+      tags:
+        - optional
+        - java
     - name: Install Gradle
       apt: name=gradle-2.12 state=latest
-      tags: java
+      tags:
+        - optional
+        - java
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
     - name: Configure Squid Proxy

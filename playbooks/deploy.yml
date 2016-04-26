@@ -15,10 +15,17 @@
   tasks:
     - name: Copy unit file for systemd
       template: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
-      notify: Reload systemd
+      notify:
+        - Reload systemd
+        - Enable eer service
+        - Restart eer service
   handlers:
     - name: Reload systemd
       command: systemctl daemon-reload
+    - name: Enable eer service
+      command: systemctl enable eer.service
+    - name: Restart eer service
+      service: name=eer state=restarted
 
 - hosts: topside
   gather_facts: no
