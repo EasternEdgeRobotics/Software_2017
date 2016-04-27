@@ -4,11 +4,13 @@ import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestroChannel;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.serial.Serial;
+import com.pi4j.io.serial.SerialFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -42,17 +44,23 @@ final class Rov {
 
     private static final String STARBOARD_VERT_NAME = "StarboardVert";
 
-    private static final byte PORT_AFT_ADDRESS = 0x2A;
+    private static final String MAESTRO_SERIAL_PORT = "/dev/ttyACM0";
 
-    private static final byte STARBOARD_AFT_ADDRESS = 0x2C;
+    private static final int MAESTRO_BAUD_RATE = 115_200;
 
-    private static final byte PORT_FORE_ADDRESS = 0x31;
+    private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    private static final byte STARBOARD_FORE_ADDRESS = 0x2E;
+    private static final byte PORT_AFT_CHANNEL = 14;
 
-    private static final byte PORT_VERT_ADDRESS = 0x2F;
+    private static final byte STARBOARD_AFT_CHANNEL = 17;
 
-    private static final byte STARBOARD_VERT_ADDRESS = 0x30;
+    private static final byte PORT_FORE_CHANNEL = 12;
+
+    private static final byte STARBOARD_FORE_CHANNEL = 15;
+
+    private static final byte PORT_VERT_CHANNEL = 13;
+
+    private static final byte STARBOARD_VERT_CHANNEL = 16;
 
     private final SixThrusterConfig thrusterConfig;
 
@@ -63,7 +71,9 @@ final class Rov {
     private Rov(final EventPublisher eventPublisher) throws IOException {
         this.eventPublisher = eventPublisher;
 
-        final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        final Serial serial = SerialFactory.createInstance();
+        final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
+        final Observable<ThrusterSpeedValue> thrusterSpeeds = eventPublisher.valuesOfType(ThrusterSpeedValue.class);
 
         final ThrusterSpeedValue portAft = ThrusterSpeedValue.create(PORT_AFT_NAME);
         final ThrusterSpeedValue starboardAft = ThrusterSpeedValue.create(STARBOARD_AFT_NAME);
@@ -71,6 +81,8 @@ final class Rov {
         final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
         final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
         final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
+
+        serial.open(MAESTRO_SERIAL_PORT, MAESTRO_BAUD_RATE);
 
         this.thrusterConfig = new SixThrusterConfig(
             eventPublisher,
@@ -83,12 +95,24 @@ final class Rov {
         );
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
-            new Thruster(eventPublisher, portAft, bus.getDevice(PORT_AFT_ADDRESS)),
-            new Thruster(eventPublisher, starboardAft, bus.getDevice(STARBOARD_AFT_ADDRESS)),
-            new Thruster(eventPublisher, portFore, bus.getDevice(PORT_FORE_ADDRESS)),
-            new Thruster(eventPublisher, starboardFore, bus.getDevice(STARBOARD_FORE_ADDRESS)),
-            new Thruster(eventPublisher, portVert, bus.getDevice(PORT_VERT_ADDRESS)),
-            new Thruster(eventPublisher, starboardVert, bus.getDevice(STARBOARD_VERT_ADDRESS))
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)),
+                new PololuMaestroChannel(maestro, PORT_AFT_CHANNEL)),
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)),
+                new PololuMaestroChannel(maestro, STARBOARD_AFT_CHANNEL)),
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)),
+                new PololuMaestroChannel(maestro, PORT_FORE_CHANNEL)),
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)),
+                new PololuMaestroChannel(maestro, STARBOARD_FORE_CHANNEL)),
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)),
+                new PololuMaestroChannel(maestro, PORT_VERT_CHANNEL)),
+            new Thruster(
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)),
+                new PololuMaestroChannel(maestro, STARBOARD_VERT_CHANNEL))
         ));
     }
 
@@ -114,24 +138,12 @@ final class Rov {
 
     private void thrustersUpdate() {
         thrusterConfig.update();
-        thrusters.forEach(thruster -> {
-            try {
-                thruster.write();
-            } catch (final IOException ex) {
-                Logger.debug(ex);
-            }
-        });
+        thrusters.forEach(Thruster::write);
     }
 
     private void softShutdown() {
         thrusterConfig.updateZero();
-        thrusters.forEach(thruster -> {
-            try {
-                thruster.writeZero();
-            } catch (final IOException ex) {
-                Logger.debug(ex);
-            }
-        });
+        thrusters.forEach(Thruster::writeZero);
     }
 
     private void beat(final HeartbeatValue heartbeat) {
