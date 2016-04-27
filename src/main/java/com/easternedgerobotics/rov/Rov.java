@@ -130,6 +130,8 @@ final class Rov {
 
         final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
 
+        thrusters.forEach(Thruster::writeZero);
+
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
