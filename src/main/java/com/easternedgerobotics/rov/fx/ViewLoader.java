@@ -9,15 +9,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 
 public class ViewLoader {
-    @FunctionalInterface
-    private interface Reflection<T> {
-        T reflect() throws Exception;
-    }
-
     private final Map<Class<?>, Object> dependencies;
 
     public ViewLoader(final Map<Class<?>, Object> dependencies) {
@@ -147,9 +143,9 @@ public class ViewLoader {
      * @param <T> the return type of the function
      * @return the result of the given function
      */
-    private <T> T carelessly(final Reflection<T> fn) {
+    private <T> T carelessly(final Callable<T> fn) {
         try {
-            return fn.reflect();
+            return fn.call();
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
