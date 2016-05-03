@@ -44,10 +44,6 @@ final class Rov {
 
     private static final String STARBOARD_VERT_NAME = "StarboardVert";
 
-    private static final String MAESTRO_SERIAL_PORT = "/dev/ttyACM0";
-
-    private static final int MAESTRO_BAUD_RATE = 115_200;
-
     private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
     private static final byte PORT_AFT_CHANNEL = 14;
@@ -68,10 +64,9 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private Rov(final EventPublisher eventPublisher) throws IOException {
+    private Rov(final EventPublisher eventPublisher, final Serial serial) throws IOException {
         this.eventPublisher = eventPublisher;
 
-        final Serial serial = SerialFactory.createInstance();
         final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
         final Observable<ThrusterSpeedValue> thrusterSpeeds = eventPublisher.valuesOfType(ThrusterSpeedValue.class);
 
@@ -81,8 +76,6 @@ final class Rov {
         final ThrusterSpeedValue starboardFore = ThrusterSpeedValue.create(STARBOARD_FORE_NAME);
         final ThrusterSpeedValue portVert = ThrusterSpeedValue.create(PORT_VERT_NAME);
         final ThrusterSpeedValue starboardVert = ThrusterSpeedValue.create(STARBOARD_VERT_NAME);
-
-        serial.open(MAESTRO_SERIAL_PORT, MAESTRO_BAUD_RATE);
 
         this.thrusterConfig = new SixThrusterConfig(
             eventPublisher,
@@ -166,17 +159,36 @@ final class Rov {
             .desc("use ADDRESS to broadcast messages")
             .required()
             .build();
+        final Option serialPort = Option.builder("s")
+            .longOpt("serial-port")
+            .hasArg()
+            .argName("FILE")
+            .desc("read and write to FILE as serial device")
+            .required()
+            .build();
+        final Option baudRate = Option.builder("r")
+            .type(Integer.class)
+            .longOpt("baud-rate")
+            .hasArg()
+            .argName("BPS")
+            .desc("the baud rate to use")
+            .required()
+            .build();
 
         final Options options = new Options();
         options.addOption(broadcast);
+        options.addOption(serialPort);
+        options.addOption(baudRate);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
+            final Serial serial = SerialFactory.createInstance();
             final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
-            final Rov rov = new Rov(eventPublisher);
+            final Rov rov = new Rov(eventPublisher, serial);
 
+            serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
             rov.init();
 
             Logger.info("Started");
