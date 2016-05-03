@@ -3,11 +3,12 @@ package com.easternedgerobotics.rov.integration;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.test.CarelessConsumer;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestroChannel;
 import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
 
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.serial.Serial;
+import com.pi4j.io.serial.SerialFactory;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assume;
@@ -19,6 +20,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings({"checkstyle:magicnumber"})
@@ -30,14 +32,12 @@ public class IndividualThrusterTest {
     @Parameterized.Parameters(name = "Address {0}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-            {(byte) 0x2A, DURATION},
-            {(byte) 0x2B, DURATION},
-            {(byte) 0x2C, DURATION},
-            {(byte) 0x2D, DURATION},
-            {(byte) 0x2E, DURATION},
-            {(byte) 0x2F, DURATION},
-            {(byte) 0x30, DURATION},
-            {(byte) 0x31, DURATION},
+            {(byte) 12, DURATION},
+            {(byte) 13, DURATION},
+            {(byte) 14, DURATION},
+            {(byte) 15, DURATION},
+            {(byte) 16, DURATION},
+            {(byte) 17, DURATION},
         });
     }
 
@@ -67,11 +67,15 @@ public class IndividualThrusterTest {
         Assume.assumeThat(
             "This test requires a Raspberry Pi", System.getProperty("os.arch"), CoreMatchers.is("arm"));
 
-        final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
-        final ThrusterSpeedValue portFore = ThrusterSpeedValue.create("???");
-        final Thruster thruster = new Thruster(eventPublisher, portFore, bus.getDevice(address));
-        final CarelessConsumer<ThrusterSpeedValue> consumer = val -> thruster.write();
+        final byte maestroDeviceNumber = 0x01;
+        final Serial serial = SerialFactory.createInstance();
+        final PololuMaestroChannel maestroChannel = new PololuMaestroChannel(
+            new PololuMaestro(serial, maestroDeviceNumber), address);
+        final Thruster thruster = new Thruster(
+            eventPublisher.valuesOfType(ThrusterSpeedValue.class), maestroChannel);
+        final Consumer<ThrusterSpeedValue> consumer = val -> thruster.write();
 
+        serial.open("/dev/ttyACM0", 115_200);
         eventPublisher.valuesOfType(ThrusterSpeedValue.class).subscribe(consumer::accept);
         eventPublisher.emit(ThrusterSpeedValue.create("???", 1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
 
