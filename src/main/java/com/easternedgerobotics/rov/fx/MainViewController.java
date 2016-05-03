@@ -11,6 +11,7 @@ import rx.subscriptions.CompositeSubscription;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
+@SuppressWarnings("unused")
 public class MainViewController implements ViewController {
     private static final int HEARTBEAT_GAP = 1;
 
