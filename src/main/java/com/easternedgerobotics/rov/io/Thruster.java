@@ -41,7 +41,7 @@ public class Thruster {
      * @return the microseconds for Pulse Width Signal
      */
     private short rangeMap(final float speed) {
-        return (short) rangeMap(speed, -1f, 1f, MAX_FORWARD, MAX_REVERSE);
+        return (short) Math.round(rangeMap(speed, -1f, 1f, MAX_FORWARD, MAX_REVERSE));
     }
 
     /**
