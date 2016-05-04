@@ -1,10 +1,15 @@
 package com.easternedgerobotics.rov.fx;
 
+import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.value.MutableValueCompanion;
+
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -109,6 +114,14 @@ public class ViewLoader {
                 viewController.add(pair.getValue());
 
                 return pair.getKey();
+            }
+            if (parameter.isAnnotationPresent(Event.class)) {
+                final ParameterizedType parameterizedType = (ParameterizedType) parameter.getParameterizedType();
+                final Class<?> inner = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                if (MutableValueCompanion.class.isAssignableFrom(inner)) {
+                    return ((EventPublisher) dependencies.get(EventPublisher.class)).valuesOfType(
+                        (Class<? extends MutableValueCompanion>) inner);
+                }
             }
             throw new RuntimeException(String.format("%s could not be resolved while constructing %s", type, clazz));
         });
