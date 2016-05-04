@@ -70,21 +70,21 @@ public class SixThrusterConfigTest {
             {
                 MotionValue.create(0, -0.5f, 0.5f, 0, 0.5f, 0),
                 Arrays.asList(
-                    ThrusterSpeedValue.create("PA",  0.33333f),
-                    ThrusterSpeedValue.create("SA", -0.33333f),
-                    ThrusterSpeedValue.create("PF",  0.33333f),
-                    ThrusterSpeedValue.create("SF",  1.00000f),
-                    ThrusterSpeedValue.create("PV",  0.00000f),
-                    ThrusterSpeedValue.create("SV",  0.00000f)
+                    ThrusterSpeedValue.create("PA",  0.1667f),
+                    ThrusterSpeedValue.create("SA", -0.1667f),
+                    ThrusterSpeedValue.create("PF",  0.1667f),
+                    ThrusterSpeedValue.create("SF",  0.5000f),
+                    ThrusterSpeedValue.create("PV",  0.0000f),
+                    ThrusterSpeedValue.create("SV",  0.0000f)
                 )
             },
             {
                 MotionValue.create(0, 0.15f, 0.5f, 0, -0.75f, 0),
                 Arrays.asList(
-                    ThrusterSpeedValue.create("PA",  0.7857f),
-                    ThrusterSpeedValue.create("SA",  0.0714f),
-                    ThrusterSpeedValue.create("PF", -1.0000f),
-                    ThrusterSpeedValue.create("SF", -0.2857f),
+                    ThrusterSpeedValue.create("PA",  0.5893f),
+                    ThrusterSpeedValue.create("SA",  0.0536f),
+                    ThrusterSpeedValue.create("PF", -0.7500f),
+                    ThrusterSpeedValue.create("SF", -0.2143f),
                     ThrusterSpeedValue.create("PV",  0.0000f),
                     ThrusterSpeedValue.create("SV",  0.0000f)
                 )
@@ -107,8 +107,8 @@ public class SixThrusterConfigTest {
                     ThrusterSpeedValue.create("SA",  0f),
                     ThrusterSpeedValue.create("PF",  0f),
                     ThrusterSpeedValue.create("SF",  0f),
-                    ThrusterSpeedValue.create("PV",  1f),
-                    ThrusterSpeedValue.create("SV", -0.5238f)
+                    ThrusterSpeedValue.create("PV",  0.8000f),
+                    ThrusterSpeedValue.create("SV", -0.4190f)
                 )
             },
             {
@@ -118,8 +118,8 @@ public class SixThrusterConfigTest {
                     ThrusterSpeedValue.create("SA", -1.000000f),
                     ThrusterSpeedValue.create("PF", -0.444444f),
                     ThrusterSpeedValue.create("SF",  0.666667f),
-                    ThrusterSpeedValue.create("PV",  0.282000f),
-                    ThrusterSpeedValue.create("SV",  1.000000f)
+                    ThrusterSpeedValue.create("PV",  0.2256f),
+                    ThrusterSpeedValue.create("SV",  0.8000f)
                 )
             }
         });
