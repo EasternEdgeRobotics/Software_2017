@@ -3,24 +3,24 @@ package com.easternedgerobotics.rov.control;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
+import com.easternedgerobotics.rov.value.SpeedValue;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
 
-    private ThrusterSpeedValue portAftThruster;
+    private SpeedValue portAftThruster;
 
-    private ThrusterSpeedValue starboardAftThruster;
+    private SpeedValue starboardAftThruster;
 
-    private ThrusterSpeedValue portForeThruster;
+    private SpeedValue portForeThruster;
 
-    private ThrusterSpeedValue starboardForeThruster;
+    private SpeedValue starboardForeThruster;
 
-    private ThrusterSpeedValue portVertThruster;
+    private SpeedValue portVertThruster;
 
-    private ThrusterSpeedValue starboardVertThruster;
+    private SpeedValue starboardVertThruster;
 
     private MotionPowerValue motionPower = MotionPowerValue.zero();
 
@@ -30,12 +30,12 @@ public class SixThrusterConfig {
 
     public SixThrusterConfig(
         final EventPublisher eventPublisher,
-        final ThrusterSpeedValue portAft,
-        final ThrusterSpeedValue starboardAft,
-        final ThrusterSpeedValue portFore,
-        final ThrusterSpeedValue starboardFore,
-        final ThrusterSpeedValue portVert,
-        final ThrusterSpeedValue starboardVert
+        final SpeedValue portAft,
+        final SpeedValue starboardAft,
+        final SpeedValue portFore,
+        final SpeedValue starboardFore,
+        final SpeedValue portVert,
+        final SpeedValue starboardVert
     ) {
         this.eventPublisher = eventPublisher;
 

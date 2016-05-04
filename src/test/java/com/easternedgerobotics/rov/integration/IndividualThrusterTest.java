@@ -4,8 +4,8 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroChannel;
-import com.easternedgerobotics.rov.value.ThrusterSpeedValue;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.value.SpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
@@ -69,15 +69,15 @@ public class IndividualThrusterTest {
 
         final byte maestroDeviceNumber = 0x01;
         final Serial serial = SerialFactory.createInstance();
-        final PololuMaestroChannel maestroChannel = new PololuMaestroChannel(
-            new PololuMaestro(serial, maestroDeviceNumber), address);
+        final PololuMaestroOutputChannel maestroChannel = new PololuMaestroOutputChannel(
+            new PololuMaestro(serial, maestroDeviceNumber), address, Thruster.MAX_FWD, Thruster.MAX_REV);
         final Thruster thruster = new Thruster(
-            eventPublisher.valuesOfType(ThrusterSpeedValue.class), maestroChannel);
-        final Consumer<ThrusterSpeedValue> consumer = val -> thruster.write();
+            eventPublisher.valuesOfType(SpeedValue.class), maestroChannel);
+        final Consumer<SpeedValue> consumer = val -> thruster.write();
 
         serial.open("/dev/ttyACM0", 115_200);
-        eventPublisher.valuesOfType(ThrusterSpeedValue.class).subscribe(consumer::accept);
-        eventPublisher.emit(ThrusterSpeedValue.create("???", 1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
+        eventPublisher.valuesOfType(SpeedValue.class).subscribe(consumer::accept);
+        eventPublisher.emit(SpeedValue.create("???", 1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
 
         TimeUnit.SECONDS.sleep(duration);
         thruster.writeZero();
