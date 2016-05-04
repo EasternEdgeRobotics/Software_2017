@@ -11,9 +11,9 @@ import javafx.util.Pair;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ public class ViewLoader {
     private final Map<Class<?>, Object> dependencies;
 
     public ViewLoader(final Map<Class<?>, Object> dependencies) {
-        this.dependencies = new WeakHashMap<>(dependencies);
+        this.dependencies = new HashMap<>(dependencies);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ViewLoader {
         final Class<T> viewClass,
         final Map<Class<?>, Object> dependencies
     ) {
-        final Map<Class<?>, Object> subtreeDependencies = new WeakHashMap<>(dependencies);
+        final Map<Class<?>, Object> subtreeDependencies = new HashMap<>(dependencies);
         final Class<?> viewControllerClass = carelessly(() -> Class.forName(viewClass.getName() + "Controller"));
         final View view = (View) subtreeDependencies.computeIfAbsent(viewClass, k -> make(viewClass, dependencies));
         final ViewController viewController = (ViewController) subtreeDependencies.computeIfAbsent(
