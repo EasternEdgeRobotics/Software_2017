@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
+import com.easternedgerobotics.rov.fx.CpuInformationView;
 import com.easternedgerobotics.rov.fx.MainView;
 import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
@@ -49,6 +50,11 @@ public final class Topside extends Application {
         thrusterStage.setTitle("Thruster Power");
         thrusterStage.initOwner(stage);
         thrusterStage.show();
+
+        final Stage rasprimeCpuInformation = viewLoader.load(CpuInformationView.class);
+        rasprimeCpuInformation.setTitle("Rasprime Sensors");
+        rasprimeCpuInformation.initOwner(stage);
+        rasprimeCpuInformation.show();
 
         Logger.info("Started");
     }
