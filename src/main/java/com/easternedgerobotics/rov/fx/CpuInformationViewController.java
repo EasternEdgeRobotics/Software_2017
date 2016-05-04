@@ -24,6 +24,9 @@ public class CpuInformationViewController implements ViewController {
 
     @Override
     public final void onCreate() {
+        view.frequencyLabel.setText("???");
+        view.temperatureLabel.setText("???");
+        view.voltageLabel.setText("???");
         subscriptions.add(rasprime.subscribe(this::updateLabels));
     }
 
