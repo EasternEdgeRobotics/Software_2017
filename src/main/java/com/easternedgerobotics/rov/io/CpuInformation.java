@@ -29,9 +29,7 @@ public final class CpuInformation {
      * @return a stream of CPU values.
      */
     public final Observable<CpuValue> observe() {
-        return interval.observeOn(Schedulers.io())
-            .map(this::pollCpu)
-            .observeOn(Schedulers.immediate());
+        return interval.observeOn(Schedulers.io()).map(this::pollCpu);
     }
 
     private CpuValue pollCpu(final long tick) {
