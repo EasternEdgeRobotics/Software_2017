@@ -19,7 +19,7 @@ public final class CpuInformation {
      * @param interval the interval at which to poll the CPU properties.
      * @param timeUnit the {@code TimeUnit} the interval is specified in.
      */
-    public CpuInformation(final int interval, final TimeUnit timeUnit) {
+    public CpuInformation(final long interval, final TimeUnit timeUnit) {
         this.interval = Observable.interval(interval, timeUnit);
     }
 
