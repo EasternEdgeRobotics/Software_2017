@@ -25,6 +25,18 @@ public class CpuValue implements MutableValueCompanion<Cpu> {
         this.cpu = cpu;
     }
 
+    public final long getFrequency() {
+        return cpu.frequency;
+    }
+
+    public final float getTemperature() {
+        return cpu.temperature;
+    }
+
+    public final float getVoltage() {
+        return cpu.voltage;
+    }
+
     @Override
     public final Cpu asMutable() {
         return cpu;
