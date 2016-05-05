@@ -100,22 +100,22 @@ final class Rov {
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)).startWith(portAft),
                 new PololuMaestroOutputChannel(maestro, PORT_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)).startWith(starboardAft),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)).startWith(portFore),
                 new PololuMaestroOutputChannel(maestro, PORT_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)).startWith(starboardFore),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)).startWith(portVert),
                 new PololuMaestroOutputChannel(maestro, PORT_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)).startWith(starboardVert),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
         ));
 
