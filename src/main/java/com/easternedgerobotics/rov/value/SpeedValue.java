@@ -6,8 +6,8 @@ public class SpeedValue implements MutableValueCompanion<Speed> {
     /**
      * Creates a SpeedValue with the given name.
      *
-     * @param name the logical name of the thruster
-     * @return a SpeedValue
+     * @param name the logical name of the device
+     * @return a zero SpeedValue
      */
     public static SpeedValue zero(final String name) {
         return create(name, 0);
@@ -16,51 +16,51 @@ public class SpeedValue implements MutableValueCompanion<Speed> {
     /**
      * Creates a SpeedValue with the given name and speed.
      *
-     * @param name the logical name of the thruster.
-     * @param speed the speed of the thruster.
+     * @param name the logical name of the device
+     * @param speed the speed of the device
      * @return a SpeedValue
      */
     public static SpeedValue create(final String name, final float speed) {
-        final Speed thruster = new Speed();
-        thruster.name = name;
-        thruster.speed = speed;
-        return new SpeedValue(thruster);
+        final Speed device = new Speed();
+        device.name = name;
+        device.speed = speed;
+        return new SpeedValue(device);
     }
 
-    private final Speed thruster;
+    private final Speed device;
 
-    SpeedValue(final Speed thruster) {
-        this.thruster = thruster;
+    SpeedValue(final Speed device) {
+        this.device = device;
     }
 
     public final SpeedValue setSpeed(
         final float speed
     ) {
         return SpeedValue.create(
-            thruster.name,
+            device.name,
             speed
         );
     }
 
     public final String getName() {
-        return thruster.name;
+        return device.name;
     }
 
     public final float getSpeed() {
-        return thruster.speed;
+        return device.speed;
     }
 
     @Override
     public final Speed asMutable() {
-        return thruster;
+        return device;
     }
 
     @Override
     public final String toString() {
         return String.format(
             "Speed={%s, %f}",
-            thruster.name,
-            thruster.speed
+            device.name,
+            device.speed
         );
     }
 
@@ -73,11 +73,11 @@ public class SpeedValue implements MutableValueCompanion<Speed> {
             return false;
         }
         final SpeedValue that = (SpeedValue) o;
-        return Objects.equals(thruster, that.thruster);
+        return Objects.equals(device, that.device);
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(thruster);
+        return Objects.hash(device);
     }
 }
