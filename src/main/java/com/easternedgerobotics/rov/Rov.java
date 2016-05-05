@@ -3,10 +3,13 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
+import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
+import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 
 import com.pi4j.io.serial.Serial;
@@ -58,6 +61,10 @@ final class Rov {
 
     private static final byte STARBOARD_VERT_CHANNEL = 16;
 
+    private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
+
+    private final LM35 internalTemperatureSensor;
+
     private final SixThrusterConfig thrusterConfig;
 
     private final List<Thruster> thrusters;
@@ -107,6 +114,9 @@ final class Rov {
                 thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
         ));
+
+        this.internalTemperatureSensor = new LM35(
+            new PololuMaestroInputChannel(maestro, INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
     }
 
     /**
@@ -129,6 +139,9 @@ final class Rov {
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
             .subscribe(this::beat, RuntimeException::new);
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
+            .map(k -> InternalTemperatureValue.create(internalTemperatureSensor.read()))
+            .subscribe(eventPublisher::emit, RuntimeException::new);
     }
 
     private void thrustersUpdate() {
