@@ -147,12 +147,12 @@ public class SixThrusterConfigTest {
 
         final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(
             eventPublisher,
-            SpeedValue.create("PA"),
-            SpeedValue.create("SA"),
-            SpeedValue.create("PF"),
-            SpeedValue.create("SF"),
-            SpeedValue.create("PV"),
-            SpeedValue.create("SV")
+            SpeedValue.zero("PA"),
+            SpeedValue.zero("SA"),
+            SpeedValue.zero("PF"),
+            SpeedValue.zero("SF"),
+            SpeedValue.zero("PV"),
+            SpeedValue.zero("SV")
         );
 
         motionPowerValues.onNext(MotionPowerValue.create(1, 1, 1, 1, 1, 1, 1));

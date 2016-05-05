@@ -70,12 +70,12 @@ final class Rov {
         final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
         final Observable<SpeedValue> thrusterSpeeds = eventPublisher.valuesOfType(SpeedValue.class);
 
-        final SpeedValue portAft = SpeedValue.create(PORT_AFT_NAME);
-        final SpeedValue starboardAft = SpeedValue.create(STARBOARD_AFT_NAME);
-        final SpeedValue portFore = SpeedValue.create(PORT_FORE_NAME);
-        final SpeedValue starboardFore = SpeedValue.create(STARBOARD_FORE_NAME);
-        final SpeedValue portVert = SpeedValue.create(PORT_VERT_NAME);
-        final SpeedValue starboardVert = SpeedValue.create(STARBOARD_VERT_NAME);
+        final SpeedValue portAft = SpeedValue.zero(PORT_AFT_NAME);
+        final SpeedValue starboardAft = SpeedValue.zero(STARBOARD_AFT_NAME);
+        final SpeedValue portFore = SpeedValue.zero(PORT_FORE_NAME);
+        final SpeedValue starboardFore = SpeedValue.zero(STARBOARD_FORE_NAME);
+        final SpeedValue portVert = SpeedValue.zero(PORT_VERT_NAME);
+        final SpeedValue starboardVert = SpeedValue.zero(STARBOARD_VERT_NAME);
 
         this.thrusterConfig = new SixThrusterConfig(
             eventPublisher,

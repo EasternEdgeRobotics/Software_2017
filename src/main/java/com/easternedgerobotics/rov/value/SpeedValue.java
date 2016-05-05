@@ -9,7 +9,7 @@ public class SpeedValue implements MutableValueCompanion<Speed> {
      * @param name the logical name of the thruster
      * @return a SpeedValue
      */
-    public static SpeedValue create(final String name) {
+    public static SpeedValue zero(final String name) {
         return create(name, 0);
     }
 
