@@ -5,8 +5,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 class Speed implements ImmutableValueCompanion<SpeedValue> {
+    @SuppressWarnings("WeakerAccess")
     public String name;
 
+    @SuppressWarnings("WeakerAccess")
     public float speed;
 
     @Override
