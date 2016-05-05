@@ -146,9 +146,6 @@ final class Rov {
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
             .observeOn(Schedulers.io())
             .subscribe(this::beat, RuntimeException::new);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
-            .map(k -> InternalTemperatureValue.create(internalTemperatureSensor.read()))
-            .subscribe(eventPublisher::emit, RuntimeException::new);
     }
 
     private void thrustersUpdate() {
@@ -167,6 +164,8 @@ final class Rov {
         } else {
             softShutdown();
         }
+
+        eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
