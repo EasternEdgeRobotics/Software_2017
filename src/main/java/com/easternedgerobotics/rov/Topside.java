@@ -4,6 +4,7 @@ import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
+import com.easternedgerobotics.rov.fx.SensorView;
 import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
@@ -49,6 +50,11 @@ public final class Topside extends Application {
         thrusterStage.setTitle("Thruster Power");
         thrusterStage.initOwner(stage);
         thrusterStage.show();
+
+        final Stage sensorStage = viewLoader.load(SensorView.class);
+        sensorStage.setTitle("Sensors 'n' stuff");
+        sensorStage.initOwner(stage);
+        sensorStage.show();
 
         Logger.info("Started");
     }
