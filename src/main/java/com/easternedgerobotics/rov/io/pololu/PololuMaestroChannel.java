@@ -3,7 +3,7 @@ package com.easternedgerobotics.rov.io.pololu;
 /**
  * A particular channel on a Pololu Maestro device.
  */
-public class PololuMaestroChannel {
+abstract class PololuMaestroChannel {
     /**
      * The Pololu Maestro instance.
      */
@@ -19,7 +19,7 @@ public class PololuMaestroChannel {
      * @param maestro the Pololu Maestro instance
      * @param channel the channel number
      */
-    public PololuMaestroChannel(final PololuMaestro maestro, final byte channel) {
+    PololuMaestroChannel(final PololuMaestro maestro, final byte channel) {
         this.maestro = maestro;
         this.channel = channel;
     }

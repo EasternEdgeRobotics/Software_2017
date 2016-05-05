@@ -4,14 +4,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class ThrusterSpeed implements ImmutableValueCompanion<ThrusterSpeedValue> {
+class Speed implements ImmutableValueCompanion<SpeedValue> {
+    @SuppressWarnings("WeakerAccess")
     public String name;
 
+    @SuppressWarnings("WeakerAccess")
     public float speed;
 
     @Override
-    public final ThrusterSpeedValue asImmutable() {
-        return new ThrusterSpeedValue(this);
+    public final SpeedValue asImmutable() {
+        return new SpeedValue(this);
     }
 
     @Override
@@ -22,7 +24,7 @@ class ThrusterSpeed implements ImmutableValueCompanion<ThrusterSpeedValue> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final ThrusterSpeed thruster = (ThrusterSpeed) o;
+        final Speed thruster = (Speed) o;
         final float epsilon = 0.0001f;
         final Function<Float, Predicate<Float>> withinReason = a ->
             b -> (Float.compare(a, b) == 0 || Math.abs(a - b) < epsilon);

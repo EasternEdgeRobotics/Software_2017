@@ -6,19 +6,20 @@ import com.easternedgerobotics.rov.value.SpeedValue;
 import rx.Observable;
 
 /**
- * See the <a href="http://docs.bluerobotics.com/besc/#specification-table">Specification Table for the Blue
- * Robotics Basic ESCs</a> for more information.
+ * See the <a href="http://www.dimensionengineering.com/datasheets/Sabertooth2X5RCQuickStart.pdf">Sabertooth 2x5 RC
+ * User’s Guide</a> for more information.
  */
-public class Thruster {
-    /**
-     * Max forward value for PololuMaestroOutputChannel connected to the Blue Robotics basic ESC.
-     */
-    public static final float MAX_FWD = 1100;
+public final class Motor {
 
     /**
-     * Max reverse value for PololuMaestroOutputChannel connected to the Blue Robotics basic ESC.
+     * Max forward value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
      */
-    public static final float MAX_REV = 1900;
+    public static final float MAX_FWD = 1000;
+
+    /**
+     * Max reverse value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
+     */
+    public static final float MAX_REV = 2000;
 
     /**
      * The output pololu channel to write speeds.
@@ -31,12 +32,12 @@ public class Thruster {
     private SpeedValue value;
 
     /**
-     * Create a Thruster device which uses a pololu channel for communication.
+     * Create a Motor device which uses a pololu channel for communication.
      *
      * @param values speed observable mapped to the pololu channel
      * @param device pololu channel to write speeds.
      */
-    public Thruster(
+    public Motor(
         final Observable<SpeedValue> values,
         final PololuMaestroOutputChannel device
     ) {
@@ -45,14 +46,14 @@ public class Thruster {
     }
 
     /**
-     * Write the latest {@code SpeedValue} for this thruster to the device.
+     * Write the latest {@code SpeedValue} for this motor to the device.
      */
     public final void write() {
         device.write(value.getSpeed());
     }
 
     /**
-     * Write zero to the thruster.
+     * Write zero to the motor.
      */
     public final void writeZero() {
         device.writeZero();
