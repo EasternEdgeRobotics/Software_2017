@@ -4,6 +4,7 @@ import com.easternedgerobotics.rov.event.Event;
 import com.easternedgerobotics.rov.value.CpuValue;
 
 import rx.Observable;
+import rx.schedulers.JavaFxScheduler;
 import rx.subscriptions.CompositeSubscription;
 
 import javax.inject.Inject;
@@ -24,7 +25,7 @@ public class CpuInformationViewController implements ViewController {
 
     @Override
     public final void onCreate() {
-        subscriptions.add(values.subscribe(this::updateLabels));
+        subscriptions.add(values.observeOn(JavaFxScheduler.getInstance()).subscribe(this::updateLabels));
     }
 
     @Override
