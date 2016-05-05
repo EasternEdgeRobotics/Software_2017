@@ -24,6 +24,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -143,6 +144,7 @@ final class Rov {
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
+            .observeOn(Schedulers.io())
             .subscribe(this::beat, RuntimeException::new);
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
             .map(k -> InternalTemperatureValue.create(internalTemperatureSensor.read()))
