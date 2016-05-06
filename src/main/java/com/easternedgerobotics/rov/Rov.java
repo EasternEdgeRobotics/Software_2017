@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
+import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
@@ -32,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 final class Rov {
     private static final long MAX_HEARTBEAT_GAP = 5;
+
+    private static final long CPU_POLL_INTERVAL = 1;
 
     private static final long SLEEP_DURATION = 100;
 
@@ -132,9 +135,11 @@ final class Rov {
             .concatWith(Observable.never());
 
         final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
+        final CpuInformation cpuInformation = new CpuInformation(CPU_POLL_INTERVAL, TimeUnit.SECONDS);
 
         thrusters.forEach(Thruster::writeZero);
 
+        cpuInformation.observe().subscribe(eventPublisher::emit);
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)

@@ -19,7 +19,7 @@ public final class CpuInformation {
      * @param interval the interval at which to poll the CPU properties.
      * @param timeUnit the {@code TimeUnit} the interval is specified in.
      */
-    public CpuInformation(final int interval, final TimeUnit timeUnit) {
+    public CpuInformation(final long interval, final TimeUnit timeUnit) {
         this.interval = Observable.interval(interval, timeUnit);
     }
 
@@ -29,9 +29,7 @@ public final class CpuInformation {
      * @return a stream of CPU values.
      */
     public final Observable<CpuValue> observe() {
-        return interval.observeOn(Schedulers.io())
-            .map(this::pollCpu)
-            .observeOn(Schedulers.immediate());
+        return interval.observeOn(Schedulers.io()).map(this::pollCpu);
     }
 
     private CpuValue pollCpu(final long tick) {
