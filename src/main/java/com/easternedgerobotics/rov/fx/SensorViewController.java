@@ -14,6 +14,11 @@ public class SensorViewController implements ViewController {
     private final InternalTemperatureSensorView internalTemperatureSensorView;
 
     /**
+     * The internal pressure sensor sub-view.
+     */
+    private final InternalPressureSensorView internalPressureSensorView;
+
+    /**
      * The CPU information sub-view.
      */
     private final CpuInformationView cpuInformationView;
@@ -22,10 +27,12 @@ public class SensorViewController implements ViewController {
     public SensorViewController(
         final SensorView view,
         final InternalTemperatureSensorView internalTemperatureSensorView,
+        final InternalPressureSensorView internalPressureSensorView,
         final CpuInformationView cpuInformationView
     ) {
         this.view = view;
         this.internalTemperatureSensorView = internalTemperatureSensorView;
+        this.internalPressureSensorView = internalPressureSensorView;
         this.cpuInformationView = cpuInformationView;
     }
 
@@ -33,6 +40,7 @@ public class SensorViewController implements ViewController {
     public final void onCreate() {
         view.row.getChildren().addAll(
             internalTemperatureSensorView.getParent(),
+            internalPressureSensorView.getParent(),
             cpuInformationView.getParent()
         );
     }
