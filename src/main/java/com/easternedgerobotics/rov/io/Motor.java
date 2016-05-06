@@ -14,12 +14,12 @@ public final class Motor {
     /**
      * Max forward value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
      */
-    public static final float MAX_FWD = 1000;
+    public static final float MAX_FWD = 500;
 
     /**
      * Max reverse value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
      */
-    public static final float MAX_REV = 2000;
+    public static final float MAX_REV = 2500;
 
     /**
      * The output pololu channel to write speeds.

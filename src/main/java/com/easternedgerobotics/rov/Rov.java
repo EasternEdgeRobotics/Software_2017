@@ -6,6 +6,7 @@ import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.MPX4250AP;
+import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
@@ -67,6 +68,10 @@ final class Rov {
 
     private static final byte STARBOARD_VERT_CHANNEL = 16;
 
+    private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
+
+    private static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
+
     private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
     private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
@@ -78,6 +83,8 @@ final class Rov {
     private final SixThrusterConfig thrusterConfig;
 
     private final List<Thruster> thrusters;
+
+    private final List<Motor> motors;
 
     private final EventPublisher eventPublisher;
 
@@ -103,6 +110,14 @@ final class Rov {
             portVert,
             starboardVert
         );
+
+        this.motors = Collections.unmodifiableList(Arrays.asList(
+            new Motor(
+                eventPublisher.valuesOfType(SpeedValue.class)
+                    .filter(x -> x.getName().equals(AFT_CAMERA_MOTOR_NAME))
+                    .startWith(SpeedValue.zero(AFT_CAMERA_MOTOR_NAME)),
+                new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
+        ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
             new Thruster(
@@ -169,8 +184,10 @@ final class Rov {
     private void beat(final HeartbeatValue heartbeat) {
         if (heartbeat.isOperational()) {
             thrustersUpdate();
+            motors.forEach(Motor::write);
         } else {
             softShutdown();
+            motors.forEach(Motor::writeZero);
         }
 
         eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
