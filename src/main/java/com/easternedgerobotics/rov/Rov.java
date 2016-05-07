@@ -56,17 +56,17 @@ final class Rov {
 
     private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    private static final byte PORT_AFT_CHANNEL = 14;
+    private static final byte PORT_AFT_CHANNEL = 17;
 
-    private static final byte STARBOARD_AFT_CHANNEL = 17;
+    private static final byte STARBOARD_AFT_CHANNEL = 14;
 
-    private static final byte PORT_FORE_CHANNEL = 12;
+    private static final byte PORT_FORE_CHANNEL = 15;
 
-    private static final byte STARBOARD_FORE_CHANNEL = 15;
+    private static final byte STARBOARD_FORE_CHANNEL = 12;
 
-    private static final byte PORT_VERT_CHANNEL = 13;
+    private static final byte PORT_VERT_CHANNEL = 16;
 
-    private static final byte STARBOARD_VERT_CHANNEL = 16;
+    private static final byte STARBOARD_VERT_CHANNEL = 13;
 
     private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
 
