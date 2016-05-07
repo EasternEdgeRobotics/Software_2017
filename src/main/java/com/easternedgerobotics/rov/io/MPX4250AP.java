@@ -2,6 +2,9 @@ package com.easternedgerobotics.rov.io;
 
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 
+/**
+ * A MPX4250 is an absolute pressure (AP) sensor. See also: <a href="http://goo.gl/n7c8tY">MPX4250</a>.
+ */
 public class MPX4250AP {
     /**
      * Scalar value for calculating pressure from voltage.
