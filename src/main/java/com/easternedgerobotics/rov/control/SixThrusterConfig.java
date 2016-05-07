@@ -144,12 +144,12 @@ public class SixThrusterConfig {
         }
 
         // We take the negative value on thrusters with counter-rotating propellers (stbd)
-        eventPublisher.emit(portAftThruster.setSpeed(absIfZero(portAft)));
-        eventPublisher.emit(starboardAftThruster.setSpeed(absIfZero(-starboardAft)));
-        eventPublisher.emit(portForeThruster.setSpeed(absIfZero(portFore)));
-        eventPublisher.emit(starboardForeThruster.setSpeed(absIfZero(-starboardFore)));
-        eventPublisher.emit(portVertThruster.setSpeed(absIfZero(portVert)));
-        eventPublisher.emit(starboardVertThruster.setSpeed(absIfZero(-starboardVert)));
+        eventPublisher.emit(portAftThruster.setSpeed(absIfZero(-portAft)));
+        eventPublisher.emit(starboardAftThruster.setSpeed(absIfZero(starboardAft)));
+        eventPublisher.emit(portForeThruster.setSpeed(absIfZero(-portFore)));
+        eventPublisher.emit(starboardForeThruster.setSpeed(absIfZero(starboardFore)));
+        eventPublisher.emit(portVertThruster.setSpeed(absIfZero(-portVert)));
+        eventPublisher.emit(starboardVertThruster.setSpeed(absIfZero(starboardVert)));
     }
 
     public final void updateZero() {

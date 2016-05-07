@@ -5,11 +5,14 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
+import com.easternedgerobotics.rov.io.MPX4250AP;
+import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 
@@ -24,6 +27,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -52,25 +56,35 @@ final class Rov {
 
     private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    private static final byte PORT_AFT_CHANNEL = 14;
+    private static final byte PORT_AFT_CHANNEL = 17;
 
-    private static final byte STARBOARD_AFT_CHANNEL = 17;
+    private static final byte STARBOARD_AFT_CHANNEL = 14;
 
-    private static final byte PORT_FORE_CHANNEL = 12;
+    private static final byte PORT_FORE_CHANNEL = 15;
 
-    private static final byte STARBOARD_FORE_CHANNEL = 15;
+    private static final byte STARBOARD_FORE_CHANNEL = 12;
 
-    private static final byte PORT_VERT_CHANNEL = 13;
+    private static final byte PORT_VERT_CHANNEL = 16;
 
-    private static final byte STARBOARD_VERT_CHANNEL = 16;
+    private static final byte STARBOARD_VERT_CHANNEL = 13;
+
+    private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
+
+    private static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
 
     private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
+    private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
+
     private final LM35 internalTemperatureSensor;
+
+    private final MPX4250AP internalPressureSensor;
 
     private final SixThrusterConfig thrusterConfig;
 
     private final List<Thruster> thrusters;
+
+    private final List<Motor> motors;
 
     private final EventPublisher eventPublisher;
 
@@ -97,29 +111,39 @@ final class Rov {
             starboardVert
         );
 
+        this.motors = Collections.unmodifiableList(Arrays.asList(
+            new Motor(
+                eventPublisher.valuesOfType(SpeedValue.class)
+                    .filter(x -> x.getName().equals(AFT_CAMERA_MOTOR_NAME))
+                    .startWith(SpeedValue.zero(AFT_CAMERA_MOTOR_NAME)),
+                new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
+        ));
+
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)).startWith(portAft),
                 new PololuMaestroOutputChannel(maestro, PORT_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)).startWith(starboardAft),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)).startWith(portFore),
                 new PololuMaestroOutputChannel(maestro, PORT_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)).startWith(starboardFore),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)).startWith(portVert),
                 new PololuMaestroOutputChannel(maestro, PORT_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)),
+                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)).startWith(starboardVert),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
         ));
 
         this.internalTemperatureSensor = new LM35(
             new PololuMaestroInputChannel(maestro, INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+        this.internalPressureSensor = new MPX4250AP(
+            new PololuMaestroInputChannel(maestro, INTERNAL_PRESSURE_SENSOR_CHANNEL));
     }
 
     /**
@@ -143,10 +167,8 @@ final class Rov {
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
+            .observeOn(Schedulers.io())
             .subscribe(this::beat, RuntimeException::new);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
-            .map(k -> InternalTemperatureValue.create(internalTemperatureSensor.read()))
-            .subscribe(eventPublisher::emit, RuntimeException::new);
     }
 
     private void thrustersUpdate() {
@@ -162,9 +184,14 @@ final class Rov {
     private void beat(final HeartbeatValue heartbeat) {
         if (heartbeat.isOperational()) {
             thrustersUpdate();
+            motors.forEach(Motor::write);
         } else {
             softShutdown();
+            motors.forEach(Motor::writeZero);
         }
+
+        eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
+        eventPublisher.emit(InternalPressureValue.create(internalPressureSensor.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {

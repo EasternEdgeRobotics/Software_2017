@@ -1,8 +1,8 @@
 [Desktop Entry]
-Version=1.0
+Version=2.0
 Name=Control Software
-Exec=/opt/topside-1.0.0/bin/topside
-Path=/opt/topside-1.0.0
+Exec=/opt/topside-2.0.0/bin/topside
+Path=/opt/topside-2.0.0
 Terminal=false
 Type=Application
 Categories=Application
