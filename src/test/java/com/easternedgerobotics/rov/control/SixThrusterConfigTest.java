@@ -37,10 +37,10 @@ public class SixThrusterConfigTest {
             {
                 MotionValue.create(0, 0, 1, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA",  1),
-                    SpeedValue.create("SA", -1),
-                    SpeedValue.create("PF", -1),
-                    SpeedValue.create("SF",  1),
+                    SpeedValue.create("PA", -1),
+                    SpeedValue.create("SA",  1),
+                    SpeedValue.create("PF",  1),
+                    SpeedValue.create("SF", -1),
                     SpeedValue.create("PV",  0),
                     SpeedValue.create("SV",  0)
                 )
@@ -48,21 +48,21 @@ public class SixThrusterConfigTest {
             {
                 MotionValue.create(0, -1, 1, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", 1),
-                    SpeedValue.create("SA", 0),
-                    SpeedValue.create("PF", 0),
-                    SpeedValue.create("SF", 1),
-                    SpeedValue.create("PV", 0),
-                    SpeedValue.create("SV", 0)
+                    SpeedValue.create("PA", -1),
+                    SpeedValue.create("SA",  0),
+                    SpeedValue.create("PF",  0),
+                    SpeedValue.create("SF", -1),
+                    SpeedValue.create("PV",  0),
+                    SpeedValue.create("SV",  0)
                 )
             },
             {
                 MotionValue.create(0, -1, 1, 0, 1, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0.333333f),
-                    SpeedValue.create("SA", -0.333333f),
-                    SpeedValue.create("PF",  0.333333f),
-                    SpeedValue.create("SF",  1.000000f),
+                    SpeedValue.create("PA", -0.333333f),
+                    SpeedValue.create("SA",  0.333333f),
+                    SpeedValue.create("PF", -0.333333f),
+                    SpeedValue.create("SF", -1.000000f),
                     SpeedValue.create("PV",  0.000000f),
                     SpeedValue.create("SV",  0.000000f)
                 )
@@ -70,10 +70,10 @@ public class SixThrusterConfigTest {
             {
                 MotionValue.create(0, -0.5f, 0.5f, 0, 0.5f, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0.1667f),
-                    SpeedValue.create("SA", -0.1667f),
-                    SpeedValue.create("PF",  0.1667f),
-                    SpeedValue.create("SF",  0.5000f),
+                    SpeedValue.create("PA", -0.1667f),
+                    SpeedValue.create("SA",  0.1667f),
+                    SpeedValue.create("PF", -0.1667f),
+                    SpeedValue.create("SF", -0.5000f),
                     SpeedValue.create("PV",  0.0000f),
                     SpeedValue.create("SV",  0.0000f)
                 )
@@ -81,10 +81,10 @@ public class SixThrusterConfigTest {
             {
                 MotionValue.create(0, 0.15f, 0.5f, 0, -0.75f, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0.5893f),
-                    SpeedValue.create("SA",  0.0536f),
-                    SpeedValue.create("PF", -0.7500f),
-                    SpeedValue.create("SF", -0.2143f),
+                    SpeedValue.create("PA", -0.5893f),
+                    SpeedValue.create("SA", -0.0536f),
+                    SpeedValue.create("PF",  0.7500f),
+                    SpeedValue.create("SF",  0.2143f),
                     SpeedValue.create("PV",  0.0000f),
                     SpeedValue.create("SV",  0.0000f)
                 )
@@ -96,8 +96,8 @@ public class SixThrusterConfigTest {
                     SpeedValue.create("SA",  0),
                     SpeedValue.create("PF",  0),
                     SpeedValue.create("SF",  0),
-                    SpeedValue.create("PV",  1),
-                    SpeedValue.create("SV", -1)
+                    SpeedValue.create("PV", -1),
+                    SpeedValue.create("SV",  1)
                 )
             },
             {
@@ -107,19 +107,19 @@ public class SixThrusterConfigTest {
                     SpeedValue.create("SA",  0f),
                     SpeedValue.create("PF",  0f),
                     SpeedValue.create("SF",  0f),
-                    SpeedValue.create("PV",  0.8000f),
-                    SpeedValue.create("SV", -0.4190f)
+                    SpeedValue.create("PV", -0.8000f),
+                    SpeedValue.create("SV",  0.4190f)
                 )
             },
             {
                 MotionValue.create(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0.111111f),
-                    SpeedValue.create("SA", -1.000000f),
-                    SpeedValue.create("PF", -0.444444f),
-                    SpeedValue.create("SF",  0.666667f),
-                    SpeedValue.create("PV",  0.2256f),
-                    SpeedValue.create("SV",  0.8000f)
+                    SpeedValue.create("PA", -0.111111f),
+                    SpeedValue.create("SA",  1.000000f),
+                    SpeedValue.create("PF",  0.444444f),
+                    SpeedValue.create("SF", -0.666667f),
+                    SpeedValue.create("PV", -0.2256f),
+                    SpeedValue.create("SV", -0.8000f)
                 )
             }
         });
