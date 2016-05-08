@@ -1,8 +1,8 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
+import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
 import com.easternedgerobotics.rov.fx.SensorView;
 import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
@@ -15,7 +15,13 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.UdpBroadcast;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public final class Topside extends Application {
@@ -32,8 +38,12 @@ public final class Topside extends Application {
     private ViewLoader viewLoader;
 
     @Override
-    public void init() {
-        eventPublisher = new UdpEventPublisher("192.168.88.255");
+    public void init() throws SocketException, UnknownHostException {
+        final InetAddress broadcastAddress = InetAddress.getByName("192.168.88.255");
+        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final DatagramSocket socket = new DatagramSocket(broadcastPort);
+        eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
+            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);

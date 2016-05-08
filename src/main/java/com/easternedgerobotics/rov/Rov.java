@@ -1,8 +1,8 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
+import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.MPX4250AP;
@@ -27,9 +27,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -229,8 +233,12 @@ final class Rov {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
+            final InetAddress broadcastAddress = InetAddress.getByName(arguments.getOptionValue("b"));
+            final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+            final DatagramSocket socket = new DatagramSocket(broadcastPort);
+            final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
+                socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
             final Serial serial = SerialFactory.createInstance();
-            final EventPublisher eventPublisher = new UdpEventPublisher(arguments.getOptionValue("b"));
             final Rov rov = new Rov(eventPublisher, serial);
 
             serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));

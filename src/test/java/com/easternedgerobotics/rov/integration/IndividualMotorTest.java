@@ -1,7 +1,7 @@
 package com.easternedgerobotics.rov.integration;
 
+import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
@@ -9,8 +9,14 @@ import com.easternedgerobotics.rov.value.SpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
-
 import rx.Observable;
+import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.UdpBroadcast;
+
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 @SuppressWarnings({"checkstyle:magicnumber"})
 public final class IndividualMotorTest {
@@ -18,7 +24,7 @@ public final class IndividualMotorTest {
 
     }
 
-    public static void main(final String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
         final byte deviceNumber = Byte.parseByte(args[0]);
         final byte channel = Byte.parseByte(args[1]);
         final int baudRate = 115200;
@@ -27,7 +33,10 @@ public final class IndividualMotorTest {
         final PololuMaestro maestro = new PololuMaestro(serial, deviceNumber);
         serial.open("/dev/ttyACM0", baudRate);
 
-        final EventPublisher eventPublisher = new UdpEventPublisher("255.255.255.255");
+        final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
+        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
+            new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
 
         final Observable<SpeedValue> speeds = eventPublisher.valuesOfType(SpeedValue.class);
         final SpeedValue speed = new SpeedValue("Test");
