@@ -237,7 +237,7 @@ final class Rov {
             final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-                socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
+                socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
             final Serial serial = SerialFactory.createInstance();
             final Rov rov = new Rov(eventPublisher, serial);
 

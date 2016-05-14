@@ -43,7 +43,7 @@ public final class Topside extends Application {
         final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
+            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
