@@ -22,9 +22,9 @@ public class SixThrusterConfig {
 
     private SpeedValue starboardVertThruster;
 
-    private MotionPowerValue motionPower = MotionPowerValue.zero();
+    private MotionPowerValue motionPower = new MotionPowerValue();
 
-    private MotionValue motion = MotionValue.zero();
+    private MotionValue motion = new MotionValue();
 
     private EventPublisher eventPublisher;
 

@@ -13,7 +13,7 @@ public class ExponentialMotionScale implements Function<MotionValue, MotionValue
      */
     @Override
     public final MotionValue apply(final MotionValue motionValue) {
-        return MotionValue.create(
+        return new MotionValue(
             scale(motionValue.getHeave()),
             scale(motionValue.getSway()),
             scale(motionValue.getSurge()),

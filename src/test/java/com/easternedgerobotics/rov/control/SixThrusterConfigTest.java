@@ -24,7 +24,7 @@ public class SixThrusterConfigTest {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
             {
-                MotionValue.create(0, 0, 0, 0, 0, 0),
+                new MotionValue(0, 0, 0, 0, 0, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", 0),
                     SpeedValue.create("SA", 0),
@@ -35,7 +35,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0, 0, 1, 0, 0, 0),
+                new MotionValue(0, 0, 1, 0, 0, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", -1),
                     SpeedValue.create("SA",  1),
@@ -46,7 +46,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0, -1, 1, 0, 0, 0),
+                new MotionValue(0, -1, 1, 0, 0, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", -1),
                     SpeedValue.create("SA",  0),
@@ -57,7 +57,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0, -1, 1, 0, 1, 0),
+                new MotionValue(0, -1, 1, 0, 1, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", -0.333333f),
                     SpeedValue.create("SA",  0.333333f),
@@ -68,7 +68,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0, -0.5f, 0.5f, 0, 0.5f, 0),
+                new MotionValue(0, -0.5f, 0.5f, 0, 0.5f, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", -0.1667f),
                     SpeedValue.create("SA",  0.1667f),
@@ -79,7 +79,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0, 0.15f, 0.5f, 0, -0.75f, 0),
+                new MotionValue(0, 0.15f, 0.5f, 0, -0.75f, 0),
                 Arrays.asList(
                     SpeedValue.create("PA", -0.5893f),
                     SpeedValue.create("SA", -0.0536f),
@@ -90,7 +90,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(1, 0, 0, 0, 0, 0),
+                new MotionValue(1, 0, 0, 0, 0, 0),
                 Arrays.asList(
                     SpeedValue.create("PA",  0),
                     SpeedValue.create("SA",  0),
@@ -101,7 +101,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(0.8f, 0, 0, 0, 0, -0.25f),
+                new MotionValue(0.8f, 0, 0, 0, 0, -0.25f),
                 Arrays.asList(
                     SpeedValue.create("PA",  0f),
                     SpeedValue.create("SA",  0f),
@@ -112,7 +112,7 @@ public class SixThrusterConfigTest {
                 )
             },
             {
-                MotionValue.create(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
+                new MotionValue(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
                 Arrays.asList(
                     SpeedValue.create("PA", -0.111111f),
                     SpeedValue.create("SA",  1.000000f),
@@ -155,7 +155,7 @@ public class SixThrusterConfigTest {
             SpeedValue.zero("SV")
         );
 
-        motionPowerValues.onNext(MotionPowerValue.create(1, 1, 1, 1, 1, 1, 1));
+        motionPowerValues.onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
         motionValues.onNext(motionValue);
         testScheduler.triggerActions();
 

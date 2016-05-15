@@ -79,12 +79,12 @@ public class LogitechExtremeJoystickTest {
         joystickSubscriber.assertNoErrors();
         joystickSubscriber.assertValueCount(6);
         joystickSubscriber.assertReceivedOnNext(Arrays.asList(
-            MotionValue.create(1, -1, 1, 0, 1, 0),
-            MotionValue.create(2, -2, 2, 0, 2, 0),
-            MotionValue.create(3,  0, 3, 0, 3, 3),
-            MotionValue.create(4,  0, 4, 0, 4, 4),
-            MotionValue.create(5,  0, 5, 0, 5, 5),
-            MotionValue.create(6, -6, 6, 0, 6, 0)
+            new MotionValue(1, -1, 1, 0, 1, 0),
+            new MotionValue(2, -2, 2, 0, 2, 0),
+            new MotionValue(3,  0, 3, 0, 3, 3),
+            new MotionValue(4,  0, 4, 0, 4, 4),
+            new MotionValue(5,  0, 5, 0, 5, 5),
+            new MotionValue(6, -6, 6, 0, 6, 0)
         ));
     }
 
