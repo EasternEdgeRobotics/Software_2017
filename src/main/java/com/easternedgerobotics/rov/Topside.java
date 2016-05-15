@@ -81,9 +81,9 @@ public final class Topside extends Application {
     private void joystickInitialization(final Joystick joystick) {
         final ExponentialMotionScale scale = new ExponentialMotionScale();
         final Observable<SpeedValue> aftCameraForward = joystick.button(AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON)
-            .map(value -> SpeedValue.create(AFT_CAMERA_MOTOR_NAME, value ?  AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
+            .map(value -> new SpeedValue(AFT_CAMERA_MOTOR_NAME, value ?  AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
         final Observable<SpeedValue> aftCameraReverse = joystick.button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
-            .map(value -> SpeedValue.create(AFT_CAMERA_MOTOR_NAME, value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
+            .map(value -> new SpeedValue(AFT_CAMERA_MOTOR_NAME, value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
         joystick.axes().map(scale::apply).subscribe(eventPublisher::emit, Logger::error);
         aftCameraForward.mergeWith(aftCameraReverse)
             .subscribe(eventPublisher::emit, Logger::error);

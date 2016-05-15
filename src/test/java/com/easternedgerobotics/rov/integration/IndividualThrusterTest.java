@@ -77,7 +77,7 @@ public class IndividualThrusterTest {
 
         serial.open("/dev/ttyACM0", 115_200);
         eventPublisher.valuesOfType(SpeedValue.class).subscribe(consumer::accept);
-        eventPublisher.emit(SpeedValue.create("???", 1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
+        eventPublisher.emit(new SpeedValue("???", 1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
 
         TimeUnit.SECONDS.sleep(duration);
         thruster.writeZero();
