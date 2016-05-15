@@ -41,6 +41,6 @@ class InternalPressureSensorViewController implements ViewController {
 
     private void updatePressureLabel(final InternalPressureValue value) {
         view.sensorValueLabel.setText(String.format(
-            InternalPressureSensorView.PRESSURE_LABEL_FORMAT, value.getInternalPressure()));
+            InternalPressureSensorView.PRESSURE_LABEL_FORMAT, value.getPressure()));
     }
 }

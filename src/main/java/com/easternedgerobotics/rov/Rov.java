@@ -191,7 +191,7 @@ final class Rov {
         }
 
         eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
-        eventPublisher.emit(InternalPressureValue.create(internalPressureSensor.read()));
+        eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
