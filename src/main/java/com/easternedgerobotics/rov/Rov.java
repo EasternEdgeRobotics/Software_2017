@@ -153,7 +153,7 @@ final class Rov {
      */
     private void init() {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final Observable<HeartbeatValue> timeout = Observable.just(HeartbeatValue.create(false))
+        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
             .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
@@ -182,7 +182,7 @@ final class Rov {
     }
 
     private void beat(final HeartbeatValue heartbeat) {
-        if (heartbeat.isOperational()) {
+        if (heartbeat.getOperational()) {
             thrustersUpdate();
             motors.forEach(Motor::write);
         } else {

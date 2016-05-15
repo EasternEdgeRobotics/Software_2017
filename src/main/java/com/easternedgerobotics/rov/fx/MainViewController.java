@@ -54,6 +54,6 @@ public class MainViewController implements ViewController {
     }
 
     private void heartbeat(final boolean operational) {
-        eventPublisher.emit(HeartbeatValue.create(operational));
+        eventPublisher.emit(new HeartbeatValue(operational));
     }
 }
