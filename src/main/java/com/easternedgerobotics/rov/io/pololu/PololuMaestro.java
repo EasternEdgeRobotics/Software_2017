@@ -10,7 +10,7 @@ import java.util.BitSet;
  * This class implements the <a href="https://www.pololu.com/docs/0J40/5">Pololu Maestro Servo Controller's serial
  * interface</a>. It is assumed that the connected Maestro is configured in USB Dual Port mode.
  */
-public class PololuMaestro {
+public final class PololuMaestro {
     /**
      * The mask used to clear a command byte's most significant bit.
      */

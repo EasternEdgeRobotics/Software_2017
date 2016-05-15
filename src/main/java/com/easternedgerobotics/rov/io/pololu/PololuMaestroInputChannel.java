@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.io.pololu;
 
-public class PololuMaestroInputChannel extends PololuMaestroChannel {
+public final class PololuMaestroInputChannel extends PololuMaestroChannel {
     /**
      * Constructs an new {@code PololuMaestroInputChannel} instance.
      *
