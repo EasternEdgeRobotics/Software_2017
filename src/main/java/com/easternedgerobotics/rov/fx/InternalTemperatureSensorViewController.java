@@ -40,6 +40,6 @@ public class InternalTemperatureSensorViewController implements ViewController {
     }
 
     private void updateInternalTemperatureLabel(final InternalTemperatureValue internalTemperatureValue) {
-        view.sensorValueLabel.setText(String.format("%.1f °C", internalTemperatureValue.getInternalTemperature()));
+        view.sensorValueLabel.setText(String.format("%.1f °C", internalTemperatureValue.getTemperature()));
     }
 }

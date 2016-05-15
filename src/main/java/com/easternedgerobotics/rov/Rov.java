@@ -190,7 +190,7 @@ final class Rov {
             motors.forEach(Motor::writeZero);
         }
 
-        eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
+        eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
     }
 
