@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.control;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.test.CollectionAssert;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import rx.Observable;
 import rx.schedulers.TestScheduler;
@@ -161,8 +163,10 @@ public class SixThrusterConfigTest {
 
         sixThrusterConfig.update();
 
-        for (SpeedValue thrusterValue : expectedThrusterValues) {
-            Mockito.verify(eventPublisher).emit(thrusterValue);
-        }
+        final ArgumentCaptor<SpeedValue> captor = ArgumentCaptor.forClass(SpeedValue.class);
+        Mockito.verify(eventPublisher, Mockito.times(6)).emit(captor.capture());
+        CollectionAssert.assertItemsMatchPredicateInOrder(
+            captor.getAllValues(), expectedThrusterValues, (a, b) ->
+                a.getName().equals(b.getName()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
     }
 }
