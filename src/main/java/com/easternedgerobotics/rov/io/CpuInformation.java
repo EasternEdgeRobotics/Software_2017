@@ -34,7 +34,7 @@ public final class CpuInformation {
 
     private CpuValue pollCpu(final long tick) {
         try {
-            return CpuValue.create(
+            return new CpuValue(
                 SystemInfo.getClockFrequencyArm(), SystemInfo.getCpuTemperature(), SystemInfo.getCpuVoltage());
         } catch (final InterruptedException | IOException e) {
             throw Exceptions.propagate(e);

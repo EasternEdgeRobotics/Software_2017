@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.control;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.test.CollectionAssert;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import rx.Observable;
 import rx.schedulers.TestScheduler;
@@ -24,102 +26,102 @@ public class SixThrusterConfigTest {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
             {
-                MotionValue.create(0, 0, 0, 0, 0, 0),
+                new MotionValue(0, 0, 0, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", 0),
-                    SpeedValue.create("SA", 0),
-                    SpeedValue.create("PF", 0),
-                    SpeedValue.create("SF", 0),
-                    SpeedValue.create("PV", 0),
-                    SpeedValue.create("SV", 0)
+                    new SpeedValue("PA", 0),
+                    new SpeedValue("SA", 0),
+                    new SpeedValue("PF", 0),
+                    new SpeedValue("SF", 0),
+                    new SpeedValue("PV", 0),
+                    new SpeedValue("SV", 0)
                 )
             },
             {
-                MotionValue.create(0, 0, 1, 0, 0, 0),
+                new MotionValue(0, 0, 1, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", -1),
-                    SpeedValue.create("SA",  1),
-                    SpeedValue.create("PF",  1),
-                    SpeedValue.create("SF", -1),
-                    SpeedValue.create("PV",  0),
-                    SpeedValue.create("SV",  0)
+                    new SpeedValue("PA", -1),
+                    new SpeedValue("SA",  1),
+                    new SpeedValue("PF",  1),
+                    new SpeedValue("SF", -1),
+                    new SpeedValue("PV",  0),
+                    new SpeedValue("SV",  0)
                 )
             },
             {
-                MotionValue.create(0, -1, 1, 0, 0, 0),
+                new MotionValue(0, -1, 1, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", -1),
-                    SpeedValue.create("SA",  0),
-                    SpeedValue.create("PF",  0),
-                    SpeedValue.create("SF", -1),
-                    SpeedValue.create("PV",  0),
-                    SpeedValue.create("SV",  0)
+                    new SpeedValue("PA", -1),
+                    new SpeedValue("SA",  0),
+                    new SpeedValue("PF",  0),
+                    new SpeedValue("SF", -1),
+                    new SpeedValue("PV",  0),
+                    new SpeedValue("SV",  0)
                 )
             },
             {
-                MotionValue.create(0, -1, 1, 0, 1, 0),
+                new MotionValue(0, -1, 1, 0, 1, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", -0.333333f),
-                    SpeedValue.create("SA",  0.333333f),
-                    SpeedValue.create("PF", -0.333333f),
-                    SpeedValue.create("SF", -1.000000f),
-                    SpeedValue.create("PV",  0.000000f),
-                    SpeedValue.create("SV",  0.000000f)
+                    new SpeedValue("PA", -0.333333f),
+                    new SpeedValue("SA",  0.333333f),
+                    new SpeedValue("PF", -0.333333f),
+                    new SpeedValue("SF", -1.000000f),
+                    new SpeedValue("PV",  0.000000f),
+                    new SpeedValue("SV",  0.000000f)
                 )
             },
             {
-                MotionValue.create(0, -0.5f, 0.5f, 0, 0.5f, 0),
+                new MotionValue(0, -0.5f, 0.5f, 0, 0.5f, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", -0.1667f),
-                    SpeedValue.create("SA",  0.1667f),
-                    SpeedValue.create("PF", -0.1667f),
-                    SpeedValue.create("SF", -0.5000f),
-                    SpeedValue.create("PV",  0.0000f),
-                    SpeedValue.create("SV",  0.0000f)
+                    new SpeedValue("PA", -0.1667f),
+                    new SpeedValue("SA",  0.1667f),
+                    new SpeedValue("PF", -0.1667f),
+                    new SpeedValue("SF", -0.5000f),
+                    new SpeedValue("PV",  0.0000f),
+                    new SpeedValue("SV",  0.0000f)
                 )
             },
             {
-                MotionValue.create(0, 0.15f, 0.5f, 0, -0.75f, 0),
+                new MotionValue(0, 0.15f, 0.5f, 0, -0.75f, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA", -0.5893f),
-                    SpeedValue.create("SA", -0.0536f),
-                    SpeedValue.create("PF",  0.7500f),
-                    SpeedValue.create("SF",  0.2143f),
-                    SpeedValue.create("PV",  0.0000f),
-                    SpeedValue.create("SV",  0.0000f)
+                    new SpeedValue("PA", -0.5893f),
+                    new SpeedValue("SA", -0.0536f),
+                    new SpeedValue("PF",  0.7500f),
+                    new SpeedValue("SF",  0.2143f),
+                    new SpeedValue("PV",  0.0000f),
+                    new SpeedValue("SV",  0.0000f)
                 )
             },
             {
-                MotionValue.create(1, 0, 0, 0, 0, 0),
+                new MotionValue(1, 0, 0, 0, 0, 0),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0),
-                    SpeedValue.create("SA",  0),
-                    SpeedValue.create("PF",  0),
-                    SpeedValue.create("SF",  0),
-                    SpeedValue.create("PV", -1),
-                    SpeedValue.create("SV",  1)
+                    new SpeedValue("PA",  0),
+                    new SpeedValue("SA",  0),
+                    new SpeedValue("PF",  0),
+                    new SpeedValue("SF",  0),
+                    new SpeedValue("PV", -1),
+                    new SpeedValue("SV",  1)
                 )
             },
             {
-                MotionValue.create(0.8f, 0, 0, 0, 0, -0.25f),
+                new MotionValue(0.8f, 0, 0, 0, 0, -0.25f),
                 Arrays.asList(
-                    SpeedValue.create("PA",  0f),
-                    SpeedValue.create("SA",  0f),
-                    SpeedValue.create("PF",  0f),
-                    SpeedValue.create("SF",  0f),
-                    SpeedValue.create("PV", -0.8000f),
-                    SpeedValue.create("SV",  0.4190f)
+                    new SpeedValue("PA",  0f),
+                    new SpeedValue("SA",  0f),
+                    new SpeedValue("PF",  0f),
+                    new SpeedValue("SF",  0f),
+                    new SpeedValue("PV", -0.8000f),
+                    new SpeedValue("SV",  0.4190f)
                 )
             },
             {
-                MotionValue.create(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
+                new MotionValue(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
                 Arrays.asList(
-                    SpeedValue.create("PA", -0.111111f),
-                    SpeedValue.create("SA",  1.000000f),
-                    SpeedValue.create("PF",  0.444444f),
-                    SpeedValue.create("SF", -0.666667f),
-                    SpeedValue.create("PV", -0.2256f),
-                    SpeedValue.create("SV", -0.8000f)
+                    new SpeedValue("PA", -0.111111f),
+                    new SpeedValue("SA",  1.000000f),
+                    new SpeedValue("PF",  0.444444f),
+                    new SpeedValue("SF", -0.666667f),
+                    new SpeedValue("PV", -0.2256f),
+                    new SpeedValue("SV", -0.8000f)
                 )
             }
         });
@@ -147,22 +149,24 @@ public class SixThrusterConfigTest {
 
         final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(
             eventPublisher,
-            SpeedValue.zero("PA"),
-            SpeedValue.zero("SA"),
-            SpeedValue.zero("PF"),
-            SpeedValue.zero("SF"),
-            SpeedValue.zero("PV"),
-            SpeedValue.zero("SV")
+            new SpeedValue("PA"),
+            new SpeedValue("SA"),
+            new SpeedValue("PF"),
+            new SpeedValue("SF"),
+            new SpeedValue("PV"),
+            new SpeedValue("SV")
         );
 
-        motionPowerValues.onNext(MotionPowerValue.create(1, 1, 1, 1, 1, 1, 1));
+        motionPowerValues.onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
         motionValues.onNext(motionValue);
         testScheduler.triggerActions();
 
         sixThrusterConfig.update();
 
-        for (SpeedValue thrusterValue : expectedThrusterValues) {
-            Mockito.verify(eventPublisher).emit(thrusterValue);
-        }
+        final ArgumentCaptor<SpeedValue> captor = ArgumentCaptor.forClass(SpeedValue.class);
+        Mockito.verify(eventPublisher, Mockito.times(6)).emit(captor.capture());
+        CollectionAssert.assertItemsMatchPredicateInOrder(
+            captor.getAllValues(), expectedThrusterValues, (a, b) ->
+                a.getName().equals(b.getName()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
     }
 }

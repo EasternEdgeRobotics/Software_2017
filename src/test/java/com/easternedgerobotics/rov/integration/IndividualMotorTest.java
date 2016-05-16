@@ -30,7 +30,7 @@ public final class IndividualMotorTest {
         final EventPublisher eventPublisher = new UdpEventPublisher("255.255.255.255");
 
         final Observable<SpeedValue> speeds = eventPublisher.valuesOfType(SpeedValue.class);
-        final SpeedValue speed = SpeedValue.zero("Test");
+        final SpeedValue speed = new SpeedValue("Test");
 
         final Motor motor = new Motor(
             speeds.filter(x -> x.getName().equals("Test")),

@@ -129,7 +129,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
         final Observable<Float> roll = values(rollSliderView);
 
         subscriptions.add(
-            Observable.combineLatest(global, heave, sway, surge, pitch, yaw, roll, MotionPowerValue::create)
+            Observable.combineLatest(global, heave, sway, surge, pitch, yaw, roll, MotionPowerValue::new)
                 .observeOn(Schedulers.io())
                 .subscribe(eventPublisher::emit));
     }

@@ -94,12 +94,12 @@ final class Rov {
         final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
         final Observable<SpeedValue> thrusterSpeeds = eventPublisher.valuesOfType(SpeedValue.class);
 
-        final SpeedValue portAft = SpeedValue.zero(PORT_AFT_NAME);
-        final SpeedValue starboardAft = SpeedValue.zero(STARBOARD_AFT_NAME);
-        final SpeedValue portFore = SpeedValue.zero(PORT_FORE_NAME);
-        final SpeedValue starboardFore = SpeedValue.zero(STARBOARD_FORE_NAME);
-        final SpeedValue portVert = SpeedValue.zero(PORT_VERT_NAME);
-        final SpeedValue starboardVert = SpeedValue.zero(STARBOARD_VERT_NAME);
+        final SpeedValue portAft = new SpeedValue(PORT_AFT_NAME);
+        final SpeedValue starboardAft = new SpeedValue(STARBOARD_AFT_NAME);
+        final SpeedValue portFore = new SpeedValue(PORT_FORE_NAME);
+        final SpeedValue starboardFore = new SpeedValue(STARBOARD_FORE_NAME);
+        final SpeedValue portVert = new SpeedValue(PORT_VERT_NAME);
+        final SpeedValue starboardVert = new SpeedValue(STARBOARD_VERT_NAME);
 
         this.thrusterConfig = new SixThrusterConfig(
             eventPublisher,
@@ -115,7 +115,7 @@ final class Rov {
             new Motor(
                 eventPublisher.valuesOfType(SpeedValue.class)
                     .filter(x -> x.getName().equals(AFT_CAMERA_MOTOR_NAME))
-                    .startWith(SpeedValue.zero(AFT_CAMERA_MOTOR_NAME)),
+                    .startWith(new SpeedValue(AFT_CAMERA_MOTOR_NAME)),
                 new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
         ));
 
@@ -153,7 +153,7 @@ final class Rov {
      */
     private void init() {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final Observable<HeartbeatValue> timeout = Observable.just(HeartbeatValue.create(false))
+        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
             .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
@@ -182,7 +182,7 @@ final class Rov {
     }
 
     private void beat(final HeartbeatValue heartbeat) {
-        if (heartbeat.isOperational()) {
+        if (heartbeat.getOperational()) {
             thrustersUpdate();
             motors.forEach(Motor::write);
         } else {
@@ -190,8 +190,8 @@ final class Rov {
             motors.forEach(Motor::writeZero);
         }
 
-        eventPublisher.emit(InternalTemperatureValue.create(internalTemperatureSensor.read()));
-        eventPublisher.emit(InternalPressureValue.create(internalPressureSensor.read()));
+        eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
+        eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {

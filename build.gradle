@@ -1,3 +1,7 @@
+plugins {
+    id 'com.zoltu.kotlin' version '1.0.2'
+}
+
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
@@ -33,6 +37,7 @@ dependencies {
     compile 'io.reactivex:rxnetty:0.4.11'
     compile 'javax.inject:javax.inject:1'
     compile 'net.java.jinput:jinput:2.0.6'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.2'
     compile 'org.tinylog:tinylog:1.0.3'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'

@@ -1,7 +1,5 @@
 package com.easternedgerobotics.rov.event;
 
-import com.easternedgerobotics.rov.value.MutableValueCompanion;
-
 import rx.Observable;
 
 public interface EventPublisher {
@@ -10,7 +8,7 @@ public interface EventPublisher {
      *
      * @param value the value to emit
      */
-    <T extends MutableValueCompanion> void emit(final T value);
+    void emit(final Object value);
 
     /**
      * Returns an {@link rx.Observable} of the values of the given type.
@@ -18,7 +16,7 @@ public interface EventPublisher {
      * @param clazz the class type to filter values by
      * @return an Observable that emits each value of the given type
      */
-    <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz);
+    <T> Observable<T> valuesOfType(final Class<T> clazz);
 
     /**
      * Stops receiving and broadcasting events.

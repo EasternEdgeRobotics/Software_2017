@@ -71,9 +71,9 @@ public class LogitechExtremeJoystick implements Joystick {
         final float yaw = axes.get(AXIS_INDEX_YAW).getPollData();
 
         if (rolling) {
-            return MotionValue.create(heave, 0, surge, 0, yaw, -sway);
+            return new MotionValue(heave, 0, surge, 0, yaw, -sway);
         }
 
-        return MotionValue.create(heave, sway, surge, 0, yaw, 0);
+        return new MotionValue(heave, sway, surge, 0, yaw, 0);
     }
 }

@@ -2,8 +2,6 @@ package com.easternedgerobotics.rov.event;
 
 import com.easternedgerobotics.rov.event.io.KryoSerializer;
 import com.easternedgerobotics.rov.event.io.Serializer;
-import com.easternedgerobotics.rov.value.ImmutableValueCompanion;
-import com.easternedgerobotics.rov.value.MutableValueCompanion;
 
 import io.netty.channel.socket.DatagramPacket;
 import io.reactivex.netty.RxNetty;
@@ -92,8 +90,8 @@ public class UdpEventPublisher implements EventPublisher {
      *
      * @param value the value to emit
      */
-    public final <T extends MutableValueCompanion> void emit(final T value) {
-        outbound.writeBytesAndFlush(serializer.serialize(value.asMutable()));
+    public final void emit(final Object value) {
+        outbound.writeBytesAndFlush(serializer.serialize(value));
     }
 
     /**
@@ -103,18 +101,12 @@ public class UdpEventPublisher implements EventPublisher {
      * @return an Observable that emits each value of the given type
      */
     @SuppressWarnings("unchecked")
-    public final <T extends MutableValueCompanion> Observable<T> valuesOfType(final Class<T> clazz) {
+    public final <T> Observable<T> valuesOfType(final Class<T> clazz) {
         if (values.containsKey(clazz)) {
             return (Observable<T>) values.get(clazz);
         }
 
-        final Observable<T> observable =
-            subject
-                .map(v -> ((ImmutableValueCompanion) v).asImmutable())
-                .filter(clazz::isInstance)
-                .cast(clazz)
-                .share();
-
+        final Observable<T> observable = subject.filter(clazz::isInstance).cast(clazz).share();
         values.put(clazz, observable);
         return observable;
     }
