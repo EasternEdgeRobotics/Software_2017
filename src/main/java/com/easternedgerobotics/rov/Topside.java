@@ -21,11 +21,11 @@ import java.util.HashMap;
 public final class Topside extends Application {
     private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
 
-    private static final int AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON = 4;
+    private static final int AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON = 6;
 
-    private static final int AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON = 6;
+    private static final int AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON = 4;
 
-    private static final float AFT_CAMERA_MOTOR_ROTATION_SPEED = 0.75f;
+    private static final float AFT_CAMERA_MOTOR_ROTATION_SPEED = 0.3f;
 
     private EventPublisher eventPublisher;
 
