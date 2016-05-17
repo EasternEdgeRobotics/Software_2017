@@ -3,24 +3,17 @@ package com.easternedgerobotics.rov.control;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.SpeedValue;
+import com.easternedgerobotics.rov.value.PortAftSpeedValue;
+import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.PortVertSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
-
-    private SpeedValue portAftThruster;
-
-    private SpeedValue starboardAftThruster;
-
-    private SpeedValue portForeThruster;
-
-    private SpeedValue starboardForeThruster;
-
-    private SpeedValue portVertThruster;
-
-    private SpeedValue starboardVertThruster;
 
     private MotionPowerValue motionPower = new MotionPowerValue();
 
@@ -28,23 +21,8 @@ public class SixThrusterConfig {
 
     private EventPublisher eventPublisher;
 
-    public SixThrusterConfig(
-        final EventPublisher eventPublisher,
-        final SpeedValue portAft,
-        final SpeedValue starboardAft,
-        final SpeedValue portFore,
-        final SpeedValue starboardFore,
-        final SpeedValue portVert,
-        final SpeedValue starboardVert
-    ) {
+    public SixThrusterConfig(final EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-
-        portAftThruster = portAft;
-        starboardAftThruster = starboardAft;
-        portForeThruster = portFore;
-        starboardForeThruster = starboardFore;
-        portVertThruster = portVert;
-        starboardVertThruster = starboardVert;
 
         eventPublisher.valuesOfType(MotionValue.class).subscribe(m -> motion = m);
 
@@ -144,21 +122,21 @@ public class SixThrusterConfig {
         }
 
         // We take the negative value on thrusters with counter-rotating propellers (stbd)
-        eventPublisher.emit(portAftThruster.setSpeed(absIfZero(-portAft)));
-        eventPublisher.emit(starboardAftThruster.setSpeed(absIfZero(starboardAft)));
-        eventPublisher.emit(portForeThruster.setSpeed(absIfZero(-portFore)));
-        eventPublisher.emit(starboardForeThruster.setSpeed(absIfZero(starboardFore)));
-        eventPublisher.emit(portVertThruster.setSpeed(absIfZero(-portVert)));
-        eventPublisher.emit(starboardVertThruster.setSpeed(absIfZero(starboardVert)));
+        eventPublisher.emit(new PortAftSpeedValue(absIfZero(-portAft)));
+        eventPublisher.emit(new StarboardAftSpeedValue(absIfZero(starboardAft)));
+        eventPublisher.emit(new PortForeSpeedValue(absIfZero(-portFore)));
+        eventPublisher.emit(new StarboardForeSpeedValue(absIfZero(starboardFore)));
+        eventPublisher.emit(new PortVertSpeedValue(absIfZero(-portVert)));
+        eventPublisher.emit(new StarboardVertSpeedValue(absIfZero(starboardVert)));
     }
 
     public final void updateZero() {
-        eventPublisher.emit(portAftThruster.setSpeed(0));
-        eventPublisher.emit(starboardAftThruster.setSpeed(0));
-        eventPublisher.emit(portForeThruster.setSpeed(0));
-        eventPublisher.emit(starboardForeThruster.setSpeed(0));
-        eventPublisher.emit(portVertThruster.setSpeed(0));
-        eventPublisher.emit(starboardVertThruster.setSpeed(0));
+        eventPublisher.emit(new PortAftSpeedValue(0));
+        eventPublisher.emit(new StarboardAftSpeedValue(0));
+        eventPublisher.emit(new PortForeSpeedValue(0));
+        eventPublisher.emit(new StarboardForeSpeedValue(0));
+        eventPublisher.emit(new PortVertSpeedValue(0));
+        eventPublisher.emit(new StarboardVertSpeedValue(0));
     }
 
     @SuppressWarnings({"checkstyle:magicnumber"})
