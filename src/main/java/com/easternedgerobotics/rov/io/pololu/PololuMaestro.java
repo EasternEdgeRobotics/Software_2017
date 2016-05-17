@@ -120,12 +120,7 @@ public final class PololuMaestro {
      * @param data the bytes to write
      */
     private void syncSerialWrite(final byte[] data) {
-        lock.lock();
-        try {
-            serial.write(data);
-        } finally {
-            lock.unlock();
-        }
+        syncSerialWriteRead(data, 0);
     }
 
     /**
