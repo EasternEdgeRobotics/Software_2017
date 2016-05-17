@@ -59,7 +59,7 @@ public final class Joysticks {
     public static Observable<Joystick> logitechExtreme3dPro() {
         final String name = ".*Logitech.*Extreme.*3D.*";
         final Observable<Controller> joystick = availableControllers()
-            .first(controller -> Pattern.matches(name, controller.getName()));
+            .takeFirst(controller -> Pattern.matches(name, controller.getName()));
 
         return joystick.map(js -> new LogitechExtremeJoystick(
             events(js),
