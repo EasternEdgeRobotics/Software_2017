@@ -37,7 +37,7 @@ abstract class PololuMaestroChannel {
      * Returns the position value of the channel. This method delegates to {@link PololuMaestro#getPosition(byte)}.
      * @return the position value of the channel
      */
-    public final short getPosition() {
+    final short getPosition() {
         return maestro.getPosition(channel);
     }
 }
