@@ -6,10 +6,10 @@ import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
 import com.easternedgerobotics.rov.value.SpeedValue;
+import com.easternedgerobotics.rov.value.TestSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
-import rx.Observable;
 import rx.broadcast.SingleSourceFifoOrder;
 import rx.broadcast.UdpBroadcast;
 
@@ -38,28 +38,25 @@ public final class IndividualMotorTest {
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
 
-        final Observable<SpeedValue> speeds = eventPublisher.valuesOfType(SpeedValue.class);
-        final SpeedValue speed = new SpeedValue("Test");
-
         final Motor motor = new Motor(
-            speeds.filter(x -> x.getName().equals("Test")),
+            eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),
             new PololuMaestroOutputChannel(maestro, channel, Motor.MAX_FWD, Motor.MAX_REV));
 
         System.out.println("Test Started");
         System.out.println("Motor is stopped");
         Thread.sleep(1000);
 
-        eventPublisher.emit(speed.setSpeed(.5f));
+        eventPublisher.emit(new TestSpeedValue(.5f));
         Thread.sleep(1000);
         System.out.println("Motor on half power clockwise");
         motor.write();
 
-        eventPublisher.emit(speed.setSpeed(0f));
+        eventPublisher.emit(new TestSpeedValue(0f));
         Thread.sleep(1000);
         System.out.println("Motor is stopped");
         motor.write();
 
-        eventPublisher.emit(speed.setSpeed(-.5f));
+        eventPublisher.emit(new TestSpeedValue(-.5f));
         Thread.sleep(1000);
         System.out.println("Motor on half power counter-clockwise");
         motor.write();
