@@ -29,7 +29,7 @@ abstract class PololuMaestroChannel {
      * given channel.
      * @param target the target
      */
-    public final void setTarget(final short target) {
+    final void setTarget(final short target) {
         maestro.setTarget(channel, target);
     }
 
