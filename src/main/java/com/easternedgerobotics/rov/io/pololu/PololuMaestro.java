@@ -11,6 +11,10 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * This class implements the <a href="https://www.pololu.com/docs/0J40/5">Pololu Maestro Servo Controller's serial
  * interface</a>. It is assumed that the connected Maestro is configured in USB Dual Port mode.
+ * <p>
+ * Individual operations performed on this device are synchronized. That is, for example, concurrent calls to
+ * {@link PololuMaestro#getPosition(byte)} will not overlap when written to the serial line and are guaranteed
+ * to see the correct response for their query.
  */
 public final class PololuMaestro {
     /**
