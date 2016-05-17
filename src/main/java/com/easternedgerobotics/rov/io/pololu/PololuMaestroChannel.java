@@ -29,7 +29,7 @@ abstract class PololuMaestroChannel {
      * given channel.
      * @param target the target
      */
-    public final void setTarget(final short target) {
+    final void setTarget(final short target) {
         maestro.setTarget(channel, target);
     }
 
@@ -37,7 +37,7 @@ abstract class PololuMaestroChannel {
      * Returns the position value of the channel. This method delegates to {@link PololuMaestro#getPosition(byte)}.
      * @return the position value of the channel
      */
-    public final short getPosition() {
+    final short getPosition() {
         return maestro.getPosition(channel);
     }
 }
