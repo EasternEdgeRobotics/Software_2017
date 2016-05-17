@@ -11,11 +11,18 @@ import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.PortAftSpeedValue;
+import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.PortVertSpeedValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
+import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
@@ -47,18 +54,6 @@ final class Rov {
 
     private static final long SLEEP_DURATION = 100;
 
-    private static final String PORT_AFT_NAME = "PortAft";
-
-    private static final String STARBOARD_AFT_NAME = "StarboardAft";
-
-    private static final String PORT_FORE_NAME = "PortFore";
-
-    private static final String STARBOARD_FORE_NAME = "StarboardFore";
-
-    private static final String PORT_VERT_NAME = "PortVert";
-
-    private static final String STARBOARD_VERT_NAME = "StarboardVert";
-
     private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
     private static final byte PORT_AFT_CHANNEL = 17;
@@ -72,8 +67,6 @@ final class Rov {
     private static final byte PORT_VERT_CHANNEL = 16;
 
     private static final byte STARBOARD_VERT_CHANNEL = 13;
-
-    private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
 
     private static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
 
@@ -101,51 +94,61 @@ final class Rov {
         this.eventPublisher = eventPublisher;
 
         final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
-        final Observable<SpeedValue> thrusterSpeeds = eventPublisher.valuesOfType(SpeedValue.class);
 
-        final SpeedValue portAft = new SpeedValue(PORT_AFT_NAME);
-        final SpeedValue starboardAft = new SpeedValue(STARBOARD_AFT_NAME);
-        final SpeedValue portFore = new SpeedValue(PORT_FORE_NAME);
-        final SpeedValue starboardFore = new SpeedValue(STARBOARD_FORE_NAME);
-        final SpeedValue portVert = new SpeedValue(PORT_VERT_NAME);
-        final SpeedValue starboardVert = new SpeedValue(STARBOARD_VERT_NAME);
+        final PortAftSpeedValue portAft = new PortAftSpeedValue();
+        final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
+        final PortForeSpeedValue portFore = new PortForeSpeedValue();
+        final StarboardForeSpeedValue starboardFore = new StarboardForeSpeedValue();
+        final PortVertSpeedValue portVert = new PortVertSpeedValue();
+        final StarboardVertSpeedValue starboardVert = new StarboardVertSpeedValue();
 
-        this.thrusterConfig = new SixThrusterConfig(
-            eventPublisher,
-            portAft,
-            starboardAft,
-            portFore,
-            starboardFore,
-            portVert,
-            starboardVert
-        );
+        this.thrusterConfig = new SixThrusterConfig(eventPublisher);
 
         this.motors = Collections.unmodifiableList(Arrays.asList(
             new Motor(
-                eventPublisher.valuesOfType(SpeedValue.class)
-                    .filter(x -> x.getName().equals(AFT_CAMERA_MOTOR_NAME))
-                    .startWith(new SpeedValue(AFT_CAMERA_MOTOR_NAME)),
+                eventPublisher
+                    .valuesOfType(AftCameraSpeedValue.class)
+                    .startWith(new AftCameraSpeedValue())
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_AFT_NAME)).startWith(portAft),
+                eventPublisher
+                    .valuesOfType(PortAftSpeedValue.class)
+                    .startWith(portAft)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, PORT_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_AFT_NAME)).startWith(starboardAft),
+                eventPublisher
+                    .valuesOfType(StarboardAftSpeedValue.class)
+                    .startWith(starboardAft)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_FORE_NAME)).startWith(portFore),
+                eventPublisher
+                    .valuesOfType(PortForeSpeedValue.class)
+                    .startWith(portFore)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, PORT_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_FORE_NAME)).startWith(starboardFore),
+                eventPublisher
+                    .valuesOfType(StarboardForeSpeedValue.class)
+                    .startWith(starboardFore)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(PORT_VERT_NAME)).startWith(portVert),
+                eventPublisher
+                    .valuesOfType(PortVertSpeedValue.class)
+                    .startWith(portVert)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, PORT_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
             new Thruster(
-                thrusterSpeeds.filter(x -> x.getName().equals(STARBOARD_VERT_NAME)).startWith(starboardVert),
+                eventPublisher
+                    .valuesOfType(StarboardVertSpeedValue.class)
+                    .startWith(starboardVert)
+                    .cast(SpeedValue.class),
                 new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
         ));
 
