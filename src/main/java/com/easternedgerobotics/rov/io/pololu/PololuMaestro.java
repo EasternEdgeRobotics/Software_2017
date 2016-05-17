@@ -5,6 +5,8 @@ import com.pi4j.io.serial.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class implements the <a href="https://www.pololu.com/docs/0J40/5">Pololu Maestro Servo Controller's serial
@@ -49,6 +51,8 @@ public final class PololuMaestro {
      */
     private final byte device;
 
+    private final Lock lock = new ReentrantLock();
+
     /**
      * Constructs a new {@code PololuMaestro} that reads and writes to given serial connection, with the
      * given <a href="https://www.pololu.com/docs/0J40/5.a">device number</a>.
@@ -78,7 +82,7 @@ public final class PololuMaestro {
         final byte lsb = (byte) (microseconds & 0x7F);
         final byte msb = (byte) ((microseconds >> 7) & 0x7F);
 
-        serial.write(new byte[]{START_BYTE, device, COMMAND_SET_TARGET, channel, lsb, msb});
+        syncSerialWrite(new byte[] {START_BYTE, device, COMMAND_SET_TARGET, channel, lsb, msb});
     }
 
     /**
@@ -89,8 +93,8 @@ public final class PololuMaestro {
      * @return the errors that the Maestro has detected
      */
     public final BitSet getErrors() {
-        serial.write(new byte[]{START_BYTE, device, COMMAND_GET_ERRORS});
-        final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
+        final char[] rs = syncSerialWriteRead(new byte[] {START_BYTE, device, COMMAND_GET_ERRORS}, 1);
+        final ByteBuffer response = ByteBuffer.allocate(2).putChar(rs[0]);
         return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
     }
 
@@ -101,9 +105,43 @@ public final class PololuMaestro {
      */
     @SuppressWarnings({"checkstyle:magicnumber"})
     public final short getPosition(final byte channel) {
-        serial.write(new byte[]{START_BYTE, device, COMMAND_GET_POSITION, channel});
-        final ByteBuffer response = ByteBuffer.allocate(4).putChar(serial.read()).putChar(serial.read());
+        final char[] rs = syncSerialWriteRead(new byte[] {START_BYTE, device, COMMAND_GET_POSITION, channel}, 2);
+        final ByteBuffer response = ByteBuffer.allocate(4).putChar(rs[0]).putChar(rs[1]);
         return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(
             new byte[]{response.get(1), response.get(3)}).getShort(0);
+    }
+
+    /**
+     * Write the given bytes to the serial device. This method is synchronized.
+     * @param data the bytes to write
+     */
+    private void syncSerialWrite(final byte[] data) {
+        lock.lock();
+        try {
+            serial.write(data);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Write the given bytes to the serial device and read {@code readCount} characters as a response. This
+     * method is synchronized.
+     * @param data the bytes to write
+     * @param readCount the number of {@code char}s to read as a response
+     * @return an array of characters read as a response
+     */
+    private char[] syncSerialWriteRead(final byte[] data, final int readCount) {
+        lock.lock();
+        try {
+            serial.write(data);
+            final char[] reads = new char[readCount];
+            for (int i = 0; i < readCount; i++) {
+                reads[i] = serial.read();
+            }
+            return reads;
+        } finally {
+            lock.unlock();
+        }
     }
 }
