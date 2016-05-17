@@ -1,7 +1,7 @@
 package com.easternedgerobotics.rov.integration;
 
+import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.event.UdpEventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
@@ -16,8 +16,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.UdpBroadcast;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -45,6 +51,8 @@ public class IndividualThrusterTest {
 
     private final int duration;
 
+    private DatagramSocket socket;
+
     private EventPublisher eventPublisher;
 
     public IndividualThrusterTest(final Byte address, final Integer duration) {
@@ -53,13 +61,18 @@ public class IndividualThrusterTest {
     }
 
     @Before
-    public final void before() {
-        eventPublisher = new UdpEventPublisher("192.168.88.255");
+    public final void before() throws SocketException, UnknownHostException {
+        final InetAddress broadcastAddress = InetAddress.getByName("192.168.88.255");
+        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        socket = new DatagramSocket(broadcastPort);
+        eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
+            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
     }
 
     @After
     public final void after() {
         eventPublisher.stop();
+        socket.close();
     }
 
     @Test

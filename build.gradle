@@ -29,16 +29,15 @@ repositories {
 }
 
 dependencies {
-    compile 'com.esotericsoftware:kryo:3.0.3'
     compile 'com.pi4j:pi4j-core:1.0'
     compile 'commons-cli:commons-cli:1.3.1'
     compile 'io.reactivex:rxjava:1.0.12'
     compile 'io.reactivex:rxjavafx:0.0.5'
-    compile 'io.reactivex:rxnetty:0.4.11'
     compile 'javax.inject:javax.inject:1'
     compile 'net.java.jinput:jinput:2.0.6'
     compile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.2'
     compile 'org.tinylog:tinylog:1.0.3'
+    compile 'rxbroadcast:rxbroadcast:0.0.4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
 }
