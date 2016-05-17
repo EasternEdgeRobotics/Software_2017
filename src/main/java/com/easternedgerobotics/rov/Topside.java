@@ -9,7 +9,7 @@ import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
-import com.easternedgerobotics.rov.value.SpeedValue;
+import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -25,7 +25,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public final class Topside extends Application {
-    private static final String AFT_CAMERA_MOTOR_NAME = "AftCamera";
 
     private static final int AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON = 6;
 
@@ -90,10 +89,12 @@ public final class Topside extends Application {
     @SuppressWarnings("checkstyle:avoidinlineconditionals")
     private void joystickInitialization(final Joystick joystick) {
         final ExponentialMotionScale scale = new ExponentialMotionScale();
-        final Observable<SpeedValue> aftCameraForward = joystick.button(AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON)
-            .map(value -> new SpeedValue(AFT_CAMERA_MOTOR_NAME, value ?  AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
-        final Observable<SpeedValue> aftCameraReverse = joystick.button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
-            .map(value -> new SpeedValue(AFT_CAMERA_MOTOR_NAME, value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
+        final Observable<AftCameraSpeedValue> aftCameraForward = joystick
+            .button(AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON)
+            .map(value -> new AftCameraSpeedValue(value ?  AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
+        final Observable<AftCameraSpeedValue> aftCameraReverse = joystick
+            .button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
+            .map(value -> new AftCameraSpeedValue(value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
         joystick.axes().map(scale::apply).subscribe(eventPublisher::emit, Logger::error);
         aftCameraForward.mergeWith(aftCameraReverse)
             .subscribe(eventPublisher::emit, Logger::error);
