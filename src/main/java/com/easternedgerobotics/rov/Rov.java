@@ -11,6 +11,7 @@ import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
@@ -78,9 +79,13 @@ final class Rov {
 
     private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
+    private static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 5;
+
     private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
 
     private final LM35 internalTemperatureSensor;
+
+    private final LM35 externalTemperatureSensor;
 
     private final MPX4250AP internalPressureSensor;
 
@@ -146,6 +151,8 @@ final class Rov {
 
         this.internalTemperatureSensor = new LM35(
             new PololuMaestroInputChannel(maestro, INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+        this.externalTemperatureSensor = new LM35(
+            new PololuMaestroInputChannel(maestro, EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.internalPressureSensor = new MPX4250AP(
             new PololuMaestroInputChannel(maestro, INTERNAL_PRESSURE_SENSOR_CHANNEL));
     }
@@ -195,6 +202,7 @@ final class Rov {
         }
 
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
+        eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
         eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
     }
 
