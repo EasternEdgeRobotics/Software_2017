@@ -79,7 +79,7 @@ final class Rov {
 
     private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
-    private static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 5;
+    private static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
 
     private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
 
