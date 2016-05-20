@@ -4,7 +4,13 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.test.CollectionAssert;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
+import com.easternedgerobotics.rov.value.PortAftSpeedValue;
+import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.PortVertSpeedValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
+import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
+import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +18,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import rx.Observable;
+
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
@@ -28,100 +34,100 @@ public class SixThrusterConfigTest {
             {
                 new MotionValue(0, 0, 0, 0, 0, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", 0),
-                    new SpeedValue("SA", 0),
-                    new SpeedValue("PF", 0),
-                    new SpeedValue("SF", 0),
-                    new SpeedValue("PV", 0),
-                    new SpeedValue("SV", 0)
+                    new PortAftSpeedValue(0),
+                    new StarboardAftSpeedValue(0),
+                    new PortForeSpeedValue(0),
+                    new StarboardForeSpeedValue(0),
+                    new PortVertSpeedValue(0),
+                    new StarboardVertSpeedValue(0)
                 )
             },
             {
                 new MotionValue(0, 0, 1, 0, 0, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", -1),
-                    new SpeedValue("SA",  1),
-                    new SpeedValue("PF",  1),
-                    new SpeedValue("SF", -1),
-                    new SpeedValue("PV",  0),
-                    new SpeedValue("SV",  0)
+                    new PortAftSpeedValue(-1),
+                    new StarboardAftSpeedValue(1),
+                    new PortForeSpeedValue(1),
+                    new StarboardForeSpeedValue(-1),
+                    new PortVertSpeedValue(0),
+                    new StarboardVertSpeedValue(0)
                 )
             },
             {
                 new MotionValue(0, -1, 1, 0, 0, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", -1),
-                    new SpeedValue("SA",  0),
-                    new SpeedValue("PF",  0),
-                    new SpeedValue("SF", -1),
-                    new SpeedValue("PV",  0),
-                    new SpeedValue("SV",  0)
+                    new PortAftSpeedValue(-1),
+                    new StarboardAftSpeedValue(0),
+                    new PortForeSpeedValue(0),
+                    new StarboardForeSpeedValue(-1),
+                    new PortVertSpeedValue(0),
+                    new StarboardVertSpeedValue(0)
                 )
             },
             {
                 new MotionValue(0, -1, 1, 0, 1, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", -0.333333f),
-                    new SpeedValue("SA",  0.333333f),
-                    new SpeedValue("PF", -0.333333f),
-                    new SpeedValue("SF", -1.000000f),
-                    new SpeedValue("PV",  0.000000f),
-                    new SpeedValue("SV",  0.000000f)
+                    new PortAftSpeedValue(-0.333333f),
+                    new StarboardAftSpeedValue(0.333333f),
+                    new PortForeSpeedValue(-0.333333f),
+                    new StarboardForeSpeedValue(-1.000000f),
+                    new PortVertSpeedValue(0.000000f),
+                    new StarboardVertSpeedValue(0.000000f)
                 )
             },
             {
                 new MotionValue(0, -0.5f, 0.5f, 0, 0.5f, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", -0.1667f),
-                    new SpeedValue("SA",  0.1667f),
-                    new SpeedValue("PF", -0.1667f),
-                    new SpeedValue("SF", -0.5000f),
-                    new SpeedValue("PV",  0.0000f),
-                    new SpeedValue("SV",  0.0000f)
+                    new PortAftSpeedValue(-0.1667f),
+                    new StarboardAftSpeedValue(0.1667f),
+                    new PortForeSpeedValue(-0.1667f),
+                    new StarboardForeSpeedValue(-0.5000f),
+                    new PortVertSpeedValue(0.0000f),
+                    new StarboardVertSpeedValue(0.0000f)
                 )
             },
             {
                 new MotionValue(0, 0.15f, 0.5f, 0, -0.75f, 0),
                 Arrays.asList(
-                    new SpeedValue("PA", -0.5893f),
-                    new SpeedValue("SA", -0.0536f),
-                    new SpeedValue("PF",  0.7500f),
-                    new SpeedValue("SF",  0.2143f),
-                    new SpeedValue("PV",  0.0000f),
-                    new SpeedValue("SV",  0.0000f)
+                    new PortAftSpeedValue(-0.5893f),
+                    new StarboardAftSpeedValue(-0.0536f),
+                    new PortForeSpeedValue(0.7500f),
+                    new StarboardForeSpeedValue(0.2143f),
+                    new PortVertSpeedValue(0.0000f),
+                    new StarboardVertSpeedValue(0.0000f)
                 )
             },
             {
                 new MotionValue(1, 0, 0, 0, 0, 0),
                 Arrays.asList(
-                    new SpeedValue("PA",  0),
-                    new SpeedValue("SA",  0),
-                    new SpeedValue("PF",  0),
-                    new SpeedValue("SF",  0),
-                    new SpeedValue("PV", -1),
-                    new SpeedValue("SV",  1)
+                    new PortAftSpeedValue(0),
+                    new StarboardAftSpeedValue(0),
+                    new PortForeSpeedValue(0),
+                    new StarboardForeSpeedValue(0),
+                    new PortVertSpeedValue(-1),
+                    new StarboardVertSpeedValue(1)
                 )
             },
             {
                 new MotionValue(0.8f, 0, 0, 0, 0, -0.25f),
                 Arrays.asList(
-                    new SpeedValue("PA",  0f),
-                    new SpeedValue("SA",  0f),
-                    new SpeedValue("PF",  0f),
-                    new SpeedValue("SF",  0f),
-                    new SpeedValue("PV", -0.8000f),
-                    new SpeedValue("SV",  0.4190f)
+                    new PortAftSpeedValue(0f),
+                    new StarboardAftSpeedValue(0f),
+                    new PortForeSpeedValue(0f),
+                    new StarboardForeSpeedValue(0f),
+                    new PortVertSpeedValue(-0.8000f),
+                    new StarboardVertSpeedValue(0.4190f)
                 )
             },
             {
                 new MotionValue(-0.4f, 0.3f, 1f, 0, 0.5f, -0.8f),
                 Arrays.asList(
-                    new SpeedValue("PA", -0.111111f),
-                    new SpeedValue("SA",  1.000000f),
-                    new SpeedValue("PF",  0.444444f),
-                    new SpeedValue("SF", -0.666667f),
-                    new SpeedValue("PV", -0.2256f),
-                    new SpeedValue("SV", -0.8000f)
+                    new PortAftSpeedValue(-0.111111f),
+                    new StarboardAftSpeedValue(1.000000f),
+                    new PortForeSpeedValue(0.444444f),
+                    new StarboardForeSpeedValue(-0.666667f),
+                    new PortVertSpeedValue(-0.2256f),
+                    new StarboardVertSpeedValue(-0.8000f)
                 )
             }
         });
@@ -143,19 +149,10 @@ public class SixThrusterConfigTest {
         final TestSubject<MotionValue> motionValues = TestSubject.create(testScheduler);
         final TestSubject<MotionPowerValue> motionPowerValues = TestSubject.create(testScheduler);
 
-        Mockito.when(eventPublisher.valuesOfType(SpeedValue.class)).thenReturn(Observable.empty());
         Mockito.when(eventPublisher.valuesOfType(MotionValue.class)).thenReturn(motionValues);
         Mockito.when(eventPublisher.valuesOfType(MotionPowerValue.class)).thenReturn(motionPowerValues);
 
-        final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(
-            eventPublisher,
-            new SpeedValue("PA"),
-            new SpeedValue("SA"),
-            new SpeedValue("PF"),
-            new SpeedValue("SF"),
-            new SpeedValue("PV"),
-            new SpeedValue("SV")
-        );
+        final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(eventPublisher);
 
         motionPowerValues.onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
         motionValues.onNext(motionValue);
@@ -167,6 +164,6 @@ public class SixThrusterConfigTest {
         Mockito.verify(eventPublisher, Mockito.times(6)).emit(captor.capture());
         CollectionAssert.assertItemsMatchPredicateInOrder(
             captor.getAllValues(), expectedThrusterValues, (a, b) ->
-                a.getName().equals(b.getName()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
+                a.getClass().equals(b.getClass()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
     }
 }
