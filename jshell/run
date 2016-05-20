@@ -4,7 +4,7 @@ jshell=${jshell:-/opt/jdk-9/bin/jshell}
 $jshell -version 2>/dev/null
 if [ "$?" -eq 0 ]; then
   (cd .. && gradle testJar)
-  $jshell -cp '../build/libs/rov-2.1.0-tests.jar' imports.jsh
+  $jshell -cp '../build/libs/rov-3.0.0-tests.jar' imports.jsh
 else
   echo "JShell could not be opened."
   echo "Please download jdk9 and export jshell location:"

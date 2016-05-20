@@ -6,7 +6,7 @@
     - name: Make opt directory
       file: path=/opt state=directory mode=0755
     - name: Copy Control Software
-      unarchive: src=../build/distributions/topside-2.1.0.zip dest=/opt
+      unarchive: src=../build/distributions/topside-3.0.0.zip dest=/opt
 
 - hosts: rasprime:picamera
   become: yes
