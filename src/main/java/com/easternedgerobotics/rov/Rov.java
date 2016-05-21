@@ -12,6 +12,8 @@ import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
 import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
 import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
+import com.easternedgerobotics.rov.value.ExternalPressureValueA;
+import com.easternedgerobotics.rov.value.ExternalPressureValueB;
 import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
@@ -76,11 +78,19 @@ final class Rov {
 
     private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
 
+    private static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
+
+    private static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
+
     private final LM35 internalTemperatureSensor;
 
     private final LM35 externalTemperatureSensor;
 
     private final MPX4250AP internalPressureSensor;
+
+    private final MPX4250AP externalPressureSensorA;
+
+    private final MPX4250AP externalPressureSensorB;
 
     private final SixThrusterConfig thrusterConfig;
 
@@ -158,6 +168,10 @@ final class Rov {
             new PololuMaestroInputChannel(maestro, EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.internalPressureSensor = new MPX4250AP(
             new PololuMaestroInputChannel(maestro, INTERNAL_PRESSURE_SENSOR_CHANNEL));
+        this.externalPressureSensorA = new MPX4250AP(
+            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
+        this.externalPressureSensorB = new MPX4250AP(
+            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
     }
 
     /**
@@ -207,6 +221,8 @@ final class Rov {
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
         eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
+        eventPublisher.emit(new ExternalPressureValueA(externalPressureSensorA.read()));
+        eventPublisher.emit(new ExternalPressureValueB(externalPressureSensorB.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
