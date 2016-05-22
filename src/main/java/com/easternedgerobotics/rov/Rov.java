@@ -37,6 +37,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.Scheduler;
 import rx.broadcast.SingleSourceFifoOrder;
 import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
@@ -178,11 +179,13 @@ final class Rov {
      * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
      * status and will shutdown.
+     * @param io the scheduler to use for device I/O
+     * @param clock the scheduler to use for timing
      */
-    private void init() {
+    private void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
-            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
 
@@ -192,10 +195,10 @@ final class Rov {
         thrusters.forEach(Thruster::writeZero);
 
         cpuInformation.observe().subscribe(eventPublisher::emit);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
-            .observeOn(Schedulers.io())
+            .observeOn(io)
             .subscribe(this::beat, RuntimeException::new);
     }
 
@@ -269,7 +272,7 @@ final class Rov {
             final Rov rov = new Rov(eventPublisher, serial);
 
             serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
-            rov.init();
+            rov.init(Schedulers.io(), Schedulers.computation());
 
             Logger.info("Started");
             eventPublisher.await();
