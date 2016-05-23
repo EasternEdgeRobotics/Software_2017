@@ -29,6 +29,12 @@
         <property name="message" value="Line has trailing whitespace" />
     </module>
 
+    <!-- Disallow Throwable#printStackTrace() -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\.printStackTrace\(\)" />
+        <property name="message" value="Do not use Throwable#printStackTrace" />
+    </module>
+
     <module name="SuppressWarningsFilter" />
 
     <module name="TreeWalker">
