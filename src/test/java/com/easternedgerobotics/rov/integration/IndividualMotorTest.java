@@ -3,8 +3,7 @@ package com.easternedgerobotics.rov.integration;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Motor;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.TestSpeedValue;
 
@@ -30,7 +29,6 @@ public final class IndividualMotorTest {
         final int baudRate = 115200;
 
         final Serial serial = SerialFactory.createInstance();
-        final PololuMaestro maestro = new PololuMaestro(serial, deviceNumber);
         serial.open("/dev/ttyACM0", baudRate);
 
         final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
@@ -40,7 +38,9 @@ public final class IndividualMotorTest {
 
         final Motor motor = new Motor(
             eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),
-            new PololuMaestroOutputChannel(maestro, channel, Motor.MAX_FWD, Motor.MAX_REV));
+            (new Maestro<>(serial, deviceNumber).get(channel)
+                .setMaxForward(Motor.MAX_FWD)
+                .setMaxReverse(Motor.MAX_REV)));
 
         System.out.println("Test Started");
         System.out.println("Motor is stopped");
