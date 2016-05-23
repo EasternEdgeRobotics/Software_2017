@@ -7,7 +7,7 @@ import rx.Observable;
 
 /**
  * See the <a href="http://www.dimensionengineering.com/datasheets/Sabertooth2X5RCQuickStart.pdf">Sabertooth 2x5 RC
- * User’s Guide</a> for more information.
+ * User's Guide</a> for more information.
  */
 public final class Motor {
     /**
