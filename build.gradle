@@ -17,7 +17,7 @@ mainClassName = 'com.easternedgerobotics.rov.Topside'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 checkstyle {
-    toolVersion = '6.11.2'
+    toolVersion = '6.18'
 }
 
 jacoco {
