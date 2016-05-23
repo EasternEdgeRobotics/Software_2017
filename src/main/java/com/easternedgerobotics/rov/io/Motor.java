@@ -10,7 +10,6 @@ import rx.Observable;
  * User’s Guide</a> for more information.
  */
 public final class Motor {
-
     /**
      * Max forward value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
      */
