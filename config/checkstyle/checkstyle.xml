@@ -66,6 +66,7 @@
             <property name="specialImportsRegExp" value="com.easternedgerobotics" />
             <property name="customImportOrderRules" value="SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE" />
             <property name="sortImportsInGroupAlphabetically" value="true" />
+            <property name="separateLineBetweenGroups" value="true"/>
         </module>
 
         <!-- Checks for Size Violations -->
