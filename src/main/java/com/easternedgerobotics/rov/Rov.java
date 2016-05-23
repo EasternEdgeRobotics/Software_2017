@@ -3,14 +3,14 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.Motor;
+import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
@@ -101,10 +101,11 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private Rov(final EventPublisher eventPublisher, final Serial serial) throws IOException {
+    private <T extends ADC & PWM> Rov(
+        final EventPublisher eventPublisher,
+        final List<T> channels
+    ) {
         this.eventPublisher = eventPublisher;
-
-        final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
 
         final PortAftSpeedValue portAft = new PortAftSpeedValue();
         final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
@@ -121,7 +122,7 @@ final class Rov {
                     .valuesOfType(AftCameraSpeedValue.class)
                     .startWith(new AftCameraSpeedValue())
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
+                channels.get(AFT_CAMERA_MOTOR_CHANNEL).setMaxForward(Motor.MAX_FWD).setMaxReverse(Motor.MAX_REV))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
@@ -130,49 +131,49 @@ final class Rov {
                     .valuesOfType(PortAftSpeedValue.class)
                     .startWith(portAft)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardAftSpeedValue.class)
                     .startWith(starboardAft)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(STARBOARD_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortForeSpeedValue.class)
                     .startWith(portFore)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardForeSpeedValue.class)
                     .startWith(starboardFore)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(STARBOARD_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortVertSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardVertSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
+                channels.get(STARBOARD_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV))
         ));
 
         this.internalTemperatureSensor = new LM35(
-            new PololuMaestroInputChannel(maestro, INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+            channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.externalTemperatureSensor = new LM35(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+            channels.get(EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.internalPressureSensor = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, INTERNAL_PRESSURE_SENSOR_CHANNEL));
+            channels.get(INTERNAL_PRESSURE_SENSOR_CHANNEL));
         this.externalPressureSensorA = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
+            channels.get(EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
         this.externalPressureSensorB = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
+            channels.get(EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
     }
 
     /**
@@ -269,7 +270,7 @@ final class Rov {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
             final Serial serial = SerialFactory.createInstance();
-            final Rov rov = new Rov(eventPublisher, serial);
+            final Rov rov = new Rov(eventPublisher, new Maestro<>(serial, MAESTRO_DEVICE_NUMBER));
 
             serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
             rov.init(Schedulers.io(), Schedulers.computation());
