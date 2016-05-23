@@ -25,7 +25,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public final class Topside extends Application {
-
     private static final int AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON = 6;
 
     private static final int AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON = 4;

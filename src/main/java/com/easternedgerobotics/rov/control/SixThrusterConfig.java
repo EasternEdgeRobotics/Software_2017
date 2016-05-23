@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
-
     private MotionPowerValue motionPower = new MotionPowerValue();
 
     private MotionValue motion = new MotionValue();
@@ -98,7 +97,6 @@ public class SixThrusterConfig {
                 Math.abs(starboardVert),
                 Math.abs(portVert)
             ));
-
 
             final float maxInputMagVertical = Collections.max(Arrays.asList(
                 Math.abs(heave),

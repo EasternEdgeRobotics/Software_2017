@@ -29,6 +29,18 @@
         <property name="message" value="Line has trailing whitespace" />
     </module>
 
+    <!-- Disallow Throwable#printStackTrace() -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\.printStackTrace\(\)" />
+        <property name="message" value="Do not use Throwable#printStackTrace" />
+    </module>
+
+    <!-- Disallow newline just inside class declaration -->
+    <module name="RegexpMultiline">
+        <property name="format" value="(\w+\s)*class\s(\w+\s)*\{$\s+$" />
+        <property name="message" value="Empty line immediately following the class declaration" />
+    </module>
+
     <module name="SuppressWarningsFilter" />
 
     <module name="TreeWalker">
@@ -54,8 +66,11 @@
 
         <!-- Checks for imports -->
         <!-- See http://checkstyle.sf.net/config_import.html -->
+        <module name="AvoidStaticImport" />
         <module name="AvoidStarImport" />
-        <module name="IllegalImport" />
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="rx.internal" />
+        </module>
         <module name="RedundantImport" />
         <module name="UnusedImports" />
         <module name="CustomImportOrder">
@@ -63,6 +78,7 @@
             <property name="specialImportsRegExp" value="com.easternedgerobotics" />
             <property name="customImportOrderRules" value="SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE" />
             <property name="sortImportsInGroupAlphabetically" value="true" />
+            <property name="separateLineBetweenGroups" value="true"/>
         </module>
 
         <!-- Checks for Size Violations -->
@@ -82,7 +98,8 @@
         <module name="CommentsIndentation"/>
         <module name="EmptyForIteratorPad" />
         <module name="EmptyLineSeparator">
-           <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="allowMultipleEmptyLines" value="false" />
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false" />
         </module>
         <module name="MethodParamPad" />
         <module name="NoWhitespaceAfter" />
