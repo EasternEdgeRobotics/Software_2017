@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
+import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
@@ -156,5 +157,20 @@ public class RovTest {
 
         Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).write(0);
         Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).write(MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
+    }
+
+    @Test
+    public final void doesUpdateAftCameraMotorGivenInput() {
+        final TestScheduler scheduler = new TestScheduler();
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final MockMaestro maestro = new MockMaestro();
+        final Rov rov = new Rov(eventPublisher, maestro);
+
+        rov.init(scheduler, scheduler);
+        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
+        eventPublisher.testObserver(AftCameraSpeedValue.class).onNext(new AftCameraSpeedValue(1));
+        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+
+        Mockito.verify(maestro.get(Rov.AFT_CAMERA_MOTOR_CHANNEL)).write(1);
     }
 }
