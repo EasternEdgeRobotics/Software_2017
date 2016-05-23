@@ -51,37 +51,37 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 final class Rov {
-    private static final long MAX_HEARTBEAT_GAP = 5;
+    static final long MAX_HEARTBEAT_GAP = 5;
 
-    private static final long CPU_POLL_INTERVAL = 1;
+    static final long CPU_POLL_INTERVAL = 1;
 
-    private static final long SLEEP_DURATION = 100;
+    static final long SLEEP_DURATION = 100;
 
-    private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
+    static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    private static final byte PORT_AFT_CHANNEL = 17;
+    static final byte PORT_AFT_CHANNEL = 17;
 
-    private static final byte STARBOARD_AFT_CHANNEL = 14;
+    static final byte STARBOARD_AFT_CHANNEL = 14;
 
-    private static final byte PORT_FORE_CHANNEL = 15;
+    static final byte PORT_FORE_CHANNEL = 15;
 
-    private static final byte STARBOARD_FORE_CHANNEL = 12;
+    static final byte STARBOARD_FORE_CHANNEL = 12;
 
-    private static final byte PORT_VERT_CHANNEL = 16;
+    static final byte PORT_VERT_CHANNEL = 16;
 
-    private static final byte STARBOARD_VERT_CHANNEL = 13;
+    static final byte STARBOARD_VERT_CHANNEL = 13;
 
-    private static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
+    static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
 
-    private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
+    static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
-    private static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
+    static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
 
-    private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
+    static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
 
-    private static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
+    static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
 
-    private static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
+    static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
 
     private final LM35 internalTemperatureSensor;
 
@@ -101,7 +101,7 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private <T extends ADC & PWM> Rov(
+    <T extends ADC & PWM> Rov(
         final EventPublisher eventPublisher,
         final List<T> channels
     ) {
@@ -183,7 +183,7 @@ final class Rov {
      * @param io the scheduler to use for device I/O
      * @param clock the scheduler to use for timing
      */
-    private void init(final Scheduler io, final Scheduler clock) {
+    void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
             .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
