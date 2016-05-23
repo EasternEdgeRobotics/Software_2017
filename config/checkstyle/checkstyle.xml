@@ -56,7 +56,9 @@
         <!-- See http://checkstyle.sf.net/config_import.html -->
         <module name="AvoidStaticImport" />
         <module name="AvoidStarImport" />
-        <module name="IllegalImport" />
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="rx.internal" />
+        </module>
         <module name="RedundantImport" />
         <module name="UnusedImports" />
         <module name="CustomImportOrder">
