@@ -8,6 +8,7 @@ import com.pi4j.io.serial.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
+import java.util.Objects;
 
 final class MaestroChannel implements ADC, PWM {
     /**
@@ -94,6 +95,23 @@ final class MaestroChannel implements ADC, PWM {
     @Override
     public final void writeZero() {
         setTarget(rangeMap(0));
+    }
+
+    @Override
+    public final boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        final MaestroChannel that = (MaestroChannel) other;
+        return maestro == that.maestro && channel == that.channel;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(maestro, channel);
     }
 
     /**
