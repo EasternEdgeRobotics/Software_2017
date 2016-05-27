@@ -1,23 +1,11 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.math.Range;
+
 /**
  * A Pulse Width Modulation (PWM) output.
  */
 public interface PWM {
-    /**
-     * Sets the maximum forward signal value.
-     * @param microseconds the maximum forward signal value
-     * @return the same instance
-     */
-    PWM setMaxForward(float microseconds);
-
-    /**
-     * Sets the maximum reverse signal value.
-     * @param microseconds the maximum reverse signal value
-     * @return the same instance
-     */
-    PWM setMaxReverse(float microseconds);
-
     /**
      * Write the given value as a signal.
      * @param value percent from -1 to 1
@@ -28,4 +16,11 @@ public interface PWM {
      * Write zero signal.
      */
     void writeZero();
+
+    /**
+     * Sets the output signal range.
+     * @param range the output signal range
+     * @return the PWM instance
+     */
+    PWM setOutputRange(Range range);
 }

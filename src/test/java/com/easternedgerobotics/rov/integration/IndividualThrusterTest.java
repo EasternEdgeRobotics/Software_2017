@@ -4,6 +4,7 @@ import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
+import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.TestSpeedValue;
 
@@ -84,9 +85,9 @@ public class IndividualThrusterTest {
         final Serial serial = SerialFactory.createInstance();
         final Thruster thruster = new Thruster(
             eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),
-            (new Maestro<>(serial, maestroDeviceNumber).get(address)
-                .setMaxForward(Thruster.MAX_FWD)
-                .setMaxReverse(Thruster.MAX_REV)));
+            new Maestro<>(serial, maestroDeviceNumber)
+                .get(address)
+                .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)));
         final Consumer<SpeedValue> consumer = val -> thruster.write();
 
         serial.open("/dev/ttyACM0", 115_200);
