@@ -156,7 +156,7 @@ final class Rov {
                     .valuesOfType(PortVertSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
-                channels.get(PORT_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
+                channels.get(PORT_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardVertSpeedValue.class)
