@@ -1,23 +1,21 @@
 package com.easternedgerobotics.rov.io;
 
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
-
-public class LM35 {
+public final class LM35 {
     /**
      * Linear + 10-mV/°C scale factor.
      */
     private static final float TEMPERATURE_CELSIUS_SCALAR = 100f;
 
     /**
-     * The Pololu Maestro channel this device uses.
+     * The ADC this device uses.
      */
-    private final PololuMaestroInputChannel channel;
+    private final ADC channel;
 
     /**
-     * Constructs a new LM35 sensor on the given channel.
-     * @param channel the channel this device uses
+     * Constructs a new LM35 sensor using the given ADC.
+     * @param channel the ADC instance
      */
-    public LM35(final PololuMaestroInputChannel channel) {
+    public LM35(final ADC channel) {
         this.channel = channel;
     }
 

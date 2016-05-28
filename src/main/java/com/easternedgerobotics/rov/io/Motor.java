@@ -1,6 +1,5 @@
 package com.easternedgerobotics.rov.io;
 
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
 import com.easternedgerobotics.rov.value.SpeedValue;
 
 import rx.Observable;
@@ -11,19 +10,19 @@ import rx.Observable;
  */
 public final class Motor {
     /**
-     * Max forward value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
+     * Max forward PWM signal value (in μs) for the connected to the Sabertooth 2x5 motor controller.
      */
     public static final float MAX_FWD = 500;
 
     /**
-     * Max reverse value for PololuMaestroOutputChannel connected to the Sabertooth 2x5 motor controller.
+     * Max reverse PWM signal value (in μs) for the connected to the Sabertooth 2x5 motor controller.
      */
     public static final float MAX_REV = 2500;
 
     /**
-     * The output pololu channel to write speeds.
+     * The output PWM device to write speeds using.
      */
-    private final PololuMaestroOutputChannel device;
+    private final PWM device;
 
     /**
      * The latest value from the speed observable.
@@ -34,12 +33,9 @@ public final class Motor {
      * Create a Motor device which uses a pololu channel for communication.
      *
      * @param values speed observable mapped to the pololu channel
-     * @param device pololu channel to write speeds.
+     * @param device PWM output to write speeds
      */
-    public Motor(
-        final Observable<SpeedValue> values,
-        final PololuMaestroOutputChannel device
-    ) {
+    public Motor(final Observable<SpeedValue> values, final PWM device) {
         this.device = device;
         values.subscribe(v -> value = v);
     }

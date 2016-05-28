@@ -3,14 +3,14 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.Motor;
+import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestro;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroInputChannel;
-import com.easternedgerobotics.rov.io.pololu.PololuMaestroOutputChannel;
+import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
@@ -37,6 +37,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.Scheduler;
 import rx.broadcast.SingleSourceFifoOrder;
 import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
@@ -50,37 +51,37 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 final class Rov {
-    private static final long MAX_HEARTBEAT_GAP = 5;
+    static final long MAX_HEARTBEAT_GAP = 5;
 
-    private static final long CPU_POLL_INTERVAL = 1;
+    static final long CPU_POLL_INTERVAL = 1;
 
-    private static final long SLEEP_DURATION = 100;
+    static final long SLEEP_DURATION = 100;
 
-    private static final byte MAESTRO_DEVICE_NUMBER = 0x01;
+    static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    private static final byte PORT_AFT_CHANNEL = 17;
+    static final byte PORT_AFT_CHANNEL = 17;
 
-    private static final byte STARBOARD_AFT_CHANNEL = 14;
+    static final byte STARBOARD_AFT_CHANNEL = 14;
 
-    private static final byte PORT_FORE_CHANNEL = 15;
+    static final byte PORT_FORE_CHANNEL = 15;
 
-    private static final byte STARBOARD_FORE_CHANNEL = 12;
+    static final byte STARBOARD_FORE_CHANNEL = 12;
 
-    private static final byte PORT_VERT_CHANNEL = 16;
+    static final byte PORT_VERT_CHANNEL = 16;
 
-    private static final byte STARBOARD_VERT_CHANNEL = 13;
+    static final byte STARBOARD_VERT_CHANNEL = 13;
 
-    private static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
+    static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
 
-    private static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
+    static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
-    private static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
+    static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
 
-    private static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
+    static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
 
-    private static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
+    static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
 
-    private static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
+    static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
 
     private final LM35 internalTemperatureSensor;
 
@@ -100,10 +101,11 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private Rov(final EventPublisher eventPublisher, final Serial serial) throws IOException {
+    <T extends ADC & PWM> Rov(
+        final EventPublisher eventPublisher,
+        final List<T> channels
+    ) {
         this.eventPublisher = eventPublisher;
-
-        final PololuMaestro maestro = new PololuMaestro(serial, MAESTRO_DEVICE_NUMBER);
 
         final PortAftSpeedValue portAft = new PortAftSpeedValue();
         final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
@@ -120,7 +122,7 @@ final class Rov {
                     .valuesOfType(AftCameraSpeedValue.class)
                     .startWith(new AftCameraSpeedValue())
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, AFT_CAMERA_MOTOR_CHANNEL, Motor.MAX_FWD, Motor.MAX_REV))
+                channels.get(AFT_CAMERA_MOTOR_CHANNEL).setMaxForward(Motor.MAX_FWD).setMaxReverse(Motor.MAX_REV))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
@@ -129,60 +131,62 @@ final class Rov {
                     .valuesOfType(PortAftSpeedValue.class)
                     .startWith(portAft)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardAftSpeedValue.class)
                     .startWith(starboardAft)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_AFT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(STARBOARD_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortForeSpeedValue.class)
                     .startWith(portFore)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardForeSpeedValue.class)
                     .startWith(starboardFore)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_FORE_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(STARBOARD_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortVertSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, PORT_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV)),
+                channels.get(PORT_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardVertSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
-                new PololuMaestroOutputChannel(maestro, STARBOARD_VERT_CHANNEL, Thruster.MAX_FWD, Thruster.MAX_REV))
+                channels.get(STARBOARD_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV))
         ));
 
         this.internalTemperatureSensor = new LM35(
-            new PololuMaestroInputChannel(maestro, INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+            channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.externalTemperatureSensor = new LM35(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
+            channels.get(EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.internalPressureSensor = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, INTERNAL_PRESSURE_SENSOR_CHANNEL));
+            channels.get(INTERNAL_PRESSURE_SENSOR_CHANNEL));
         this.externalPressureSensorA = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
+            channels.get(EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
         this.externalPressureSensorB = new MPX4250AP(
-            new PololuMaestroInputChannel(maestro, EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
+            channels.get(EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
     }
 
     /**
      * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
      * status and will shutdown.
+     * @param io the scheduler to use for device I/O
+     * @param clock the scheduler to use for timing
      */
-    private void init() {
+    void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
-            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS)
+            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
 
@@ -192,10 +196,10 @@ final class Rov {
         thrusters.forEach(Thruster::writeZero);
 
         cpuInformation.observe().subscribe(eventPublisher::emit);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS)
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
-            .observeOn(Schedulers.io())
+            .observeOn(io)
             .subscribe(this::beat, RuntimeException::new);
     }
 
@@ -266,10 +270,10 @@ final class Rov {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
             final Serial serial = SerialFactory.createInstance();
-            final Rov rov = new Rov(eventPublisher, serial);
+            final Rov rov = new Rov(eventPublisher, new Maestro<>(serial, MAESTRO_DEVICE_NUMBER));
 
             serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
-            rov.init();
+            rov.init(Schedulers.io(), Schedulers.computation());
 
             Logger.info("Started");
             eventPublisher.await();
