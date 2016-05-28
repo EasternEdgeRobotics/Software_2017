@@ -138,7 +138,7 @@ final class Rov {
                     .valuesOfType(StarboardAftSpeedValue.class)
                     .startWith(starboardAft)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
+                channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortForeSpeedValue.class)
@@ -150,7 +150,7 @@ final class Rov {
                     .valuesOfType(StarboardForeSpeedValue.class)
                     .startWith(starboardFore)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
+                channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortVertSpeedValue.class)
@@ -162,7 +162,7 @@ final class Rov {
                     .valuesOfType(StarboardVertSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)))
+                channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
         ));
 
         this.internalTemperatureSensor = new LM35(
