@@ -2,6 +2,7 @@ package com.easternedgerobotics.rov.io.pololu;
 
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.PWM;
+import com.easternedgerobotics.rov.math.Range;
 
 import com.pi4j.io.serial.Serial;
 
@@ -9,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
 import java.util.Objects;
+import java.util.function.DoubleFunction;
 
 final class MaestroChannel implements ADC, PWM {
     /**
@@ -45,16 +47,16 @@ final class MaestroChannel implements ADC, PWM {
 
     private final byte channel;
 
-    private float maxForward;
+    private final Range input;
 
-    private float maxReverse;
+    private DoubleFunction<Double> rangeMap;
 
     MaestroChannel(final Serial serial, final byte maestro, final byte channel) {
         this.serial = serial;
         this.maestro = maestro;
         this.channel = channel;
-        this.maxForward = +1;
-        this.maxReverse = -1;
+        this.input = new Range(-1, 1);
+        this.rangeMap = Range.map(input, new Range(-1, 1));
     }
 
     /**
@@ -67,18 +69,6 @@ final class MaestroChannel implements ADC, PWM {
         return 5 * (getPosition() / 1023.0f);
     }
 
-    @Override
-    public final PWM setMaxForward(final float maxForward) {
-        this.maxForward = maxForward;
-        return this;
-    }
-
-    @Override
-    public final PWM setMaxReverse(final float maxReverse) {
-        this.maxReverse = maxReverse;
-        return this;
-    }
-
     /**
      * Write a value to this channel.
      *
@@ -86,7 +76,7 @@ final class MaestroChannel implements ADC, PWM {
      */
     @Override
     public final void write(final float value) {
-        setTarget(rangeMap(value));
+        setTarget((short) Math.round(rangeMap.apply(value)));
     }
 
     /**
@@ -94,7 +84,19 @@ final class MaestroChannel implements ADC, PWM {
      */
     @Override
     public final void writeZero() {
-        setTarget(rangeMap(0));
+        setTarget((short) Math.round(rangeMap.apply(0)));
+    }
+
+    /**
+     * Sets the output signal range.
+     *
+     * @param range the output signal range
+     * @return the PWM instance
+     */
+    @Override
+    public final PWM setOutputRange(final Range range) {
+        rangeMap = Range.map(input, range);
+        return this;
     }
 
     @Override
@@ -157,29 +159,5 @@ final class MaestroChannel implements ADC, PWM {
         serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_ERRORS});
         final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
         return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
-    }
-
-    /**
-     * Returns the value mapped to the input microseconds valid for this PWM channel.
-     *
-     * @param value the output value from -1 to 1
-     * @return the microseconds for pulse width signal
-     */
-    private short rangeMap(final float value) {
-        return (short) Math.round(rangeMap(value, -1f, 1f, maxForward, maxReverse));
-    }
-
-    /**
-     * Returns the given value mapped from Range A to Range B. See also
-     * <a href="https://git.io/vwrID">{@code EasternEdge.Common.Utils.ExtensionMethods.NumberRangeMapExtensions}</a>.
-     * @param value the value to map
-     * @param fromA the start of the range the value is in now
-     * @param fromB the end of the range the value is in now
-     * @param toA the start of the range the value is being mapped to
-     * @param toB the end of the range the value is being mapped to
-     * @return the mapped value
-     */
-    private float rangeMap(final float value, final float fromA, final float fromB, final float toA, final float toB) {
-        return toA + (toB - toA) * (value - fromA) / (fromB - fromA);
     }
 }

@@ -12,12 +12,12 @@ public final class Thruster {
     /**
      * Max forward PWM signal value (in μs) for the connected to the Blue Robotics basic ESC.
      */
-    public static final float MAX_FWD = 1100;
+    public static final float MAX_FWD = 1900;
 
     /**
      * Max reverse PWM signal value (in μs) for the connected to the Blue Robotics basic ESC.
      */
-    public static final float MAX_REV = 1900;
+    public static final float MAX_REV = 1100;
 
     /**
      * The output PWM device to write speeds.

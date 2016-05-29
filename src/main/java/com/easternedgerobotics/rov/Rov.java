@@ -11,6 +11,7 @@ import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
+import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
@@ -122,7 +123,7 @@ final class Rov {
                     .valuesOfType(AftCameraSpeedValue.class)
                     .startWith(new AftCameraSpeedValue())
                     .cast(SpeedValue.class),
-                channels.get(AFT_CAMERA_MOTOR_CHANNEL).setMaxForward(Motor.MAX_FWD).setMaxReverse(Motor.MAX_REV))
+                channels.get(AFT_CAMERA_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
@@ -131,37 +132,37 @@ final class Rov {
                     .valuesOfType(PortAftSpeedValue.class)
                     .startWith(portAft)
                     .cast(SpeedValue.class),
-                channels.get(PORT_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
+                channels.get(PORT_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardAftSpeedValue.class)
                     .startWith(starboardAft)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_AFT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
+                channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortForeSpeedValue.class)
                     .startWith(portFore)
                     .cast(SpeedValue.class),
-                channels.get(PORT_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
+                channels.get(PORT_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardForeSpeedValue.class)
                     .startWith(starboardFore)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_FORE_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
+                channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortVertSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
-                channels.get(PORT_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV)),
+                channels.get(PORT_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardVertSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_VERT_CHANNEL).setMaxForward(Thruster.MAX_FWD).setMaxReverse(Thruster.MAX_REV))
+                channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
         ));
 
         this.internalTemperatureSensor = new LM35(

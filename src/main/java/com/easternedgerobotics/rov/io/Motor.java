@@ -12,12 +12,12 @@ public final class Motor {
     /**
      * Max forward PWM signal value (in μs) for the connected to the Sabertooth 2x5 motor controller.
      */
-    public static final float MAX_FWD = 500;
+    public static final float MAX_FWD = 2500;
 
     /**
      * Max reverse PWM signal value (in μs) for the connected to the Sabertooth 2x5 motor controller.
      */
-    public static final float MAX_REV = 2500;
+    public static final float MAX_REV = 500;
 
     /**
      * The output PWM device to write speeds using.
