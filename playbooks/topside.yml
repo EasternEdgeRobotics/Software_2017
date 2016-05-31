@@ -23,6 +23,12 @@
     - name: Install video drivers
       apt: name=mesa-vdpau-drivers state=latest
       environment: "{{proxy}}"
+    - name: Create mpv configuration directory
+      file: path=~/.config/mpv state=directory mode=0700
+      become: no
+    - name: Install mpv input.conf
+      copy: src=files/config/mpv/input.conf dest=~/.config/mpv/input.conf mode=600
+      become: no
     - name: Install htop
       apt: name=htop state=latest
       environment: "{{proxy}}"
