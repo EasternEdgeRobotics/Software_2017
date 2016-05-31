@@ -37,12 +37,16 @@
     - name: Install DHCP Server
       apt: name=isc-dhcp-server state=latest
       environment: "{{proxy}}"
+      tags: dhcp
     - name: Configure DHCP Service
       template: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root
+      tags: dhcp
     - name: Configure DHCP Auto-restart
       template: src=files/etc/network/if-up.d/dhcp-server dest=/etc/network/if-up.d/dhcp-server mode=755 owner=root group=root
+      tags: dhcp
     - name: Configure DHCP Server
       copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
+      tags: dhcp
       notify: Restart DHCP Server
   handlers:
     - name: Restart DHCP Server
