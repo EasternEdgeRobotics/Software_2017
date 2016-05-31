@@ -37,7 +37,7 @@ public final class Topside extends Application {
 
     @Override
     public void init() throws SocketException, UnknownHostException {
-        final InetAddress broadcastAddress = InetAddress.getByName("192.168.88.255");
+        final InetAddress broadcastAddress = InetAddress.getByName(System.getProperty("broadcast", "192.168.88.255"));
         final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
