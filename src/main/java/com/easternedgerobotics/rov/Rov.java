@@ -196,7 +196,7 @@ final class Rov {
 
         thrusters.forEach(Thruster::writeZero);
 
-        cpuInformation.observe().subscribe(eventPublisher::emit);
+        cpuInformation.observe().subscribe(eventPublisher::emit, Logger::warn);
         Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
