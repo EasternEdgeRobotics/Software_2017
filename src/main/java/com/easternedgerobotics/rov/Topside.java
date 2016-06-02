@@ -9,6 +9,7 @@ import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
+import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
 
 import javafx.application.Application;
@@ -33,6 +34,8 @@ public final class Topside extends Application {
 
     private EventPublisher eventPublisher;
 
+    private PilotPanel pilotPanel;
+
     private ViewLoader viewLoader;
 
     @Override
@@ -42,9 +45,13 @@ public final class Topside extends Application {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
+        pilotPanel = new PilotPanel(
+            System.getProperty("pilot-panel-name", "Pilot Panel"),
+            System.getProperty("pilot-panel-port", "/dev/ttyACM0"));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
+                put(PilotPanel.class, pilotPanel);
             }
         });
 
@@ -71,6 +78,7 @@ public final class Topside extends Application {
         sensorStage.initOwner(stage);
         sensorStage.show();
 
+        pilotPanel.start();
         Logger.info("Started");
     }
 
@@ -78,6 +86,7 @@ public final class Topside extends Application {
     public void stop() {
         Logger.info("Stopping");
         eventPublisher.stop();
+        pilotPanel.stop();
         Logger.info("Stopped");
     }
 
