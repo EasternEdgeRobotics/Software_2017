@@ -119,6 +119,7 @@ public final class Arduino {
             for (final byte pin : inputPullups) {
                 writer.setPinInputPullupMode(pin);
             }
+            writer.requestAllPinValues();
         } catch (final IOException e) {
             Logger.warn("Error while creating Arduino connection: {}", e);
             port.close();
