@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
+import com.easternedgerobotics.rov.control.MotionReverser;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
@@ -31,6 +32,8 @@ public final class Topside extends Application {
     private static final int AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON = 4;
 
     private static final float AFT_CAMERA_MOTOR_ROTATION_SPEED = 0.3f;
+
+    private static final int MOTION_REVERSE_JOYSTICK_BUTTON = 10;
 
     private EventPublisher eventPublisher;
 
@@ -103,7 +106,9 @@ public final class Topside extends Application {
         final Observable<AftCameraSpeedValue> aftCameraReverse = joystick
             .button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
             .map(value -> new AftCameraSpeedValue(value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
-        joystick.axes().map(scale::apply).subscribe(eventPublisher::emit, Logger::error);
+        final MotionReverser reverser = new MotionReverser();
+        joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(Boolean::valueOf).subscribe(press -> reverser.toggle());
+        joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
         aftCameraForward.mergeWith(aftCameraReverse)
             .subscribe(eventPublisher::emit, Logger::error);
     }
