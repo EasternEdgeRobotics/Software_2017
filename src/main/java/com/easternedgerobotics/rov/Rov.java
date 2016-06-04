@@ -60,17 +60,17 @@ final class Rov {
 
     static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
-    static final byte PORT_AFT_CHANNEL = 17;
+    static final byte PORT_AFT_CHANNEL = 15;
 
-    static final byte STARBOARD_AFT_CHANNEL = 14;
+    static final byte STARBOARD_AFT_CHANNEL = 12;
 
-    static final byte PORT_FORE_CHANNEL = 15;
+    static final byte PORT_FORE_CHANNEL = 16;
 
-    static final byte STARBOARD_FORE_CHANNEL = 12;
+    static final byte STARBOARD_FORE_CHANNEL = 13;
 
-    static final byte PORT_VERT_CHANNEL = 16;
+    static final byte PORT_VERT_CHANNEL = 17;
 
-    static final byte STARBOARD_VERT_CHANNEL = 13;
+    static final byte STARBOARD_VERT_CHANNEL = 14;
 
     static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
 
