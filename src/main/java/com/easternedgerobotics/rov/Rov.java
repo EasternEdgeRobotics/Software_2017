@@ -39,7 +39,7 @@ import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
 import rx.Scheduler;
-import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
 
@@ -269,7 +269,7 @@ final class Rov {
             final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-                socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
+                socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final Serial serial = SerialFactory.createInstance();
             final Rov rov = new Rov(eventPublisher, new Maestro<>(serial, MAESTRO_DEVICE_NUMBER));
 
