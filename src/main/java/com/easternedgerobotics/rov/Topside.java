@@ -11,7 +11,9 @@ import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
 import com.easternedgerobotics.rov.io.PilotPanel;
-import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
+import com.easternedgerobotics.rov.value.CameraSpeedValueA;
+import com.easternedgerobotics.rov.value.CameraSpeedValueB;
+import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -27,11 +29,19 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public final class Topside extends Application {
-    private static final int AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON = 6;
+    private static final int CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON = 4;
 
-    private static final int AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON = 4;
+    private static final int CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON = 6;
 
-    private static final float AFT_CAMERA_MOTOR_ROTATION_SPEED = 0.3f;
+    private static final int CAMERA_B_MOTOR_FORWARD_JOYSTICK_BUTTON = 5;
+
+    private static final int CAMERA_B_MOTOR_REVERSE_JOYSTICK_BUTTON = 3;
+
+    private static final int TOOLING_MOTOR_FORWARD_JOYSTICK_BUTTON = 11;
+
+    private static final int TOOLING_MOTOR_REVERSE_JOYSTICK_BUTTON = 12;
+
+    private static final float MOTOR_ROTATION_SPEED = 0.3f;
 
     private static final int MOTION_REVERSE_JOYSTICK_BUTTON = 2;
 
@@ -100,16 +110,35 @@ public final class Topside extends Application {
     @SuppressWarnings("checkstyle:avoidinlineconditionals")
     private void joystickInitialization(final Joystick joystick) {
         final ExponentialMotionScale scale = new ExponentialMotionScale();
-        final Observable<AftCameraSpeedValue> aftCameraForward = joystick
-            .button(AFT_CAMERA_MOTOR_FORWARD_JOYSTICK_BUTTON)
-            .map(value -> new AftCameraSpeedValue(value ?  AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
-        final Observable<AftCameraSpeedValue> aftCameraReverse = joystick
-            .button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
-            .map(value -> new AftCameraSpeedValue(value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
         final MotionReverser reverser = new MotionReverser();
         joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(x -> x).subscribe(press -> reverser.toggle());
         joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
-        aftCameraForward.mergeWith(aftCameraReverse)
+
+        final Observable<CameraSpeedValueA> cameraForwardA = joystick
+            .button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON)
+            .map(value -> new CameraSpeedValueA(value ? MOTOR_ROTATION_SPEED : 0));
+        final Observable<CameraSpeedValueA> cameraReverseA = joystick
+            .button(CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON)
+            .map(value -> new CameraSpeedValueA(value ? -MOTOR_ROTATION_SPEED : 0));
+        cameraForwardA.mergeWith(cameraReverseA)
+            .subscribe(eventPublisher::emit, Logger::error);
+
+        final Observable<CameraSpeedValueB> cameraForwardB = joystick
+            .button(CAMERA_B_MOTOR_FORWARD_JOYSTICK_BUTTON)
+            .map(value -> new CameraSpeedValueB(value ? MOTOR_ROTATION_SPEED : 0));
+        final Observable<CameraSpeedValueB> cameraReverseB = joystick
+            .button(CAMERA_B_MOTOR_REVERSE_JOYSTICK_BUTTON)
+            .map(value -> new CameraSpeedValueB(value ? -MOTOR_ROTATION_SPEED : 0));
+        cameraForwardB.mergeWith(cameraReverseB)
+            .subscribe(eventPublisher::emit, Logger::error);
+
+        final Observable<ToolingSpeedValue> toolingForward = joystick
+            .button(TOOLING_MOTOR_FORWARD_JOYSTICK_BUTTON)
+            .map(value -> new ToolingSpeedValue(value ? MOTOR_ROTATION_SPEED : 0));
+        final Observable<ToolingSpeedValue> toolingReverse = joystick
+            .button(TOOLING_MOTOR_REVERSE_JOYSTICK_BUTTON)
+            .map(value -> new ToolingSpeedValue(value ? -MOTOR_ROTATION_SPEED : 0));
+        toolingForward.mergeWith(toolingReverse)
             .subscribe(eventPublisher::emit, Logger::error);
     }
 
