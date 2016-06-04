@@ -15,7 +15,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
-import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 
 import java.net.DatagramSocket;
@@ -41,7 +41,7 @@ public final class Topside extends Application {
         final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>(SingleSourceFifoOrder.DROP_LATE)));
+            socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
