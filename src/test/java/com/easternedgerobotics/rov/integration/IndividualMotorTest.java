@@ -10,7 +10,7 @@ import com.easternedgerobotics.rov.value.TestSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
-import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 
 import java.net.DatagramSocket;
@@ -35,7 +35,7 @@ public final class IndividualMotorTest {
         final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
         final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-            new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
+            new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new BasicOrder<>()));
 
         final Motor motor = new Motor(
             eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),

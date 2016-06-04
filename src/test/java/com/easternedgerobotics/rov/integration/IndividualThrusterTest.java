@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import rx.broadcast.SingleSourceFifoOrder;
+import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class IndividualThrusterTest {
         final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
         socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-            socket, broadcastAddress, broadcastPort, new SingleSourceFifoOrder<>()));
+            socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
     }
 
     @After
