@@ -14,6 +14,8 @@
       with_items: "{{ ansible_interfaces }}"
     - name: "Add eedge to input group (fixes #129)"
       user: name=eedge groups=input append=yes
+    - name: "Add eedge to tty and dialout groups (fixes #172)"
+      user: name=eedge groups=tty,dialout append=yes
     - name: Add MPV repo for Ubuntu 15.10
       apt_repository: repo='ppa:mc3man/ffmpeg-test1'
       environment: "{{proxy}}"
