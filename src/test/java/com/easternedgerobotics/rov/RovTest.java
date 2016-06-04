@@ -3,10 +3,12 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
-import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
+import com.easternedgerobotics.rov.value.CameraSpeedValueA;
+import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
+import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -160,7 +162,7 @@ public class RovTest {
     }
 
     @Test
-    public final void doesUpdateAftCameraMotorGivenInput() {
+    public final void doesUpdateCameraAGivenInput() {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
@@ -168,9 +170,39 @@ public class RovTest {
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(AftCameraSpeedValue.class).onNext(new AftCameraSpeedValue(1));
+        eventPublisher.testObserver(CameraSpeedValueA.class).onNext(new CameraSpeedValueA(1));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.AFT_CAMERA_MOTOR_CHANNEL)).write(1);
+        Mockito.verify(maestro.get(Rov.CAMERA_A_MOTOR_CHANNEL)).write(1);
+    }
+
+    @Test
+    public final void doesUpdateCameraBGivenInput() {
+        final TestScheduler scheduler = new TestScheduler();
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final MockMaestro maestro = new MockMaestro();
+        final Rov rov = new Rov(eventPublisher, maestro);
+
+        rov.init(scheduler, scheduler);
+        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
+        eventPublisher.testObserver(CameraSpeedValueB.class).onNext(new CameraSpeedValueB(1));
+        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+
+        Mockito.verify(maestro.get(Rov.CAMERA_B_MOTOR_CHANNEL)).write(1);
+    }
+
+    @Test
+    public final void doesUpdateToolingGivenInput() {
+        final TestScheduler scheduler = new TestScheduler();
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final MockMaestro maestro = new MockMaestro();
+        final Rov rov = new Rov(eventPublisher, maestro);
+
+        rov.init(scheduler, scheduler);
+        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
+        eventPublisher.testObserver(ToolingSpeedValue.class).onNext(new ToolingSpeedValue(1));
+        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+
+        Mockito.verify(maestro.get(Rov.TOOLING_MOTOR_CHANNEL)).write(1);
     }
 }
