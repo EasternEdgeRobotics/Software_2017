@@ -33,7 +33,7 @@ public final class Topside extends Application {
 
     private static final float AFT_CAMERA_MOTOR_ROTATION_SPEED = 0.3f;
 
-    private static final int MOTION_REVERSE_JOYSTICK_BUTTON = 10;
+    private static final int MOTION_REVERSE_JOYSTICK_BUTTON = 2;
 
     private EventPublisher eventPublisher;
 
