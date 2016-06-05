@@ -107,7 +107,7 @@ public final class Topside extends Application {
             .button(AFT_CAMERA_MOTOR_REVERSE_JOYSTICK_BUTTON)
             .map(value -> new AftCameraSpeedValue(value ? -AFT_CAMERA_MOTOR_ROTATION_SPEED : 0));
         final MotionReverser reverser = new MotionReverser();
-        joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(Boolean::valueOf).subscribe(press -> reverser.toggle());
+        joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(x -> x).subscribe(press -> reverser.toggle());
         joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
         aftCameraForward.mergeWith(aftCameraReverse)
             .subscribe(eventPublisher::emit, Logger::error);
