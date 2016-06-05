@@ -6,15 +6,11 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 import org.pmw.tinylog.Logger;
-import rx.Observable;
 import rx.Subscription;
-import rx.exceptions.Exceptions;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
-import java.util.concurrent.TimeUnit;
 
 public final class ArduinoPort {
     /**
@@ -73,6 +69,7 @@ public final class ArduinoPort {
      *
      * @throws IOException if the connection can not be made.
      */
+    @SuppressWarnings({"checkstyle:magicnumber"})
     void open() throws IOException {
         try {
             final CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(comPort);
@@ -81,29 +78,13 @@ public final class ArduinoPort {
                 SerialPort.DATABITS_8,
                 SerialPort.STOPBITS_1,
                 SerialPort.PARITY_NONE);
-
-            // Should not actually error out unless something is totally whack.
-            final Observable<Object> connectionAttempt = Observable.create(subscriber -> {
-                try {
-                    final InputStream in = serialPort.getInputStream();
-                    while (!subscriber.isUnsubscribed()) {
-                        if (in.read() != -1) {
-                            subscriber.onCompleted();
-                        }
-                    }
-                } catch (final IOException e) {
-                    throw Exceptions.propagate(e);
-                }
-            });
-
-            connectionAttempt.timeout(connectionTimeout, TimeUnit.MILLISECONDS).toBlocking().subscribe(
-                ignored -> { },
-                error -> Logger.warn("Failed to init to device on com {}: {}", comPort, error),
-                () -> Logger.info("Connected  to device on com {}", comPort)
-            );
+            // required to ensure that the Arduino does not get accessed during its initialization.
+            Thread.sleep(2500);
 
         } catch (final NoSuchPortException | PortInUseException | UnsupportedCommOperationException e) {
             throw new IOException(e);
+        } catch (final InterruptedException e) {
+            Logger.warn("Serial port connection has been interuppted.");
         }
     }
 
