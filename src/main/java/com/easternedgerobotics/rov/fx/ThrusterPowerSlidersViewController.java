@@ -1,10 +1,12 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 
 import rx.Observable;
 import rx.observables.JavaFxObservable;
+import rx.schedulers.JavaFxScheduler;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -16,6 +18,11 @@ public class ThrusterPowerSlidersViewController implements ViewController {
      * The event publisher instance.
      */
     private final EventPublisher eventPublisher;
+
+    /**
+     * The pilot panel interface.
+     */
+    private final PilotPanel pilotPanel;
 
     /**
      * The @{code ThrusterPowerSlidersView} this controller works for.
@@ -78,6 +85,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
     @Inject
     public ThrusterPowerSlidersViewController(
         final EventPublisher eventPublisher,
+        final PilotPanel pilotPanel,
         final ThrusterPowerSlidersView view,
         final SliderView globalSliderView,
         final SliderView heaveSliderView,
@@ -88,6 +96,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
         final SliderView rollSliderView
     ) {
         this.eventPublisher = eventPublisher;
+        this.pilotPanel = pilotPanel;
         this.view = view;
         this.globalSliderView = globalSliderView;
         this.heaveSliderView = heaveSliderView;
@@ -119,6 +128,21 @@ public class ThrusterPowerSlidersViewController implements ViewController {
             yawSliderView.getParent(),
             rollSliderView.getParent()
         );
+
+        subscriptions.add(pilotPanel.gloablPowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(globalSliderView.slider::setValue));
+        subscriptions.add(pilotPanel.heavePowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(heaveSliderView.slider::setValue));
+        subscriptions.add(pilotPanel.swayPowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(swaySliderView.slider::setValue));
+        subscriptions.add(pilotPanel.surgePowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(surgeSliderView.slider::setValue));
+        subscriptions.add(pilotPanel.pitchPowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(pitchSliderView.slider::setValue));
+        subscriptions.add(pilotPanel.yawPowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(yawSliderView.slider::setValue));
+        subscriptions.add(pilotPanel.rollPowerSlider().observeOn(JavaFxScheduler.getInstance())
+            .subscribe(rollSliderView.slider::setValue));
 
         final Observable<Float> global = values(globalSliderView);
         final Observable<Float> heave = values(heaveSliderView);
