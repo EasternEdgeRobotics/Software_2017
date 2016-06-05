@@ -40,6 +40,11 @@ final class ArduinoWriter {
     private static final byte HEARTBEAT_REQUEST = 0x03;
 
     /**
+     * Indicates the start of an pin value dump request.
+     */
+    private static final byte DUMP_VALUES_REQUEST = 0x04;
+
+    /**
      * The output stream connected to the mega.
      */
     private final PublishSubject<byte[]> out = PublishSubject.create();
@@ -94,5 +99,12 @@ final class ArduinoWriter {
      */
     void setPinInputPullupMode(final byte address) {
         out.onNext(new byte[]{MESSAGE_START, WRITE_DIGITAL_MODE, address, INPUT_PULLUP_MODE});
+    }
+
+    /**
+     * Request the Arduino to report all pin values.
+     */
+    void requestAllPinValues() {
+        out.onNext(new byte[]{MESSAGE_START, DUMP_VALUES_REQUEST});
     }
 }
