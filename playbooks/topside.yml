@@ -19,6 +19,10 @@
     - name: Add MPV repo for Ubuntu 15.10
       apt_repository: repo='ppa:mc3man/ffmpeg-test1'
       environment: "{{proxy}}"
+    - name: Add video scripts to PATH
+      template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
+      with_items:
+        - eer-video
     - name: Install MPV
       apt: name=mpv state=latest
       environment: "{{proxy}}"
