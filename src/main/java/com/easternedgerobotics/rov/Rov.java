@@ -12,7 +12,8 @@ import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.math.Range;
-import com.easternedgerobotics.rov.value.AftCameraSpeedValue;
+import com.easternedgerobotics.rov.value.CameraSpeedValueA;
+import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
 import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
@@ -26,6 +27,7 @@ import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
@@ -72,7 +74,11 @@ final class Rov {
 
     static final byte STARBOARD_VERT_CHANNEL = 14;
 
-    static final byte AFT_CAMERA_MOTOR_CHANNEL = 18;
+    static final byte CAMERA_A_MOTOR_CHANNEL = 18;
+
+    static final byte CAMERA_B_MOTOR_CHANNEL = 19;
+
+    static final byte TOOLING_MOTOR_CHANNEL = 22;
 
     static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
@@ -120,10 +126,22 @@ final class Rov {
         this.motors = Collections.unmodifiableList(Arrays.asList(
             new Motor(
                 eventPublisher
-                    .valuesOfType(AftCameraSpeedValue.class)
-                    .startWith(new AftCameraSpeedValue())
+                    .valuesOfType(CameraSpeedValueA.class)
+                    .startWith(new CameraSpeedValueA())
                     .cast(SpeedValue.class),
-                channels.get(AFT_CAMERA_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
+                channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+            new Motor(
+                eventPublisher
+                    .valuesOfType(CameraSpeedValueB.class)
+                    .startWith(new CameraSpeedValueB())
+                    .cast(SpeedValue.class),
+                channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+            new Motor(
+                eventPublisher
+                    .valuesOfType(ToolingSpeedValue.class)
+                    .startWith(new ToolingSpeedValue())
+                    .cast(SpeedValue.class),
+                channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
