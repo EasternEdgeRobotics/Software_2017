@@ -76,6 +76,9 @@ final class MaestroChannel implements ADC, PWM {
      */
     @Override
     public final void write(final float value) {
+        if (value > 1 || value < -1) {
+            throw new IllegalArgumentException("Maestro channel values must be between -1 and 1");
+        }
         setTarget((short) Math.round(rangeMap.apply(value)));
     }
 
