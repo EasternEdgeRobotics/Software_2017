@@ -26,7 +26,7 @@ public final class TwoActionButton {
     public TwoActionButton(final Observable<Boolean> input, final long holdDuration, final Scheduler scheduler) {
         this.holdDuration = holdDuration;
         toggle = Observable.zip(input.first().map(x -> !x).mergeWith(input), input, Pair::new)
-            .filter(p -> p.getValue() != p.getKey()).map(Pair::getValue).observeOn(scheduler).timestamp();
+            .filter(p -> p.getValue() != p.getKey()).map(Pair::getValue).observeOn(scheduler).timestamp(scheduler);
     }
 
     /**
