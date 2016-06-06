@@ -13,6 +13,7 @@ import com.easternedgerobotics.rov.io.Joysticks;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
+import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoFlipValueB;
@@ -79,6 +80,7 @@ public final class Topside extends Application {
         });
 
         Joysticks.logitechExtreme3dPro().subscribe(this::joystickInitialization);
+        pilotPanel.lightPowerSlider().map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
         Logger.info("Initialising video player");
         videoPlayer.init();
