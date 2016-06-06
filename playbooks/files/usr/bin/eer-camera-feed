@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import picamera
+import signal
+import socket
+import sys
+
+with picamera.PiCamera() as camera:
+    def flip_video(signum, stack):
+        camera.vflip = not camera.vflip
+        camera.hflip = not camera.hflip
+    signal.signal(signal.SIGUSR1, flip_video)
+    camera.resolution = (1296, 720)
+    camera.framerate = 24
+
+    nc = socket.socket()
+    nc.connect((sys.argv[1], int(sys.argv[2])))
+    fd = nc.makefile('wb')
+    try:
+        camera.start_recording(fd, format='h264', quantization=23)
+        while True:
+            signal.pause()
+    finally:
+        fd.close()
+        nc.close()
