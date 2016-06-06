@@ -30,9 +30,8 @@ public final class MotionReverser {
                 -motion.getSway(),
                 -motion.getSurge(),
                 -motion.getPitch(),
-                -motion.getRoll(),
-                motion.getYaw()
-            );
+                motion.getYaw(),
+                -motion.getRoll());
         }
     }
 }
