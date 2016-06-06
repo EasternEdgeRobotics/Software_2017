@@ -13,6 +13,7 @@ import com.easternedgerobotics.rov.io.Joysticks;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
+import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import javafx.application.Application;
@@ -98,6 +99,7 @@ public final class Topside extends Application {
     @Override
     public void stop() {
         Logger.info("Stopping");
+        eventPublisher.emit(new HeartbeatValue(false));
         eventPublisher.stop();
         pilotPanel.stop();
         Logger.info("Stopped");
