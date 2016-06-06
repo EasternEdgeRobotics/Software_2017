@@ -43,6 +43,7 @@ public class MainViewController implements ViewController {
     @Override
     public final void onDestroy() {
         subscriptions.unsubscribe();
+        eventPublisher.emit(new HeartbeatValue(false));
     }
 
     private void onSelected(final boolean selected) {
