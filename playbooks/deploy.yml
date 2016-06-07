@@ -18,12 +18,17 @@
       notify:
         - Reload systemd
         - Enable eer service
-        - Restart eer service
   handlers:
     - name: Reload systemd
       command: systemctl daemon-reload
     - name: Enable eer service
       command: systemctl enable eer.service
+
+- hosts: rasprime:picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  tasks:
     - name: Restart eer service
       service: name=eer state=restarted
 
