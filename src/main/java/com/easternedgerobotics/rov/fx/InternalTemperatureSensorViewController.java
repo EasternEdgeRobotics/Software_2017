@@ -4,7 +4,6 @@ import com.easternedgerobotics.rov.event.Event;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 
 import rx.Observable;
-import rx.schedulers.JavaFxScheduler;
 import rx.subscriptions.CompositeSubscription;
 
 import javax.inject.Inject;
@@ -30,7 +29,7 @@ public class InternalTemperatureSensorViewController implements ViewController {
     @Override
     public final void onCreate() {
         subscriptions.add(
-            internalTemperature.observeOn(JavaFxScheduler.getInstance())
+            internalTemperature.observeOn(jfxScheduler)
                 .subscribe(this::updateInternalTemperatureLabel));
     }
 
