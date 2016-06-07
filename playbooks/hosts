@@ -10,4 +10,5 @@
 192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=rov
 
 [picamera]
-192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera
+192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera-a
+192.168.88.6 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera-b
