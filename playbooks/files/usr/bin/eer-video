@@ -5,8 +5,10 @@ set -u
 set -o pipefail
 
 PORT=$1
-nc -l "$PORT" | mpv --osd-level=0 --no-osc --no-cache --no-correct-pts \
+exec 1> >(mpv --osd-level=0 --no-osc --no-cache --no-correct-pts \
     --hwdec=vdpau --vo=vdpau \
     --demuxer-readahead-secs=0 --demuxer-lavf-probescore=1 --demuxer-lavf-buffersize=1 \
     --fps=48 \
-    --title=ROV fd://0 &> /dev/null
+    --title=ROV fd://0 &> /dev/null)
+
+exec nc -l "$PORT"
