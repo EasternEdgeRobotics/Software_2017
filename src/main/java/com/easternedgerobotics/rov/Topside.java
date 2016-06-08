@@ -2,17 +2,19 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.control.MotionReverser;
+import com.easternedgerobotics.rov.control.PrecisionPowerScale;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
+import com.easternedgerobotics.rov.fx.MovementView;
 import com.easternedgerobotics.rov.fx.SensorView;
-import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
+import com.easternedgerobotics.rov.value.PrecisionPowerValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoFlipValueB;
@@ -51,6 +53,8 @@ public final class Topside extends Application {
     private static final int CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON = 7;
 
     private static final int CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON = 8;
+
+    private static final int PRECISION_POWER_JOYSTICK_BUTTON = 9;
 
     private EventPublisher eventPublisher;
 
@@ -93,10 +97,10 @@ public final class Topside extends Application {
         stage.setTitle("Control Software");
         stage.show();
 
-        final Stage thrusterStage = viewLoader.load(ThrusterPowerSlidersView.class);
-        thrusterStage.setTitle("Thruster Power");
-        thrusterStage.initOwner(stage);
-        thrusterStage.show();
+        final Stage movementStage = viewLoader.load(MovementView.class);
+        movementStage.setTitle("Movement Controls");
+        movementStage.initOwner(stage);
+        movementStage.show();
 
         final Stage sensorStage = viewLoader.load(SensorView.class);
         sensorStage.setTitle("Sensors 'n' stuff");
@@ -124,6 +128,7 @@ public final class Topside extends Application {
     private void joystickInitialization(final Joystick joystick) {
         final ExponentialMotionScale scale = new ExponentialMotionScale();
         final MotionReverser reverser = new MotionReverser();
+        final PrecisionPowerScale precision = new PrecisionPowerScale();
         joystick.button(CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON).filter(x -> x).map(x -> new VideoFlipValueA())
             .doOnEach(Logger::info)
             .subscribe(eventPublisher::emit);
@@ -131,7 +136,12 @@ public final class Topside extends Application {
             .doOnEach(Logger::info)
             .subscribe(eventPublisher::emit);
         joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(x -> x).subscribe(press -> reverser.toggle());
-        joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
+        joystick.button(PRECISION_POWER_JOYSTICK_BUTTON).subscribe(precision::setEnabled);
+        Observable.combineLatest(
+            joystick.axes().map(scale::apply).map(reverser::apply),
+            eventPublisher.valuesOfType(PrecisionPowerValue.class).startWith(new PrecisionPowerValue()),
+            precision::apply
+        ).subscribe(eventPublisher::emit, Logger::error);
 
         final Observable<CameraSpeedValueA> cameraForwardA = joystick
             .button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON)

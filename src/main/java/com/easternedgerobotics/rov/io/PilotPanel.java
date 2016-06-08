@@ -86,6 +86,11 @@ public final class PilotPanel {
     private static final byte ROLL_POWER_SLIDER_ADDRESS = 4;
 
     /**
+     * Index of the precision movements power slider.
+     */
+    private static final byte PRECISION_POWER_SLIDER_ADDRESS = 6;
+
+    /**
      * The Arduino Mega instance.
      */
     private final Arduino arduino;
@@ -195,6 +200,17 @@ public final class PilotPanel {
      */
     public Observable<Integer> rollPowerSlider() {
         return arduino.analogPin(ROLL_POWER_SLIDER_ADDRESS)
+            .map(AnalogPinValue::getValue)
+            .map(AnalogToPowerLevel::convert);
+    }
+
+    /**
+     * Observe changes on the precision movement power slider.
+     *
+     * @return observable
+     */
+    public Observable<Integer> precisionPowerSlider() {
+        return arduino.analogPin(PRECISION_POWER_SLIDER_ADDRESS)
             .map(AnalogPinValue::getValue)
             .map(AnalogToPowerLevel::convert);
     }
