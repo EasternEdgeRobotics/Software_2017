@@ -24,7 +24,7 @@ public class CpuInformationViewController implements ViewController {
 
     @Override
     public final void onCreate() {
-        subscriptions.add(values.observeOn(jfxScheduler).subscribe(this::updateLabels));
+        subscriptions.add(values.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateLabels));
     }
 
     @Override

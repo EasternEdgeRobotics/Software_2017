@@ -60,11 +60,11 @@ public class SensorViewController implements ViewController {
     @Override
     public final void onCreate() {
         view.row.getChildren().add(cpuInformationView.getParent());
-        subscriptions.add(internalPressure.observeOn(jfxScheduler).subscribe(this::updatePressureLabel));
-        subscriptions.add(externalPressureA.observeOn(jfxScheduler).subscribe(this::updatePressureLabel));
-        subscriptions.add(externalPressureB.observeOn(jfxScheduler).subscribe(this::updatePressureLabel));
-        subscriptions.add(internalTemperature.observeOn(jfxScheduler).subscribe(this::updateTemperatureLabel));
-        subscriptions.add(externalTemperature.observeOn(jfxScheduler).subscribe(this::updateTemperatureLabel));
+        subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(externalPressureA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(externalPressureB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
+        subscriptions.add(externalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
     }
 
     @Override

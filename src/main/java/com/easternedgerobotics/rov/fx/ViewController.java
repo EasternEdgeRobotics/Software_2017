@@ -11,7 +11,7 @@ import rx.schedulers.JavaFxScheduler;
  * not).
  */
 interface ViewController {
-    Scheduler jfxScheduler = JavaFxScheduler.getInstance();
+    Scheduler JAVA_FX_SCHEDULER = JavaFxScheduler.getInstance();
 
     /**
      * Called after the view for this controller is displayed.

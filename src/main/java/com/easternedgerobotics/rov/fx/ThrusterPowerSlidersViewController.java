@@ -128,19 +128,19 @@ public class ThrusterPowerSlidersViewController implements ViewController {
             rollSliderView.getParent()
         );
 
-        subscriptions.add(pilotPanel.gloablPowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.gloablPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(globalSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.heavePowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.heavePowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(heaveSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.swayPowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.swayPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(swaySliderView.slider::setValue));
-        subscriptions.add(pilotPanel.surgePowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.surgePowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(surgeSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.pitchPowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.pitchPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(pitchSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.yawPowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.yawPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(yawSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.rollPowerSlider().observeOn(jfxScheduler)
+        subscriptions.add(pilotPanel.rollPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(rollSliderView.slider::setValue));
 
         final Observable<Float> global = values(globalSliderView);
