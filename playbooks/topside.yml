@@ -40,6 +40,10 @@
       apt: name=openjfx state=latest
       tags: java
       environment: "{{proxy}}"
+    - name: Add script to poweroff vehicle
+      template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
+      with_items:
+        - eer-poweroff-vehicle
     - name: Install DHCP Server
       apt: name=isc-dhcp-server state=latest
       environment: "{{proxy}}"
