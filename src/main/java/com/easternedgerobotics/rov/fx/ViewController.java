@@ -1,5 +1,8 @@
 package com.easternedgerobotics.rov.fx;
 
+import rx.Scheduler;
+import rx.schedulers.JavaFxScheduler;
+
 /**
  * A view controller encapsulates the behaviour and logic required to render a view.
  * <p>
@@ -8,6 +11,8 @@ package com.easternedgerobotics.rov.fx;
  * not).
  */
 interface ViewController {
+    Scheduler JAVA_FX_SCHEDULER = JavaFxScheduler.getInstance();
+
     /**
      * Called after the view for this controller is displayed.
      */

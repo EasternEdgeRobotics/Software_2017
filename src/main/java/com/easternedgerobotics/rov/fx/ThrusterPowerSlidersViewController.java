@@ -6,7 +6,6 @@ import com.easternedgerobotics.rov.value.MotionPowerValue;
 
 import rx.Observable;
 import rx.observables.JavaFxObservable;
-import rx.schedulers.JavaFxScheduler;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -129,19 +128,19 @@ public class ThrusterPowerSlidersViewController implements ViewController {
             rollSliderView.getParent()
         );
 
-        subscriptions.add(pilotPanel.gloablPowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.gloablPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(globalSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.heavePowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.heavePowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(heaveSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.swayPowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.swayPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(swaySliderView.slider::setValue));
-        subscriptions.add(pilotPanel.surgePowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.surgePowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(surgeSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.pitchPowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.pitchPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(pitchSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.yawPowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.yawPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(yawSliderView.slider::setValue));
-        subscriptions.add(pilotPanel.rollPowerSlider().observeOn(JavaFxScheduler.getInstance())
+        subscriptions.add(pilotPanel.rollPowerSlider().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(rollSliderView.slider::setValue));
 
         final Observable<Float> global = values(globalSliderView);
