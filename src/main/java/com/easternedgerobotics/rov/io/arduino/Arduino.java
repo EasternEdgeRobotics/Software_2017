@@ -14,6 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 public final class Arduino {
     /**
+     * Used to debounce buttons where a physical push may cause jankiness.
+     */
+    private static final int DIGITAL_DEBOUNCE_INTERVAL = 10;
+
+    /**
      * Controls access to a serialPort connected to an Arduino.
      */
     private final ArduinoPort port;
@@ -141,7 +146,8 @@ public final class Arduino {
      * @return Observable
      */
     public Observable<DigitalPinValue> digitalPin(final byte address) {
-        return reader.valuesOfType(DigitalPinValue.class).filter(pin -> pin.getAddress() == address);
+        return reader.valuesOfType(DigitalPinValue.class).filter(pin -> pin.getAddress() == address)
+            .debounce(DIGITAL_DEBOUNCE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     /**
