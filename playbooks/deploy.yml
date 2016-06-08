@@ -6,7 +6,7 @@
     - name: Make opt directory
       file: path=/opt state=directory mode=0755
     - name: Copy Control Software
-      unarchive: src=../build/distributions/topside-4.1.0.zip dest=/opt
+      unarchive: src=../build/distributions/topside-5.0.0.zip dest=/opt
 
 - hosts: rasprime:picamera
   become: yes
@@ -18,12 +18,17 @@
       notify:
         - Reload systemd
         - Enable eer service
-        - Restart eer service
   handlers:
     - name: Reload systemd
       command: systemctl daemon-reload
     - name: Enable eer service
       command: systemctl enable eer.service
+
+- hosts: rasprime:picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  tasks:
     - name: Restart eer service
       service: name=eer state=restarted
 

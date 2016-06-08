@@ -14,6 +14,9 @@ import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.VideoFlipValueA;
+import com.easternedgerobotics.rov.value.VideoFlipValueB;
+import com.easternedgerobotics.rov.video.VideoPlayer;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -45,9 +48,15 @@ public final class Topside extends Application {
 
     private static final int MOTION_REVERSE_JOYSTICK_BUTTON = 2;
 
+    private static final int CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON = 7;
+
+    private static final int CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON = 8;
+
     private EventPublisher eventPublisher;
 
     private PilotPanel pilotPanel;
+
+    private VideoPlayer videoPlayer;
 
     private ViewLoader viewLoader;
 
@@ -61,6 +70,7 @@ public final class Topside extends Application {
         pilotPanel = new PilotPanel(
             System.getProperty("pilot-panel-name", "Pilot Panel"),
             System.getProperty("pilot-panel-port", "/dev/ttyACM0"));
+        videoPlayer = new VideoPlayer(eventPublisher, System.getProperty("mpv", "192.168.88.2"));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
@@ -70,6 +80,8 @@ public final class Topside extends Application {
 
         Joysticks.logitechExtreme3dPro().subscribe(this::joystickInitialization);
 
+        Logger.info("Initialising video player");
+        videoPlayer.init();
         Logger.info("Initialised");
     }
 
@@ -98,6 +110,7 @@ public final class Topside extends Application {
     @Override
     public void stop() {
         Logger.info("Stopping");
+        videoPlayer.stop();
         eventPublisher.stop();
         pilotPanel.stop();
         Logger.info("Stopped");
@@ -111,6 +124,12 @@ public final class Topside extends Application {
     private void joystickInitialization(final Joystick joystick) {
         final ExponentialMotionScale scale = new ExponentialMotionScale();
         final MotionReverser reverser = new MotionReverser();
+        joystick.button(CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON).filter(x -> x).map(x -> new VideoFlipValueA())
+            .doOnEach(Logger::info)
+            .subscribe(eventPublisher::emit);
+        joystick.button(CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON).filter(x -> x).map(x -> new VideoFlipValueB())
+            .doOnEach(Logger::info)
+            .subscribe(eventPublisher::emit);
         joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(x -> x).subscribe(press -> reverser.toggle());
         joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
 

@@ -12,7 +12,7 @@ applicationDefaultJvmArgs = [
     '-Xloggc:gc.log', '-XX:+PrintGCApplicationStoppedTime', '-XX:+PrintGCTimeStamps'
 ]
 applicationName = 'topside'
-version = '4.1.0'
+version = '5.0.0'
 mainClassName = 'com.easternedgerobotics.rov.Topside'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -61,7 +61,8 @@ test {
 
 multipleStartScripts {
     mainClasses = [
-        'picamera': 'com.easternedgerobotics.rov.Picamera',
+        'picamera-a': 'com.easternedgerobotics.rov.PicameraA',
+        'picamera-b': 'com.easternedgerobotics.rov.PicameraB',
         'rov': 'com.easternedgerobotics.rov.Rov',
         'topside': 'com.easternedgerobotics.rov.Topside',
     ]
