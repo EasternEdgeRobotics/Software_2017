@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 
 import rx.Observable;
@@ -19,12 +20,15 @@ public class MainViewController implements ViewController {
 
     private final EventPublisher eventPublisher;
 
+    private final PilotPanel pilotPanel;
+
     private final CompositeSubscription subscriptions;
 
     @Inject
-    public MainViewController(final MainView view, final EventPublisher eventPublisher) {
+    public MainViewController(final MainView view, final EventPublisher eventPublisher, final PilotPanel pilotPanel) {
         this.view = view;
         this.eventPublisher = eventPublisher;
+        this.pilotPanel = pilotPanel;
         this.subscriptions = new CompositeSubscription();
     }
 
@@ -38,6 +42,8 @@ public class MainViewController implements ViewController {
                 .subscribe(this::heartbeat));
         subscriptions.add(JavaFxObservable.fromObservableValue(view.button.selectedProperty())
             .subscribe(this::onSelected));
+        subscriptions.add(pilotPanel.emergencyStopClick().observeOn(JAVA_FX_SCHEDULER)
+            .subscribe(this::onEmergencyStopClick));
     }
 
     @Override
@@ -56,5 +62,18 @@ public class MainViewController implements ViewController {
 
     private void heartbeat(final boolean operational) {
         eventPublisher.emit(new HeartbeatValue(operational));
+    }
+
+    private void onEmergencyStopClick(final boolean stop) {
+        if (!stop) {
+            view.button.setDisable(true);
+            view.button.setSelected(false);
+            view.button.setStyle("-fx-text-fill: red");
+            view.button.setText("Emergency Stop");
+        } else {
+            view.button.setDisable(false);
+            view.button.setStyle("-fx-text-fill: black");
+            view.button.setText("Start");
+        }
     }
 }
