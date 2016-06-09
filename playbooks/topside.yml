@@ -40,6 +40,8 @@
       apt: name=openjfx state=latest
       tags: java
       environment: "{{proxy}}"
+    - name: Add poweroff script desktop launcher
+      copy: src=files/Poweroff.desktop dest=~/Desktop mode=700
     - name: Add script to poweroff vehicle
       template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
       with_items:

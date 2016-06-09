@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0.0
+Name=Poweroff Pis
+Exec=eer-poweroff-vehicle
+Terminal=false
+Type=Application
+Categories=Application
