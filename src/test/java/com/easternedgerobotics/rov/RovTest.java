@@ -6,6 +6,7 @@ import com.easternedgerobotics.rov.test.TestEventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
@@ -204,5 +205,20 @@ public class RovTest {
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.TOOLING_MOTOR_CHANNEL)).write(1);
+    }
+
+    @Test
+    public final void doesUpdateLightGivenInput() {
+        final TestScheduler scheduler = new TestScheduler();
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final MockMaestro maestro = new MockMaestro();
+        final Rov rov = new Rov(eventPublisher, maestro);
+
+        rov.init(scheduler, scheduler);
+        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
+        eventPublisher.testObserver(LightSpeedValue.class).onNext(new LightSpeedValue(1));
+        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+
+        Mockito.verify(maestro.get(Rov.LIGHT_CHANNEL)).write(1);
     }
 }

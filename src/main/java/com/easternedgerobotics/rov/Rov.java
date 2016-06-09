@@ -6,6 +6,7 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.LM35;
+import com.easternedgerobotics.rov.io.Light;
 import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
@@ -20,6 +21,7 @@ import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
 import com.easternedgerobotics.rov.value.PortVertSpeedValue;
@@ -80,6 +82,8 @@ final class Rov {
 
     static final byte TOOLING_MOTOR_CHANNEL = 22;
 
+    static final byte LIGHT_CHANNEL = 23;
+
     static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
 
     static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
@@ -105,6 +109,8 @@ final class Rov {
     private final List<Thruster> thrusters;
 
     private final List<Motor> motors;
+
+    private final List<Light> lights;
 
     private final EventPublisher eventPublisher;
 
@@ -183,6 +189,16 @@ final class Rov {
                 channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
         ));
 
+        this.lights = Collections.singletonList(
+            new Light(
+                eventPublisher
+                    .valuesOfType(LightSpeedValue.class)
+                    .startWith(new LightSpeedValue())
+                    .cast(SpeedValue.class),
+                channels.get(LIGHT_CHANNEL).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
+            )
+        );
+
         this.internalTemperatureSensor = new LM35(
             channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.externalTemperatureSensor = new LM35(
@@ -240,6 +256,7 @@ final class Rov {
             softShutdown();
             motors.forEach(Motor::writeZero);
         }
+        lights.forEach(Light::write);
 
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));

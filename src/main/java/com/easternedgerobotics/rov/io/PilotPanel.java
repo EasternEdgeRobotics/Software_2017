@@ -86,6 +86,11 @@ public final class PilotPanel {
     private static final byte ROLL_POWER_SLIDER_ADDRESS = 4;
 
     /**
+     * Index of the light power slider.
+     */
+    private static final byte LIGHT_POWER_SLIDER_ADDRESS = 7;
+
+    /**
      * The Arduino Mega instance.
      */
     private final Arduino arduino;
@@ -195,6 +200,17 @@ public final class PilotPanel {
      */
     public Observable<Integer> rollPowerSlider() {
         return arduino.analogPin(ROLL_POWER_SLIDER_ADDRESS)
+            .map(AnalogPinValue::getValue)
+            .map(AnalogToPowerLevel::convert);
+    }
+
+    /**
+     * Observe changes on the light power slider.
+     *
+     * @return observable
+     */
+    public Observable<Integer> lightPowerSlider() {
+        return arduino.analogPin(LIGHT_POWER_SLIDER_ADDRESS)
             .map(AnalogPinValue::getValue)
             .map(AnalogToPowerLevel::convert);
     }
