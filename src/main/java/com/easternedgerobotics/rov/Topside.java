@@ -53,6 +53,8 @@ public final class Topside extends Application {
 
     private static final int CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON = 8;
 
+    private static final float MAX_SLIDER_VALUE = 100f;
+
     private EventPublisher eventPublisher;
 
     private PilotPanel pilotPanel;
@@ -80,7 +82,8 @@ public final class Topside extends Application {
         });
 
         Joysticks.logitechExtreme3dPro().subscribe(this::joystickInitialization);
-        pilotPanel.lightPowerSlider().map(LightSpeedValue::new).subscribe(eventPublisher::emit);
+        pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
+            .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
         Logger.info("Initialising video player");
         videoPlayer.init();
