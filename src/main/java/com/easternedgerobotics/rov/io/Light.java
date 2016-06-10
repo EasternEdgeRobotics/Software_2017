@@ -16,6 +16,16 @@ public class Light {
     public static final float MAX_REV = 1000;
 
     /**
+     * Flashing period for the lights.
+     */
+    private static final float PERIOD = 600;
+
+    /**
+     * Flashing max intensity for the lights.
+     */
+    private static final float AMPLITUDE = .3f;
+
+    /**
      * The output PWM device to write speeds.
      */
     private final PWM device;
@@ -52,5 +62,12 @@ public class Light {
      */
     public final void writeZero() {
         device.writeZero();
+    }
+
+    /**
+     * Write the default flashing light values.
+     */
+    public final void flash() {
+        device.write((float) (AMPLITUDE * (1 - Math.sin(2 * Math.PI / PERIOD * System.currentTimeMillis()))));
     }
 }
