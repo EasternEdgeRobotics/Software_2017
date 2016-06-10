@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+{% for host in groups['rasprime'] %}
+sshpass -p raspberry ssh pi@{{ host }} 'sudo poweroff'
+{% endfor %}
+{% for host in groups['picamera'] %}
+sshpass -p raspberry ssh pi@{{ host }} 'sudo poweroff'
+{% endfor %}
