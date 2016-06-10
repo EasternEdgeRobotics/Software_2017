@@ -7,9 +7,17 @@ import com.easternedgerobotics.rov.value.AnalogPinValue;
 
 import rx.Observable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public final class PilotPanel {
+    /**
+     * The number of light buttons on the pilot panel.
+     */
+    public static final int LIGHT_BUTTON_COUNT = 9;
+
     /**
      * Max tim to wait for initial com port connection.
      */
@@ -28,7 +36,7 @@ public final class PilotPanel {
     /**
      * Index of input pullups on the pilot panel.
      */
-    private static final byte[] ARDUINO_INPUT_PULLUPS = {22, 24, 26, 28, 30, 32, 34, 36, 38};
+    private static final byte[] ARDUINO_INPUT_PULLUPS = {22, 24, 26, 28, 30, 32, 34, 36, 38, 53};
 
     /**
      * Index of outputs on the pilot panel.
@@ -44,11 +52,6 @@ public final class PilotPanel {
      * Time between heartbeats which the Arduino is considered dead.
      */
     private static final int ARDUINO_HEARTBEAT_TIMEOUT = 5000;
-
-    /**
-     * Used to debounce button where a physical push may cause jankiness.
-     */
-    private static final int BUTTON_DEBOUNCE_INTERVAL = 10;
 
     /**
      * Index of the global power slider.
@@ -91,9 +94,24 @@ public final class PilotPanel {
     private static final byte LIGHT_POWER_SLIDER_ADDRESS = 7;
 
     /**
+     * Address of the emergency stop buttons.
+     */
+    private static final byte EMERGENCY_STOP_BUTTON_ADDRESS = 53;
+
+    /**
      * The Arduino Mega instance.
      */
     private final Arduino arduino;
+
+    /**
+     * PilotButton and LED pairs on the buttons panel unit.
+     */
+    private final List<PilotButton> buttons;
+
+    /**
+     * PilotButton for the emergency stop.
+     */
+    private final PilotButton emergencyStop;
 
     /**
      * Create a pilot panel instance for the Arduino Mega on the given com port.
@@ -105,12 +123,16 @@ public final class PilotPanel {
         arduino = new Arduino(new ArduinoPort(arduinoComName, arduinoCom, ARDUINO_TIMEOUT, ARDUINO_BAUD),
             ARDUINO_INPUTS, ARDUINO_OUTPUTS, ARDUINO_INPUT_PULLUPS);
 
-        for (int i = 0; i < ARDUINO_INPUT_PULLUPS.length; i++) {
-            final int index = i;
-            arduino.digitalPin(ARDUINO_INPUT_PULLUPS[index])
-                .debounce(BUTTON_DEBOUNCE_INTERVAL, TimeUnit.MILLISECONDS)
-                .subscribe(pin -> arduino.setPinValue(ARDUINO_OUTPUTS[index], !pin.getValue()));
-        }
+        buttons = Collections.unmodifiableList(new ArrayList<PilotButton>() {
+            {
+                for (int i = 0; i < LIGHT_BUTTON_COUNT; i++) {
+                    final PilotButton button = new PilotButton(arduino, ARDUINO_INPUT_PULLUPS[i], ARDUINO_OUTPUTS[i]);
+                    button.click().map(x -> !x).subscribe(button::setLight);
+                    add(button);
+                }
+            }
+        });
+        emergencyStop = new PilotButton(arduino, EMERGENCY_STOP_BUTTON_ADDRESS);
     }
 
     /**
@@ -213,5 +235,34 @@ public final class PilotPanel {
         return arduino.analogPin(LIGHT_POWER_SLIDER_ADDRESS)
             .map(AnalogPinValue::getValue)
             .map(AnalogToPowerLevel::convert);
+    }
+
+    /**
+     * Observe changes on the emergency stop buttons.
+     *
+     * @return observable
+     */
+    public Observable<Boolean> emergencyStopClick() {
+        return emergencyStop.click();
+    }
+
+    /**
+     * Observe normal buttons presses on the pilot panel.
+     *
+     * @param index the buttons index
+     * @return observable
+     */
+    public Observable<Boolean> click(final int index) {
+        return buttons.get(index).click();
+    }
+
+    /**
+     * Set the LED state of a particular button.
+     *
+     * @param index the button index
+     * @param value the new LED state
+     */
+    public void setLight(final int index, final boolean value) {
+        buttons.get(index).setLight(value);
     }
 }
