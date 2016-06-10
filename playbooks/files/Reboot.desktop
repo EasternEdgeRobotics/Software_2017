@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0.0
+Name=Reboot Pis
+Exec=eer-command-vehicle reboot
+Terminal=false
+Type=Application
+Categories=Application

@@ -43,6 +43,9 @@
     - name: Add poweroff script desktop launcher
       copy: src=files/Poweroff.desktop dest=~/Desktop mode=700
       become: no
+    - name: Add reboot script desktop launcher
+      copy: src=files/Reboot.desktop dest=~/Desktop mode=700
+      become: no
     - name: Add script to command vehicle
       template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
       with_items:
