@@ -251,12 +251,13 @@ final class Rov {
     private void beat(final HeartbeatValue heartbeat) {
         if (heartbeat.getOperational()) {
             thrustersUpdate();
+            lights.forEach(Light::write);
             motors.forEach(Motor::write);
         } else {
             softShutdown();
+            lights.forEach(Light::flash);
             motors.forEach(Motor::writeZero);
         }
-        lights.forEach(Light::write);
 
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
