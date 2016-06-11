@@ -7,16 +7,21 @@ import com.pi4j.io.serial.Serial;
 
 import java.util.AbstractList;
 import java.util.RandomAccess;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class Maestro<T extends ADC & PWM> extends AbstractList<T> implements RandomAccess {
     private static final byte NUMBER_OF_CHANNELS = 24;
 
     private final Serial serial;
 
+    private final Lock lock;
+
     private final byte device;
 
     public Maestro(final Serial serial, final byte device) {
         this.serial = serial;
+        this.lock = new ReentrantLock();
         this.device = device;
     }
 
@@ -28,7 +33,7 @@ public final class Maestro<T extends ADC & PWM> extends AbstractList<T> implemen
         }
 
         final byte channel = (byte) index;
-        return (T) new MaestroChannel(serial, device, channel);
+        return (T) new MaestroChannel(serial, lock, device, channel);
     }
 
     @Override

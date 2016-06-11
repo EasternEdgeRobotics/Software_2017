@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 import java.util.function.DoubleFunction;
 
 final class MaestroChannel implements ADC, PWM {
@@ -43,6 +44,8 @@ final class MaestroChannel implements ADC, PWM {
 
     private final Serial serial;
 
+    private final Lock lock;
+
     private final byte maestro;
 
     private final byte channel;
@@ -51,8 +54,9 @@ final class MaestroChannel implements ADC, PWM {
 
     private DoubleFunction<Double> rangeMap;
 
-    MaestroChannel(final Serial serial, final byte maestro, final byte channel) {
+    MaestroChannel(final Serial serial, final Lock lock, final byte maestro, final byte channel) {
         this.serial = serial;
+        this.lock = lock;
         this.maestro = maestro;
         this.channel = channel;
         this.input = new Range(-1, 1);
@@ -131,11 +135,16 @@ final class MaestroChannel implements ADC, PWM {
      */
     @SuppressWarnings({"checkstyle:magicnumber"})
     private void setTarget(final short target) {
-        final short microseconds = (short) (target * 4);
-        final byte lsb = (byte) (microseconds & 0x7F);
-        final byte msb = (byte) ((microseconds >> 7) & 0x7F);
+        lock.lock();
+        try {
+            final short microseconds = (short) (target * 4);
+            final byte lsb = (byte) (microseconds & 0x7F);
+            final byte msb = (byte) ((microseconds >> 7) & 0x7F);
 
-        serial.write(new byte[] {START_BYTE, maestro, COMMAND_SET_TARGET, channel, lsb, msb});
+            serial.write(new byte[] {START_BYTE, maestro, COMMAND_SET_TARGET, channel, lsb, msb});
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -144,10 +153,15 @@ final class MaestroChannel implements ADC, PWM {
      */
     @SuppressWarnings({"checkstyle:magicnumber"})
     private short getPosition() {
-        serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_POSITION, channel});
-        final ByteBuffer response = ByteBuffer.allocate(4).putChar(serial.read()).putChar(serial.read());
-        return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(
-            new byte[]{response.get(1), response.get(3)}).getShort(0);
+        lock.lock();
+        try {
+            serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_POSITION, channel});
+            final ByteBuffer response = ByteBuffer.allocate(4).putChar(serial.read()).putChar(serial.read());
+            return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(
+                new byte[]{response.get(1), response.get(3)}).getShort(0);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -159,8 +173,13 @@ final class MaestroChannel implements ADC, PWM {
      */
     @SuppressWarnings("unused")
     private BitSet getErrors() {
-        serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_ERRORS});
-        final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
-        return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
+        lock.lock();
+        try {
+            serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_ERRORS});
+            final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
+            return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
+        } finally {
+            lock.unlock();
+        }
     }
 }
