@@ -5,7 +5,7 @@ Description=Eastern Edge Robotics Control Software
 User={{ ansible_user }}
 TimeoutStartSec=0
 Restart=on-failure
-ExecStart=/opt/topside-5.0.0/bin/{{ entry_point }} --broadcast 192.168.88.255 --serial-port /dev/ttyACM0 --baud-rate 115200
+ExecStart=/opt/topside-6.0.0/bin/{{ entry_point }} --broadcast 192.168.88.255 --serial-port /dev/ttyACM0 --baud-rate 115200
 
 [Install]
 WantedBy=multi-user.target
