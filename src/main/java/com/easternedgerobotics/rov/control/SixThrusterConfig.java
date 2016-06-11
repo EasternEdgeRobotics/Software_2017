@@ -24,12 +24,10 @@ public class SixThrusterConfig {
         this.eventPublisher = eventPublisher;
 
         eventPublisher.valuesOfType(MotionValue.class).subscribe(m -> motion = m);
-
         eventPublisher.valuesOfType(MotionPowerValue.class).subscribe(m -> motionPower = m);
     }
 
     public final void update() {
-
         float starboardFore = 0;
         float portFore = 0;
         float starboardAft = 0;
