@@ -61,26 +61,9 @@ final class PicameraB {
             .desc("use ADDRESS to broadcast messages")
             .required()
             .build();
-        final Option serialPort = Option.builder("s")
-            .longOpt("serial-port")
-            .hasArg()
-            .argName("FILE")
-            .desc("read and write to FILE as serial device")
-            .required()
-            .build();
-        final Option baudRate = Option.builder("r")
-            .type(Integer.class)
-            .longOpt("baud-rate")
-            .hasArg()
-            .argName("BPS")
-            .desc("the serial baud rate to use")
-            .required()
-            .build();
 
         final Options options = new Options();
         options.addOption(broadcast);
-        options.addOption(serialPort);
-        options.addOption(baudRate);
 
         try {
             final CommandLineParser parser = new DefaultParser();
