@@ -36,7 +36,7 @@ public class SixThrusterConfig {
         float portVert = 0;
 
         final float surge = motion.getSurge() * motionPower.getSurge() * motionPower.getGlobal();
-        final float heave = motion.getHeave() * motionPower.getHeave() * motionPower.getGlobal();
+        final float heave = motion.getHeave() * motionPower.getHeave();
         final float roll = motion.getRoll() * motionPower.getRoll() * motionPower.getGlobal();
         final float yaw = motion.getYaw() * motionPower.getYaw() * motionPower.getGlobal();
         final float sway = motion.getSway() * motionPower.getSway() * motionPower.getGlobal();
