@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystick;
 import com.easternedgerobotics.rov.value.MotionValue;
 
 import net.java.games.input.Component;
