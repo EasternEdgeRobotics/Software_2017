@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.joystick;
 
 import net.java.games.input.Component;
 
