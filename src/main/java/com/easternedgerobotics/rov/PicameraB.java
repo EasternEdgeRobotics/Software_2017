@@ -29,26 +29,28 @@ final class PicameraB {
 
     private final CompositeSubscription subscriptions;
 
+    private final CompositeSubscription flips;
+
     private PicameraB(final EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
         this.subscriptions = new CompositeSubscription();
+        this.flips = new CompositeSubscription();
     }
 
     private void initCameraB() {
-        Logger.info("Initialising video camera B");
-        subscriptions.add(eventPublisher.valuesOfType(VideoValueB.class)
-            .first()
-            .delay(1, TimeUnit.SECONDS)
-            .subscribe(this::startCameraB));
-    }
-
-    private void startCameraB(final VideoValueB value) {
-        final PicameraVideo video = new PicameraVideo(value.getHost(), value.getPort());
-
-        Logger.info("Starting video camera B");
-        video.start();
-        subscriptions.add(eventPublisher.valuesOfType(VideoFlipValueB.class)
-            .subscribe(f -> video.flip()));
+        subscriptions.add(
+            eventPublisher.valuesOfType(VideoValueB.class)
+                .map(value -> new PicameraVideo(value.getHost(), value.getPort()))
+                .scan((old, event) -> {
+                    flips.clear();
+                    old.stop();
+                    return event;
+                })
+                .delay(1, TimeUnit.SECONDS)
+                .subscribe(video -> {
+                    video.start();
+                    flips.add(eventPublisher.valuesOfType(VideoFlipValueB.class).subscribe(f -> video.flip()));
+                }));
     }
 
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
