@@ -10,6 +10,7 @@ import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.Joystick;
 import com.easternedgerobotics.rov.io.Joysticks;
+import com.easternedgerobotics.rov.io.MotionPowerProfile;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
@@ -63,6 +64,8 @@ public final class Topside extends Application {
 
     private ViewLoader viewLoader;
 
+    private MotionPowerProfile profile;
+
     @Override
     public void init() throws SocketException, UnknownHostException {
         final InetAddress broadcastAddress = InetAddress.getByName(System.getProperty("broadcast", "192.168.88.255"));
@@ -73,11 +76,14 @@ public final class Topside extends Application {
         pilotPanel = new PilotPanel(
             System.getProperty("pilot-panel-name", "Pilot Panel"),
             System.getProperty("pilot-panel-port", "/dev/ttyACM0"));
+        profile = new MotionPowerProfile(
+            System.getProperty("profile-pref", "profiles"));
         videoPlayer = new VideoPlayer(eventPublisher, System.getProperty("mpv", "192.168.88.2"));
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
                 put(PilotPanel.class, pilotPanel);
+                put(MotionPowerProfile.class, profile);
             }
         });
 

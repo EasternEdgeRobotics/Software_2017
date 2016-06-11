@@ -1,6 +1,8 @@
 package com.easternedgerobotics.rov.fx;
 
+import com.easternedgerobotics.rov.control.TwoActionButton;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.MotionPowerProfile;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 
@@ -9,10 +11,16 @@ import rx.observables.JavaFxObservable;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import java.util.stream.IntStream;
 import javax.inject.Inject;
 
 @SuppressWarnings("unused")
 public class ThrusterPowerSlidersViewController implements ViewController {
+    /**
+     * Long click duration for profile buttons.
+     */
+    private static final int LONG_CLICK = 2000;
+
     /**
      * The event publisher instance.
      */
@@ -22,6 +30,11 @@ public class ThrusterPowerSlidersViewController implements ViewController {
      * The pilot panel interface.
      */
     private final PilotPanel pilotPanel;
+
+    /**
+     * Contains saved motion power profiles.
+     */
+    private final MotionPowerProfile profile;
 
     /**
      * The @{code ThrusterPowerSlidersView} this controller works for.
@@ -72,6 +85,8 @@ public class ThrusterPowerSlidersViewController implements ViewController {
      * Constructs a {@code ThrusterPowerSlidersViewController} with the specified event publisher and view.
      *
      * @param eventPublisher the event publisher instance to use
+     * @param pilotPanel the pilot panel instance to use
+     * @param profiles the motion power profile instance to use
      * @param view the {@code ThrusterPowerSlidersView} this controller works for
      * @param globalSliderView the global power slider view
      * @param heaveSliderView the heave power slider view
@@ -85,6 +100,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
     public ThrusterPowerSlidersViewController(
         final EventPublisher eventPublisher,
         final PilotPanel pilotPanel,
+        final MotionPowerProfile profiles,
         final ThrusterPowerSlidersView view,
         final SliderView globalSliderView,
         final SliderView heaveSliderView,
@@ -96,6 +112,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
     ) {
         this.eventPublisher = eventPublisher;
         this.pilotPanel = pilotPanel;
+        this.profile = profiles;
         this.view = view;
         this.globalSliderView = globalSliderView;
         this.heaveSliderView = heaveSliderView;
@@ -155,6 +172,12 @@ public class ThrusterPowerSlidersViewController implements ViewController {
             Observable.combineLatest(global, heave, sway, surge, pitch, yaw, roll, MotionPowerValue::new)
                 .observeOn(Schedulers.io())
                 .subscribe(eventPublisher::emit));
+
+        IntStream.range(0, PilotPanel.LIGHT_BUTTON_COUNT).forEach(i -> {
+            final TwoActionButton button = new TwoActionButton(pilotPanel.click(i), LONG_CLICK, JAVA_FX_SCHEDULER);
+            subscriptions.add(button.shortClick().filter(x -> x).map(x -> profile.get(i)).subscribe(this::setPower));
+            subscriptions.add(button.longClick().filter(x -> x).subscribe(x -> profile.set(i, getPower())));
+        });
     }
 
     @Override
@@ -165,5 +188,35 @@ public class ThrusterPowerSlidersViewController implements ViewController {
     private Observable<Float> values(final SliderView sliderView) {
         return JavaFxObservable.fromObservableValue(sliderView.slider.valueProperty())
             .map((value) -> (float) (value.floatValue() / SliderView.MAX_VALUE));
+    }
+
+    private void setPower(final MotionPowerValue value) {
+        globalSliderView.slider.setValue(powerToSliderValue(value.getGlobal()));
+        heaveSliderView.slider.setValue(powerToSliderValue(value.getHeave()));
+        swaySliderView.slider.setValue(powerToSliderValue(value.getSway()));
+        surgeSliderView.slider.setValue(powerToSliderValue(value.getSurge()));
+        pitchSliderView.slider.setValue(powerToSliderValue(value.getPitch()));
+        yawSliderView.slider.setValue(powerToSliderValue(value.getYaw()));
+        rollSliderView.slider.setValue(powerToSliderValue(value.getRoll()));
+    }
+
+    private static int powerToSliderValue(final float power) {
+        return (int) (power * SliderView.MAX_VALUE);
+    }
+
+    private MotionPowerValue getPower() {
+        return new MotionPowerValue(
+            sliderValueToPower(globalSliderView),
+            sliderValueToPower(heaveSliderView),
+            sliderValueToPower(swaySliderView),
+            sliderValueToPower(surgeSliderView),
+            sliderValueToPower(pitchSliderView),
+            sliderValueToPower(yawSliderView),
+            sliderValueToPower(rollSliderView)
+        );
+    }
+
+    private static float sliderValueToPower(final SliderView sliderView) {
+        return  (float) (sliderView.slider.valueProperty().floatValue() / SliderView.MAX_VALUE);
     }
 }
