@@ -5,6 +5,7 @@ import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.CpuInformation;
+import com.easternedgerobotics.rov.io.CurrentSensor;
 import com.easternedgerobotics.rov.io.LM35;
 import com.easternedgerobotics.rov.io.Light;
 import com.easternedgerobotics.rov.io.MPX4250AP;
@@ -101,6 +102,12 @@ final class Rov {
 
     static final byte VOLTAGE_SENSOR_48V_CHANNEL = 6;
 
+    static final byte CURRENT_SENSOR_05V_CHANNEL = 11;
+
+    static final byte CURRENT_SENSOR_12V_CHANNEL = 10;
+
+    static final byte CURRENT_SENSOR_48V_CHANNEL = 9;
+
     private final LM35 internalTemperatureSensor;
 
     private final LM35 externalTemperatureSensor;
@@ -120,6 +127,8 @@ final class Rov {
     private final List<Light> lights;
 
     private final List<VoltageSensor> voltageSensors;
+
+    private final List<CurrentSensor> currentSensors;
 
     private final EventPublisher eventPublisher;
 
@@ -214,6 +223,12 @@ final class Rov {
             VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))
         ));
 
+        this.currentSensors = Collections.unmodifiableList(Arrays.asList(
+            CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL)),
+            CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL)),
+            CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))
+        ));
+
         this.internalTemperatureSensor = new LM35(
             channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.externalTemperatureSensor = new LM35(
@@ -275,6 +290,7 @@ final class Rov {
         }
 
         voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
+        currentSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
         eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
