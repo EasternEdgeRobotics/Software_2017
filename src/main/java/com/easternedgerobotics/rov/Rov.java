@@ -11,6 +11,7 @@ import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thruster;
+import com.easternedgerobotics.rov.io.VoltageSensor;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
@@ -94,6 +95,12 @@ final class Rov {
 
     static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
 
+    static final byte VOLTAGE_SENSOR_05V_CHANNEL = 8;
+
+    static final byte VOLTAGE_SENSOR_12V_CHANNEL = 7;
+
+    static final byte VOLTAGE_SENSOR_48V_CHANNEL = 6;
+
     private final LM35 internalTemperatureSensor;
 
     private final LM35 externalTemperatureSensor;
@@ -111,6 +118,8 @@ final class Rov {
     private final List<Motor> motors;
 
     private final List<Light> lights;
+
+    private final List<VoltageSensor> voltageSensors;
 
     private final EventPublisher eventPublisher;
 
@@ -199,6 +208,12 @@ final class Rov {
             )
         );
 
+        this.voltageSensors = Collections.unmodifiableList(Arrays.asList(
+            VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL)),
+            VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL)),
+            VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))
+        ));
+
         this.internalTemperatureSensor = new LM35(
             channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.externalTemperatureSensor = new LM35(
@@ -259,6 +274,7 @@ final class Rov {
             motors.forEach(Motor::writeZero);
         }
 
+        voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
         eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
         eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
         eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
