@@ -11,6 +11,7 @@ import com.easternedgerobotics.rov.io.Light;
 import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
+import com.easternedgerobotics.rov.io.TMP36;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.VoltageSensor;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
@@ -110,7 +111,7 @@ final class Rov {
 
     private final LM35 internalTemperatureSensor;
 
-    private final LM35 externalTemperatureSensor;
+    private final TMP36 externalTemperatureSensor;
 
     private final MPX4250AP internalPressureSensor;
 
@@ -231,7 +232,7 @@ final class Rov {
 
         this.internalTemperatureSensor = new LM35(
             channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
-        this.externalTemperatureSensor = new LM35(
+        this.externalTemperatureSensor = new TMP36(
             channels.get(EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
         this.internalPressureSensor = new MPX4250AP(
             channels.get(INTERNAL_PRESSURE_SENSOR_CHANNEL));
