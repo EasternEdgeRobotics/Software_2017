@@ -1,12 +1,15 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.value.CurrentValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
 import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.VoltageValue;
 
+import javafx.scene.control.Label;
 import rx.Observable;
 import rx.subscriptions.CompositeSubscription;
 
@@ -14,6 +17,12 @@ import javax.inject.Inject;
 
 @SuppressWarnings("unused")
 public class SensorViewController implements ViewController {
+    private static final float BUS_LINE_48 = 48;
+
+    private static final float BUS_LINE_12 = 12;
+
+    private static final float BUS_LINE_05 =  5;
+
     /**
      * The sensor view.
      */
@@ -34,6 +43,10 @@ public class SensorViewController implements ViewController {
 
     private final Observable<ExternalTemperatureValue> externalTemperature;
 
+    private final Observable<VoltageValue> voltage;
+
+    private final Observable<CurrentValue> current;
+
     private final CompositeSubscription subscriptions;
 
     @Inject
@@ -44,7 +57,9 @@ public class SensorViewController implements ViewController {
         @Event final Observable<ExternalPressureValueA> externalPressureA,
         @Event final Observable<ExternalPressureValueB> externalPressureB,
         @Event final Observable<InternalTemperatureValue> internalTemperature,
-        @Event final Observable<ExternalTemperatureValue> externalTemperature
+        @Event final Observable<ExternalTemperatureValue> externalTemperature,
+        @Event final Observable<VoltageValue> voltage,
+        @Event final Observable<CurrentValue> current
     ) {
         this.view = view;
         this.cpuInformationView = cpuInformationView;
@@ -55,6 +70,8 @@ public class SensorViewController implements ViewController {
         this.externalPressureB = externalPressureB;
         this.internalTemperature = internalTemperature;
         this.externalTemperature = externalTemperature;
+        this.voltage = voltage;
+        this.current = current;
     }
 
     @Override
@@ -65,6 +82,30 @@ public class SensorViewController implements ViewController {
         subscriptions.add(externalPressureB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
         subscriptions.add(externalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
+        subscriptions.add(
+            voltage.filter(value -> value.getBus() == BUS_LINE_48)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateVoltageLabel(view.voltageLabel48, value)));
+        subscriptions.add(
+            voltage.filter(value -> value.getBus() == BUS_LINE_12)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateVoltageLabel(view.voltageLabel12, value)));
+        subscriptions.add(
+            voltage.filter(value -> value.getBus() == BUS_LINE_05)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateVoltageLabel(view.voltageLabel05, value)));
+        subscriptions.add(
+            current.filter(value -> value.getBus() == BUS_LINE_48)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateCurrentLabel(view.currentLabel48, value)));
+        subscriptions.add(
+            current.filter(value -> value.getBus() == BUS_LINE_12)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateCurrentLabel(view.currentLabel12, value)));
+        subscriptions.add(
+            current.filter(value -> value.getBus() == BUS_LINE_05)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(value -> updateCurrentLabel(view.voltageLabel05, value)));
     }
 
     @Override
@@ -92,5 +133,13 @@ public class SensorViewController implements ViewController {
     private void updateTemperatureLabel(final ExternalTemperatureValue internalTemperatureValue) {
         view.externalTemperatureLabel.setText(
             String.format(SensorView.TEMPERATURE_LABEL_FORMAT, internalTemperatureValue.getValue()));
+    }
+
+    private void updateVoltageLabel(final Label label, final VoltageValue value) {
+        label.setText(String.format(SensorView.VOLTAGE_LABEL_FORMAT, value.getValue()));
+    }
+
+    private void updateCurrentLabel(final Label label, final CurrentValue value) {
+        label.setText(String.format(SensorView.CURRENT_LABEL_FORMAT, value.getValue()));
     }
 }

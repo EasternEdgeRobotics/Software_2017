@@ -21,6 +21,10 @@ public class SensorView implements View {
 
     static final String TEMPERATURE_LABEL_FORMAT = "%.1f °C";
 
+    static final String VOLTAGE_LABEL_FORMAT = "%.1fV";
+
+    static final String CURRENT_LABEL_FORMAT = "%.1fA";
+
     final Label internalPressureLabel = new Label("???");
 
     final Label externalPressureLabelA = new Label("???");
@@ -30,6 +34,18 @@ public class SensorView implements View {
     final Label internalTemperatureLabel = new Label("???");
 
     final Label externalTemperatureLabel = new Label("???");
+
+    final Label voltageLabel48 = new Label("???");
+
+    final Label voltageLabel12 = new Label("???");
+
+    final Label voltageLabel05 = new Label("???");
+
+    final Label currentLabel48 = new Label("???");
+
+    final Label currentLabel12 = new Label("???");
+
+    final Label currentLabel05 = new Label("???");
 
     final HBox row;
 
@@ -43,7 +59,13 @@ public class SensorView implements View {
             column(bold(externalPressureLabelA), new Label("External Pressure A")),
             column(bold(externalPressureLabelB), new Label("External Pressure B")),
             column(bold(internalTemperatureLabel), new Label("Internal Temperature")),
-            column(bold(externalTemperatureLabel), new Label("External Temperature"))
+            column(bold(externalTemperatureLabel), new Label("External Temperature")),
+            column(bold(voltageLabel48), new Label("48V Voltage")),
+            column(bold(voltageLabel12), new Label("12V Voltage")),
+            column(bold(voltageLabel05), new Label("5V Voltage")),
+            column(bold(currentLabel48), new Label("48V Current")),
+            column(bold(currentLabel12), new Label("12V Current")),
+            column(bold(currentLabel05), new Label("5V Current"))
         );
 
         node.setPadding(new Insets(CELL_SPACING));
