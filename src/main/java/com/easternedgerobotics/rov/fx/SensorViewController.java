@@ -105,7 +105,7 @@ public class SensorViewController implements ViewController {
         subscriptions.add(
             current.filter(value -> value.getBus() == BUS_LINE_05)
                 .observeOn(JAVA_FX_SCHEDULER)
-                .subscribe(value -> updateCurrentLabel(view.voltageLabel05, value)));
+                .subscribe(value -> updateCurrentLabel(view.currentLabel05, value)));
     }
 
     @Override
