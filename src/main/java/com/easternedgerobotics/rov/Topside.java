@@ -27,6 +27,7 @@ import rx.Observable;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -91,8 +92,17 @@ public final class Topside extends Application {
         pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
             .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
-        Logger.info("Initialising video player");
-        videoPlayer.init();
+        try {
+            Logger.info("Initialising video player");
+            videoPlayer.init();
+        } catch (final RuntimeException e) {
+            if (!(e.getCause() instanceof IOException)) {
+                throw e;
+            }
+
+            Logger.warn("The video player could not be initialised");
+            Logger.warn(e);
+        }
         Logger.info("Initialised");
     }
 
