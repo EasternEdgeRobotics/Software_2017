@@ -2,6 +2,6 @@
 Version=1.0.0
 Name=Reboot Pis
 Exec=eer-command-vehicle reboot
-Terminal=false
+Terminal=true
 Type=Application
 Categories=Application
