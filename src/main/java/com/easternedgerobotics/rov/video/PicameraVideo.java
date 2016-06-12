@@ -46,4 +46,16 @@ public final class PicameraVideo {
 
         process.sigusr1();
     }
+
+    /**
+     * Stop the video feed.
+     */
+    public final void stop() {
+        if (process == null) {
+            throw new IllegalStateException("The process must be started before it can be killed.");
+        }
+
+        process.kill();
+        process = null;
+    }
 }
