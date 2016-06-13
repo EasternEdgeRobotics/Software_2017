@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-set -x
 set -e
 set -u
 set -o pipefail
 
 COMMAND=$1
 
+set -x
 {% for host in groups['rasprime'] %}
 sshpass -p raspberry ssh pi@{{ host }} "sudo $COMMAND"
 {% endfor %}
 {% for host in groups['picamera'] %}
 sshpass -p raspberry ssh pi@{{ host }} "sudo $COMMAND"
 {% endfor %}
+sleep 30
