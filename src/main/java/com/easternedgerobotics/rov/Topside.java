@@ -11,6 +11,7 @@ import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.io.joystick.Joystick;
+import com.easternedgerobotics.rov.io.joystick.JoystickDisconnectedException;
 import com.easternedgerobotics.rov.io.joystick.Joysticks;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
@@ -88,7 +89,9 @@ public final class Topside extends Application {
             }
         });
 
-        Joysticks.logitechExtreme3dPro().subscribe(this::joystickInitialization);
+        Joysticks.logitechExtreme3dPro()
+            .retry((count, ex) -> ex instanceof JoystickDisconnectedException)
+            .subscribe(this::joystickInitialization);
         pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
             .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
