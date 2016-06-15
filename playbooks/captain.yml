@@ -16,7 +16,7 @@
         - optional
         - java
     - name: Install Gradle
-      apt: name=gradle-2.13 state=latest
+      apt: name=gradle-2.14 state=latest
       tags:
         - optional
         - java
