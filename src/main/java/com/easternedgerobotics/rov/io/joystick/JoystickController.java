@@ -65,7 +65,7 @@ public final class JoystickController implements Observer<Joystick> {
         joystick.axes().map(motionFunction::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
 
         joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON)
-            .filter(x -> x)
+            .filter(x -> x == Joystick.BUTTON_DOWN)
             .subscribe(press -> reverser.toggle());
 
         initCameraFlipA(joystick);
@@ -78,28 +78,28 @@ public final class JoystickController implements Observer<Joystick> {
 
     private void initCameraFlipA(final Joystick joystick) {
         joystick.button(CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON)
-            .filter(x -> x)
+            .filter(x -> x == Joystick.BUTTON_DOWN)
             .map(x -> new VideoFlipValueA())
             .subscribe(eventPublisher::emit);
     }
 
     private void initCameraFlipB(final Joystick joystick) {
         joystick.button(CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON)
-            .filter(x -> x)
+            .filter(x -> x == Joystick.BUTTON_DOWN)
             .map(x -> new VideoFlipValueB())
             .subscribe(eventPublisher::emit);
     }
 
     private void initCameraMotorA(final Joystick joystick) {
         final Observable<CameraSpeedValueA> fwd = joystick.button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new CameraSpeedValueA(MOTOR_ROTATION_SPEED);
             }
 
             return new CameraSpeedValueA(0);
         });
         final Observable<CameraSpeedValueA> rev = joystick.button(CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new CameraSpeedValueA(-MOTOR_ROTATION_SPEED);
             }
 
@@ -111,14 +111,14 @@ public final class JoystickController implements Observer<Joystick> {
 
     private void initCameraMotorB(final Joystick joystick) {
         final Observable<CameraSpeedValueB> fwd = joystick.button(CAMERA_B_MOTOR_FORWARD_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new CameraSpeedValueB(MOTOR_ROTATION_SPEED);
             }
 
             return new CameraSpeedValueB(0);
         });
         final Observable<CameraSpeedValueB> rev = joystick.button(CAMERA_B_MOTOR_REVERSE_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new CameraSpeedValueB(-MOTOR_ROTATION_SPEED);
             }
 
@@ -130,14 +130,14 @@ public final class JoystickController implements Observer<Joystick> {
 
     private void initToolingMotor(final Joystick joystick) {
         final Observable<ToolingSpeedValue> fwd = joystick.button(TOOLING_MOTOR_FORWARD_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new ToolingSpeedValue(MOTOR_ROTATION_SPEED);
             }
 
             return new ToolingSpeedValue(0);
         });
         final Observable<ToolingSpeedValue> rev = joystick.button(TOOLING_MOTOR_REVERSE_JOYSTICK_BUTTON).map(value -> {
-            if (value) {
+            if (value == Joystick.BUTTON_DOWN) {
                 return new ToolingSpeedValue(-MOTOR_ROTATION_SPEED);
             }
 
