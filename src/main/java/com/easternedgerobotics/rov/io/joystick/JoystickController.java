@@ -1,10 +1,10 @@
 package com.easternedgerobotics.rov.io.joystick;
 
-import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.control.MotionReverser;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
+import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoFlipValueB;
@@ -12,6 +12,8 @@ import com.easternedgerobotics.rov.value.VideoFlipValueB;
 import org.pmw.tinylog.Logger;
 import rx.Observable;
 import rx.Observer;
+
+import java.util.function.Function;
 
 public final class JoystickController implements Observer<Joystick> {
     static final int CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON = 4;
@@ -36,8 +38,14 @@ public final class JoystickController implements Observer<Joystick> {
 
     private final EventPublisher eventPublisher;
 
-    public JoystickController(final EventPublisher eventPublisher) {
+    private final Function<MotionValue, MotionValue> motionFunction;
+
+    public JoystickController(
+        final EventPublisher eventPublisher,
+        final Function<MotionValue, MotionValue> motionFunction
+    ) {
         this.eventPublisher = eventPublisher;
+        this.motionFunction = motionFunction;
     }
 
     @Override
@@ -52,7 +60,6 @@ public final class JoystickController implements Observer<Joystick> {
 
     @Override
     public void onNext(final Joystick joystick) {
-        final ExponentialMotionScale scale = new ExponentialMotionScale();
         final MotionReverser reverser = new MotionReverser();
         joystick.button(CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON).filter(x -> x).map(x -> new VideoFlipValueA())
             .doOnEach(Logger::info)
@@ -61,7 +68,7 @@ public final class JoystickController implements Observer<Joystick> {
             .doOnEach(Logger::info)
             .subscribe(eventPublisher::emit);
         joystick.button(MOTION_REVERSE_JOYSTICK_BUTTON).filter(x -> x).subscribe(press -> reverser.toggle());
-        joystick.axes().map(scale::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
+        joystick.axes().map(motionFunction::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
 
         final Observable<CameraSpeedValueA> cameraForwardA = joystick
             .button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON)

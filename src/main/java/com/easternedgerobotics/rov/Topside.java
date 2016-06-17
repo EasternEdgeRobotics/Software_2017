@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
@@ -60,7 +61,8 @@ public final class Topside extends Application {
             }
         });
 
-        Joysticks.logitechExtreme3dPro().subscribe(new JoystickController(eventPublisher));
+        Joysticks.logitechExtreme3dPro().subscribe(
+            new JoystickController(eventPublisher, new ExponentialMotionScale()));
         pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
             .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
