@@ -13,6 +13,7 @@ import org.pmw.tinylog.Logger;
 import rx.Observable;
 import rx.Observer;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public final class JoystickController implements Observer<Joystick> {
@@ -90,23 +91,27 @@ public final class JoystickController implements Observer<Joystick> {
             .subscribe(eventPublisher::emit);
     }
 
+    @SuppressWarnings("checkstyle:AvoidInlineConditionals")
     private void initCameraMotorA(final Joystick joystick) {
-        final Observable<CameraSpeedValueA> fwd = joystick.button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON).map(value -> {
-            if (value == Joystick.BUTTON_DOWN) {
-                return new CameraSpeedValueA(MOTOR_ROTATION_SPEED);
-            }
+        // This needs to be a reference to a boolean, it being atomic is irrelevant
+        final AtomicBoolean flipped = new AtomicBoolean(true);
+        final Observable<Boolean> fwd = joystick.button(CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON);
+        final Observable<Boolean> rev = joystick.button(CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON);
+        final Observable<Boolean> flips = joystick.button(CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON)
+            .filter(x -> x == Joystick.BUTTON_DOWN)
+            .startWith(Joystick.BUTTON_DOWN);
 
-            return new CameraSpeedValueA(0);
-        });
-        final Observable<CameraSpeedValueA> rev = joystick.button(CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON).map(value -> {
-            if (value == Joystick.BUTTON_DOWN) {
-                return new CameraSpeedValueA(-MOTOR_ROTATION_SPEED);
-            }
-
-            return new CameraSpeedValueA(0);
-        });
-
-        Observable.merge(fwd, rev).subscribe(eventPublisher::emit, Logger::error);
+        Observable.switchOnNext(flips.map(flip -> {
+            flipped.set(!flipped.get());
+            return Observable.merge(
+                fwd.map(x -> new CameraSpeedValueA(
+                    x ? (flipped.get() ? -MOTOR_ROTATION_SPEED : MOTOR_ROTATION_SPEED) : (float) 0
+                )),
+                rev.map(x -> new CameraSpeedValueA(
+                    x ? (flipped.get() ? MOTOR_ROTATION_SPEED : -MOTOR_ROTATION_SPEED) : (float) 0
+                ))
+            );
+        })).subscribe(eventPublisher::emit, Logger::error);
     }
 
     private void initCameraMotorB(final Joystick joystick) {
