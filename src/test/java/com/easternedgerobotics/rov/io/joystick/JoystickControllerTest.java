@@ -219,4 +219,148 @@ public final class JoystickControllerTest {
             new ToolingSpeedValue(-JoystickController.MOTOR_ROTATION_SPEED), new ToolingSpeedValue(0)
         ));
     }
+
+    @Test
+    public final void forwardCameraRotateButtonDoesFlipWhenCameraIsFlippedA() {
+        final int index = JoystickController.CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON;
+        final int flipIndexA = JoystickController.CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON;
+        final TestScheduler scheduler = new TestScheduler();
+        final TestSubscriber<CameraSpeedValueA> subscriber = new TestSubscriber<>();
+        final TestSubject<Boolean> motorForwardButton = TestSubject.create(scheduler);
+        final TestSubject<Boolean> videoFlipCameraA = TestSubject.create(scheduler);
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final JoystickController joystickController = new JoystickController(eventPublisher, Function.identity());
+
+        final Joystick joystick = Mockito.mock(Joystick.class);
+        Mockito.when(joystick.axes()).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+            !argument.equals(index) && !argument.equals(flipIndexA)
+        )))).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraA);
+        Mockito.when(joystick.button(Mockito.eq(index))).thenReturn(motorForwardButton);
+
+        joystickController.onNext(joystick);
+
+        eventPublisher.valuesOfType(CameraSpeedValueA.class).subscribe(subscriber);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        videoFlipCameraA.onNext(Joystick.BUTTON_DOWN);
+        videoFlipCameraA.onNext(Joystick.BUTTON_UP);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        scheduler.triggerActions();
+
+        subscriber.assertReceivedOnNext(Arrays.asList(
+            new CameraSpeedValueA(JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueA(0),
+            new CameraSpeedValueA(-JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueA(0)
+        ));
+    }
+
+    @Test
+    public final void forwardCameraRotateButtonDoesFlipWhenCameraIsFlippedB() {
+        final int index = JoystickController.CAMERA_B_MOTOR_FORWARD_JOYSTICK_BUTTON;
+        final int flipIndexA = JoystickController.CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON;
+        final TestScheduler scheduler = new TestScheduler();
+        final TestSubscriber<CameraSpeedValueB> subscriber = new TestSubscriber<>();
+        final TestSubject<Boolean> motorForwardButton = TestSubject.create(scheduler);
+        final TestSubject<Boolean> videoFlipCameraB = TestSubject.create(scheduler);
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final JoystickController joystickController = new JoystickController(eventPublisher, Function.identity());
+
+        final Joystick joystick = Mockito.mock(Joystick.class);
+        Mockito.when(joystick.axes()).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+            !argument.equals(index) && !argument.equals(flipIndexA)
+        )))).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraB);
+        Mockito.when(joystick.button(Mockito.eq(index))).thenReturn(motorForwardButton);
+
+        joystickController.onNext(joystick);
+
+        eventPublisher.valuesOfType(CameraSpeedValueB.class).subscribe(subscriber);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        videoFlipCameraB.onNext(Joystick.BUTTON_DOWN);
+        videoFlipCameraB.onNext(Joystick.BUTTON_UP);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        scheduler.triggerActions();
+
+        subscriber.assertReceivedOnNext(Arrays.asList(
+            new CameraSpeedValueB(JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueB(0),
+            new CameraSpeedValueB(-JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueB(0)
+        ));
+    }
+
+    @Test
+    public final void reverseCameraRotateButtonDoesFlipWhenCameraIsFlippedA() {
+        final int index = JoystickController.CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON;
+        final int flipIndexA = JoystickController.CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON;
+        final TestScheduler scheduler = new TestScheduler();
+        final TestSubscriber<CameraSpeedValueA> subscriber = new TestSubscriber<>();
+        final TestSubject<Boolean> motorForwardButton = TestSubject.create(scheduler);
+        final TestSubject<Boolean> videoFlipCameraA = TestSubject.create(scheduler);
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final JoystickController joystickController = new JoystickController(eventPublisher, Function.identity());
+
+        final Joystick joystick = Mockito.mock(Joystick.class);
+        Mockito.when(joystick.axes()).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+            !argument.equals(index) && !argument.equals(flipIndexA)
+        )))).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraA);
+        Mockito.when(joystick.button(Mockito.eq(index))).thenReturn(motorForwardButton);
+
+        joystickController.onNext(joystick);
+
+        eventPublisher.valuesOfType(CameraSpeedValueA.class).subscribe(subscriber);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        videoFlipCameraA.onNext(Joystick.BUTTON_DOWN);
+        videoFlipCameraA.onNext(Joystick.BUTTON_UP);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        scheduler.triggerActions();
+
+        subscriber.assertReceivedOnNext(Arrays.asList(
+            new CameraSpeedValueA(-JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueA(0),
+            new CameraSpeedValueA(JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueA(0)
+        ));
+    }
+
+    @Test
+    public final void reverseCameraRotateButtonDoesFlipWhenCameraIsFlippedB() {
+        final int index = JoystickController.CAMERA_B_MOTOR_REVERSE_JOYSTICK_BUTTON;
+        final int flipIndexA = JoystickController.CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON;
+        final TestScheduler scheduler = new TestScheduler();
+        final TestSubscriber<CameraSpeedValueB> subscriber = new TestSubscriber<>();
+        final TestSubject<Boolean> motorForwardButton = TestSubject.create(scheduler);
+        final TestSubject<Boolean> videoFlipCameraB = TestSubject.create(scheduler);
+        final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
+        final JoystickController joystickController = new JoystickController(eventPublisher, Function.identity());
+
+        final Joystick joystick = Mockito.mock(Joystick.class);
+        Mockito.when(joystick.axes()).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+            !argument.equals(index) && !argument.equals(flipIndexA)
+        )))).thenReturn(Observable.never());
+        Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraB);
+        Mockito.when(joystick.button(Mockito.eq(index))).thenReturn(motorForwardButton);
+
+        joystickController.onNext(joystick);
+
+        eventPublisher.valuesOfType(CameraSpeedValueB.class).subscribe(subscriber);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        videoFlipCameraB.onNext(Joystick.BUTTON_DOWN);
+        videoFlipCameraB.onNext(Joystick.BUTTON_UP);
+        motorForwardButton.onNext(Joystick.BUTTON_DOWN);
+        motorForwardButton.onNext(Joystick.BUTTON_UP);
+        scheduler.triggerActions();
+
+        subscriber.assertReceivedOnNext(Arrays.asList(
+            new CameraSpeedValueB(-JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueB(0),
+            new CameraSpeedValueB(JoystickController.MOTOR_ROTATION_SPEED), new CameraSpeedValueB(0)
+        ));
+    }
 }
