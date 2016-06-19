@@ -86,12 +86,12 @@ final class PicameraA {
                 .observeOn(Schedulers.computation())
                 .map(Depth::fromPressure)
                 .observeOn(Schedulers.io())
-                .subscribe(eventPublisher::emit);
+                .subscribe(eventPublisher::emit, Logger::error);
             eventPublisher.valuesOfType(ExternalPressureValueB.class)
                 .observeOn(Schedulers.computation())
                 .map(Depth::fromPressure)
                 .observeOn(Schedulers.io())
-                .subscribe(eventPublisher::emit);
+                .subscribe(eventPublisher::emit, Logger::error);
 
             picamera.initCameraA();
             Logger.info("Started");
