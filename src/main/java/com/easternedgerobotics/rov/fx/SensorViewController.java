@@ -2,6 +2,8 @@ package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
 import com.easternedgerobotics.rov.value.CurrentValue;
+import com.easternedgerobotics.rov.value.DepthValueA;
+import com.easternedgerobotics.rov.value.DepthValueB;
 import com.easternedgerobotics.rov.value.ExternalPressureValueA;
 import com.easternedgerobotics.rov.value.ExternalPressureValueB;
 import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
@@ -39,6 +41,10 @@ public class SensorViewController implements ViewController {
 
     private final Observable<ExternalPressureValueB> externalPressureB;
 
+    private final Observable<DepthValueA> depthA;
+
+    private final Observable<DepthValueB> depthB;
+
     private final Observable<InternalTemperatureValue> internalTemperature;
 
     private final Observable<ExternalTemperatureValue> externalTemperature;
@@ -56,6 +62,8 @@ public class SensorViewController implements ViewController {
         @Event final Observable<InternalPressureValue> internalPressure,
         @Event final Observable<ExternalPressureValueA> externalPressureA,
         @Event final Observable<ExternalPressureValueB> externalPressureB,
+        @Event final Observable<DepthValueA> depthA,
+        @Event final Observable<DepthValueB> depthB,
         @Event final Observable<InternalTemperatureValue> internalTemperature,
         @Event final Observable<ExternalTemperatureValue> externalTemperature,
         @Event final Observable<VoltageValue> voltage,
@@ -68,6 +76,8 @@ public class SensorViewController implements ViewController {
         this.internalPressure = internalPressure;
         this.externalPressureA = externalPressureA;
         this.externalPressureB = externalPressureB;
+        this.depthA = depthA;
+        this.depthB = depthB;
         this.internalTemperature = internalTemperature;
         this.externalTemperature = externalTemperature;
         this.voltage = voltage;
@@ -80,6 +90,8 @@ public class SensorViewController implements ViewController {
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(externalPressureA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(externalPressureB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(depthA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelA));
+        subscriptions.add(depthB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelB));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
         subscriptions.add(externalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
         subscriptions.add(
@@ -123,6 +135,14 @@ public class SensorViewController implements ViewController {
 
     private void updatePressureLabel(final ExternalPressureValueB value) {
         view.externalPressureLabelB.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getValue()));
+    }
+
+    private void updateDepthLabelA(final DepthValueA value) {
+        view.depthLabelA.setText(String.format(SensorView.DEPTH_LABEL_FORMAT, value.getValue()));
+    }
+
+    private void updateDepthLabelB(final DepthValueB value) {
+        view.depthLabelB.setText(String.format(SensorView.DEPTH_LABEL_FORMAT, value.getValue()));
     }
 
     private void updateTemperatureLabel(final InternalTemperatureValue internalTemperatureValue) {

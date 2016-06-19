@@ -19,6 +19,8 @@ public class SensorView implements View {
 
     static final String PRESSURE_LABEL_FORMAT = "%.1f kPa";
 
+    static final String DEPTH_LABEL_FORMAT = "%.1f m";
+
     static final String TEMPERATURE_LABEL_FORMAT = "%.1f °C";
 
     static final String VOLTAGE_LABEL_FORMAT = "%.1fV";
@@ -26,6 +28,10 @@ public class SensorView implements View {
     static final String CURRENT_LABEL_FORMAT = "%.1fA";
 
     final Label internalPressureLabel = new Label("???");
+
+    final Label depthLabelA = new Label("???");
+
+    final Label depthLabelB = new Label("???");
 
     final Label externalPressureLabelA = new Label("???");
 
@@ -56,8 +62,18 @@ public class SensorView implements View {
         this.row = new HBox(
             LABEL_SPACING,
             column(bold(internalPressureLabel), new Label("Internal Pressure")),
-            column(bold(externalPressureLabelA), new Label("External Pressure A")),
-            column(bold(externalPressureLabelB), new Label("External Pressure B")),
+            column(
+                bold(externalPressureLabelA),
+                new Label("External Pressure A"),
+                bold(depthLabelA),
+                new Label("Depth A")
+            ),
+            column(
+                bold(externalPressureLabelB),
+                new Label("External Pressure B"),
+                bold(depthLabelB),
+                new Label("Depth B")
+            ),
             column(bold(internalTemperatureLabel), new Label("Internal Temperature")),
             column(bold(externalTemperatureLabel), new Label("External Temperature")),
             column(bold(voltageLabel48), new Label("48V Voltage")),
