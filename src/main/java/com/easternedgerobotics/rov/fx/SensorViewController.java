@@ -13,10 +13,8 @@ import com.easternedgerobotics.rov.value.VoltageValue;
 
 import javafx.scene.control.Label;
 import rx.Observable;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 @SuppressWarnings("unused")
@@ -26,8 +24,6 @@ public class SensorViewController implements ViewController {
     private static final float BUS_LINE_12 = 12;
 
     private static final float BUS_LINE_05 =  5;
-
-    private static final int PRESSURE_BUFFER_WINDOW_DURATION = 500;
 
     /**
      * The sensor view.
@@ -92,28 +88,8 @@ public class SensorViewController implements ViewController {
     public final void onCreate() {
         view.row.getChildren().add(cpuInformationView.getParent());
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
-        subscriptions.add(
-            externalPressureA
-                .observeOn(Schedulers.computation())
-                .buffer(PRESSURE_BUFFER_WINDOW_DURATION, TimeUnit.MILLISECONDS)
-                .filter(x -> !x.isEmpty())
-                .map(values -> new ExternalPressureValueA((float) values.stream()
-                    .mapToDouble(ExternalPressureValueA::getValue)
-                    .summaryStatistics()
-                    .getAverage()))
-                .observeOn(JAVA_FX_SCHEDULER)
-                .subscribe(this::updatePressureLabel));
-        subscriptions.add(
-            externalPressureB
-                .observeOn(Schedulers.computation())
-                .buffer(PRESSURE_BUFFER_WINDOW_DURATION, TimeUnit.MILLISECONDS)
-                .filter(x -> !x.isEmpty())
-                .map(values -> new ExternalPressureValueB((float) values.stream()
-                    .mapToDouble(ExternalPressureValueB::getValue)
-                    .summaryStatistics()
-                    .getAverage()))
-                .observeOn(JAVA_FX_SCHEDULER)
-                .subscribe(this::updatePressureLabel));
+        subscriptions.add(externalPressureA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(externalPressureB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(depthA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelA));
         subscriptions.add(depthB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelB));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
