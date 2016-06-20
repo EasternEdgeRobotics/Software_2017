@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.math.MovingAverage;
 import com.easternedgerobotics.rov.value.CurrentValue;
 import com.easternedgerobotics.rov.value.DepthValueA;
 import com.easternedgerobotics.rov.value.DepthValueB;
@@ -24,6 +25,8 @@ public class SensorViewController implements ViewController {
     private static final float BUS_LINE_12 = 12;
 
     private static final float BUS_LINE_05 =  5;
+
+    private static final int TEMPERATURE_AVERAGE_COUNT = 8;
 
     /**
      * The sensor view.
@@ -93,7 +96,11 @@ public class SensorViewController implements ViewController {
         subscriptions.add(depthA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelA));
         subscriptions.add(depthB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateDepthLabelB));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
-        subscriptions.add(externalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
+        subscriptions.add(
+            MovingAverage.from(externalTemperature.map(ExternalTemperatureValue::getValue), TEMPERATURE_AVERAGE_COUNT)
+                .map(ExternalTemperatureValue::new)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(this::updateTemperatureLabel));
         subscriptions.add(
             voltage.filter(value -> value.getBus() == BUS_LINE_48)
                 .observeOn(JAVA_FX_SCHEDULER)
