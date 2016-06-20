@@ -77,6 +77,8 @@ public final class RovSimulator {
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
         final Rov rov = new Rov(eventPublisher, new NullMaestro());
 
+        Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
+
         rov.init(Schedulers.io(), Schedulers.computation());
         Logger.info("Started");
         eventPublisher.await();

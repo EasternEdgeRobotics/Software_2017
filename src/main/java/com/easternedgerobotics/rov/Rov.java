@@ -364,6 +364,8 @@ final class Rov {
             final Serial serial = SerialFactory.createInstance();
             final Rov rov = new Rov(eventPublisher, new Maestro<>(serial, MAESTRO_DEVICE_NUMBER));
 
+            Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
+
             serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
             rov.init(Schedulers.io(), Schedulers.computation());
 
