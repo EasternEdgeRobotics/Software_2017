@@ -49,6 +49,8 @@ import rx.Scheduler;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -57,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 final class Rov {
     static final long MAX_HEARTBEAT_GAP = 5;
@@ -132,6 +135,10 @@ final class Rov {
     private final List<CurrentSensor> currentSensors;
 
     private final EventPublisher eventPublisher;
+
+    private final AtomicBoolean dead = new AtomicBoolean();
+
+    private final Subject<Void, Void> killSwitch = PublishSubject.create();
 
     <T extends ADC & PWM> Rov(
         final EventPublisher eventPublisher,
@@ -242,6 +249,20 @@ final class Rov {
             channels.get(EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
     }
 
+    void shutdown() {
+        Logger.info("Shutting down");
+        killSwitch.onCompleted();
+        while (true) {
+            if (dead.get()) {
+                break;
+            }
+        }
+
+        motors.forEach(Motor::writeZero);
+        lights.forEach(Light::writeZero);
+        thrusters.forEach(Thruster::writeZero);
+    }
+
     /**
      * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
@@ -266,7 +287,8 @@ final class Rov {
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
             .observeOn(io)
-            .subscribe(this::beat, RuntimeException::new);
+            .takeUntil(killSwitch)
+            .subscribe(this::beat, RuntimeException::new, () -> dead.set(true));
     }
 
     private void thrustersUpdate() {
