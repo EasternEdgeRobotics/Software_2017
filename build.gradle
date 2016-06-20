@@ -12,7 +12,7 @@ applicationDefaultJvmArgs = [
     '-Xloggc:gc.log', '-XX:+PrintGCApplicationStoppedTime', '-XX:+PrintGCTimeStamps'
 ]
 applicationName = 'topside'
-version = '7.0.0'
+version = '8.0.0'
 mainClassName = 'com.easternedgerobotics.rov.Topside'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
