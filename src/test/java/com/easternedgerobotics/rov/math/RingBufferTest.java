@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
-@SuppressWarnings("checkstyle:MagicNumber")
+@SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:LineLength"})
 public final class RingBufferTest {
     private static final double DELTA = 0.01;
 
