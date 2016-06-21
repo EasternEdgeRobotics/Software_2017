@@ -22,16 +22,16 @@ public final class MovingAverageTest {
         numbers.onNext(8.5f);
         scheduler.triggerActions();
         subscriber.assertValueCount(2);
-        subscriber.assertValues(1.5f, 8.5f);
+        subscriber.assertValues(1.5f, 5f);
 
         numbers.onNext(21.5f);
         scheduler.triggerActions();
         subscriber.assertValueCount(3);
-        subscriber.assertValues(1.5f, 8.5f, 15f);
+        subscriber.assertValues(1.5f, 5f, 15f);
 
         numbers.onNext(41.5f);
         scheduler.triggerActions();
         subscriber.assertValueCount(4);
-        subscriber.assertValues(1f, 5f, 14.5f, 30f);
+        subscriber.assertValues(1.5f, 5f, 15f, 31.5f);
     }
 }
