@@ -3,8 +3,7 @@ package com.easternedgerobotics.rov.math;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
-import java.util.stream.LongStream;
-import java.util.stream.LongStream.Builder;
+import java.util.stream.DoubleStream;
 
 @SuppressWarnings("WeakerAccess")
 final class RingBuffer {
@@ -16,15 +15,15 @@ final class RingBuffer {
 
     private boolean filled;
 
-    private final long[] elements;
+    private final double[] elements;
 
     public RingBuffer(final int size) {
         this.size = size;
         this.mark = -1;
-        this.elements = new long[size];
+        this.elements = new double[size];
     }
 
-    public final void add(final long item) {
+    public final void add(final double item) {
         lock.lock();
         try {
             mark = (mark + 1) % size;
@@ -36,18 +35,18 @@ final class RingBuffer {
     }
 
     @SuppressWarnings("checkstyle:AvoidInlineConditionals")
-    public final <R> R apply(final Function<LongStream, R> fn) {
+    public final <R> R apply(final Function<DoubleStream, R> fn) {
         lock.lock();
         try {
             if (filled) {
-                final Builder builder = LongStream.builder();
+                final DoubleStream.Builder builder = DoubleStream.builder();
                 for (int i = 0; i < size; i++) {
                     builder.add(elements[(mark + 1 + i) % size]);
                 }
                 return fn.apply(builder.build());
             }
 
-            return fn.apply(LongStream.of(elements).limit(mark + 1));
+            return fn.apply(DoubleStream.of(elements).limit(mark + 1));
         } finally {
             lock.unlock();
         }

@@ -4,15 +4,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.function.Function;
-import java.util.stream.LongStream;
+import java.util.stream.DoubleStream;
 
-@SuppressWarnings("checkstyle:MagicNumber")
+@SuppressWarnings({"checkstyle:MagicNumber", "checkstyle:LineLength"})
 public final class RingBufferTest {
+    private static final double DELTA = 0.01;
+
     @Test
     public final void addDoesAddElementToBuffer() {
         final RingBuffer buffer = new RingBuffer(4);
         buffer.add(5);
-        Assert.assertArrayEquals(LongStream.of(5).toArray(), buffer.apply(Function.identity()).toArray());
+        Assert.assertArrayEquals(DoubleStream.of(5).toArray(), buffer.apply(Function.identity()).toArray(), DELTA);
     }
 
     @Test
@@ -23,6 +25,6 @@ public final class RingBufferTest {
         buffer.add(3);
         buffer.add(4);
         buffer.add(5);
-        Assert.assertArrayEquals(LongStream.of(2, 3, 4, 5).toArray(), buffer.apply(Function.identity()).toArray());
+        Assert.assertArrayEquals(DoubleStream.of(2, 3, 4, 5).toArray(), buffer.apply(Function.identity()).toArray(), DELTA);
     }
 }
