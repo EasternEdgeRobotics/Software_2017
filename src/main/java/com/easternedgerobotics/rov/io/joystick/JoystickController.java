@@ -31,9 +31,9 @@ public final class JoystickController implements Observer<Joystick> {
 
     static final int MOTION_REVERSE_JOYSTICK_BUTTON = 2;
 
-    static final int CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON = 7;
+    static final int CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON = 8;
 
-    static final int CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON = 8;
+    static final int CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON = 7;
 
     static final float MOTOR_ROTATION_SPEED = 0.3f;
 
