@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.io.TMP36;
 import com.easternedgerobotics.rov.math.AverageTransformer;
 import com.easternedgerobotics.rov.math.MedianTransformer;
 import com.easternedgerobotics.rov.value.CurrentValue;
@@ -103,6 +104,7 @@ public class SensorViewController implements ViewController {
             externalTemperature.map(ExternalTemperatureValue::getValue)
                 .compose(new MedianTransformer<>(TEMPERATURE_MEDIAN_SAMPLE_SIZE))
                 .compose(new AverageTransformer<>(TEMPERATURE_AVERAGE_SAMPLE_SIZE))
+                .compose(TMP36.CALIBRATION)
                 .map(Number::floatValue)
                 .map(ExternalTemperatureValue::new)
                 .observeOn(JAVA_FX_SCHEDULER)
