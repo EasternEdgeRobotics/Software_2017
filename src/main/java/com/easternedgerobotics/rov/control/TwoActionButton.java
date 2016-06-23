@@ -11,7 +11,7 @@ public final class TwoActionButton {
     /**
      * Observe state toggles in an Observable boolean.
      */
-    final Observable<Timestamped<Boolean>> toggle;
+    private final Observable<Timestamped<Boolean>> toggle;
 
     /**
      * Observes short button clicks.
