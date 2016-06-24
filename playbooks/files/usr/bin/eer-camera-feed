@@ -16,7 +16,7 @@ with picamera.PiCamera() as camera:
     nc.connect((sys.argv[1], int(sys.argv[2])))
     fd = nc.makefile('wb')
     try:
-        camera.start_recording(fd, format='h264', quantization=23)
+        camera.start_recording(fd, format='h264', profile='baseline', intra_period=0, quantization=23)
         while True:
             signal.pause()
     finally:
