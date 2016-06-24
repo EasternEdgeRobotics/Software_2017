@@ -2,9 +2,6 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.measure.Depth;
-import com.easternedgerobotics.rov.value.ExternalPressureValueA;
-import com.easternedgerobotics.rov.value.ExternalPressureValueB;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoValueA;
 import com.easternedgerobotics.rov.video.PicameraVideo;
@@ -19,7 +16,6 @@ import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import java.net.DatagramSocket;
@@ -81,17 +77,6 @@ final class PicameraA {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final PicameraA picamera = new PicameraA(eventPublisher);
-
-            eventPublisher.valuesOfType(ExternalPressureValueA.class)
-                .observeOn(Schedulers.computation())
-                .map(Depth::fromPressure)
-                .observeOn(Schedulers.io())
-                .subscribe(eventPublisher::emit, Logger::error);
-            eventPublisher.valuesOfType(ExternalPressureValueB.class)
-                .observeOn(Schedulers.computation())
-                .map(Depth::fromPressure)
-                .observeOn(Schedulers.io())
-                .subscribe(eventPublisher::emit, Logger::error);
 
             picamera.initCameraA();
             Logger.info("Started");
