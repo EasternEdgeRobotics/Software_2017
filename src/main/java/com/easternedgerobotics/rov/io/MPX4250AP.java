@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.io;
 
+import rx.Observable;
+
 /**
  * A MPX4250 is an absolute pressure (AP) sensor. See also: <a href="http://goo.gl/n7c8tY">MPX4250</a>.
  */
@@ -13,6 +15,10 @@ public final class MPX4250AP {
      * Offset value for calculating pressure from voltage.
      */
     private static final float PRESSURE_OFFSET = 54.20054200f;
+
+    @SuppressWarnings("checkstyle:MagicNumber")
+    public static final Observable.Transformer<Double, Double> CALIBRATION = source -> source.map(
+        x -> 0.83060f * x + 10.0445f);
 
     /**
      * The ADC this device uses.
