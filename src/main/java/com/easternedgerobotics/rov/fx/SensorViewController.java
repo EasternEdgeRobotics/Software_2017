@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.io.TMP36;
 import com.easternedgerobotics.rov.math.AverageTransformer;
 import com.easternedgerobotics.rov.math.MedianTransformer;
@@ -29,6 +30,10 @@ public class SensorViewController implements ViewController {
     private static final int TEMPERATURE_MEDIAN_SAMPLE_SIZE = 25;
 
     private static final int TEMPERATURE_AVERAGE_SAMPLE_SIZE = 64;
+
+    private static final int SENSOR_MEDIAN_SAMPLE_SIZE = 12;
+
+    private static final int SENSOR_AVERAGE_SAMPLE_SIZE = 32;
 
     /**
      * The sensor view.
@@ -85,8 +90,24 @@ public class SensorViewController implements ViewController {
     public final void onCreate() {
         view.row.getChildren().add(cpuInformationView.getParent());
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
-        subscriptions.add(externalPressureA.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
-        subscriptions.add(externalPressureB.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(
+            externalPressureA.map(ExternalPressureValueA::getValue)
+                .compose(new MedianTransformer<>(SENSOR_MEDIAN_SAMPLE_SIZE))
+                .compose(new AverageTransformer<>(SENSOR_AVERAGE_SAMPLE_SIZE))
+                .compose(MPX4250AP.CALIBRATION)
+                .map(Number::floatValue)
+                .map(ExternalPressureValueA::new)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(this::updatePressureLabel));
+        subscriptions.add(
+            externalPressureB.map(ExternalPressureValueB::getValue)
+                .compose(new MedianTransformer<>(SENSOR_MEDIAN_SAMPLE_SIZE))
+                .compose(new AverageTransformer<>(SENSOR_AVERAGE_SAMPLE_SIZE))
+                .compose(MPX4250AP.CALIBRATION)
+                .map(Number::floatValue)
+                .map(ExternalPressureValueB::new)
+                .observeOn(JAVA_FX_SCHEDULER)
+                .subscribe(this::updatePressureLabel));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
         subscriptions.add(
             externalTemperature.map(ExternalTemperatureValue::getValue)
