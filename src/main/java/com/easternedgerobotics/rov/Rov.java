@@ -66,7 +66,7 @@ final class Rov {
 
     static final long CPU_POLL_INTERVAL = 1;
 
-    static final long SLEEP_DURATION = 100;
+    static final long SLEEP_DURATION = 99;
 
     static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
