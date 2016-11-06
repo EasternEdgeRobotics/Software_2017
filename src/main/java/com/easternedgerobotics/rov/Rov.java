@@ -64,9 +64,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class Rov {
     static final long MAX_HEARTBEAT_GAP = 5;
 
-    static final long CPU_POLL_INTERVAL = 10;
+    static final long CPU_POLL_INTERVAL = 1;
 
-    static final long SLEEP_DURATION = 1;
+    static final long SLEEP_DURATION = 100;
 
     static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
