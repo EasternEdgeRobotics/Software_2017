@@ -120,10 +120,9 @@ final class LSM303D {
     /**
      * Read acceleration from register data.
      *
-     * @param tick ignored.
      * @return the current pressure data.
      */
-    AccelerationValue pollAccelerometer(final long tick) {
+    AccelerationValue pollAccelerometer() {
         try {
             // Read bytes from OUT_X_L_A to OUT_Z_H_A inclusive.
             final byte[] accelerationBytes = device.read(OUT_X_L_A, READ_SIZE);
@@ -150,10 +149,9 @@ final class LSM303D {
     /**
      * Read rotational strengths from register data.
      *
-     * @param tick ignored.
      * @return the current pressure data.
      */
-    RotationValue pollMagnetometer(final long tick) {
+    RotationValue pollMagnetometer() {
         try {
             // Read bytes from OUT_X_L_M to OUT_Z_H_M inclusive.
             final byte[] rotationBytes = device.read(OUT_X_L_M, READ_SIZE);
