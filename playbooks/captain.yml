@@ -10,6 +10,9 @@
     - name: Install OpenJDK 8
       apt: name=openjdk-8-jdk state=latest
       tags: java
+    - name: Install Open JavaFX
+      apt: name=openjfx state=latest
+      tags: java
     - name: Add Gradle repo
       apt_repository: repo='ppa:cwchien/gradle'
       tags:
@@ -20,6 +23,12 @@
       tags:
         - optional
         - java
+    - name: Remove old Java certificates
+      command: dpkg --purge --force-depends ca-certificates-java
+      tags: java
+    - name: Install latest Java certificates
+      apt: name=ca-certificates-java state=latest
+      tags: java
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
     - name: Configure Squid Proxy
