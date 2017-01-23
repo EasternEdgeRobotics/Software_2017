@@ -14,14 +14,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 
 public class ViewLoader {
+    private static final String WINDOW_POSITION_X = "WindowPositionX";
+
+    private static final String WINDOW_POSITION_Y = "WindowPositionY";
+
+    private static final String WINDOW_WIDTH = "WindowWidth";
+
+    private static final String WINDOW_HEIGHT = "WindowHeight";
+
+    private static final String NODE_NAME = "ViewLoader";
+
     private final Map<Class<?>, Object> dependencies;
 
     public ViewLoader(final Map<Class<?>, Object> dependencies) {
         this.dependencies = new HashMap<>(dependencies);
+    }
+
+    public static void dropPreferences() throws BackingStoreException {
+        Preferences.userRoot().node(NODE_NAME).removeNode();
     }
 
     /**
@@ -42,8 +58,18 @@ public class ViewLoader {
         stage.setOnShown(event -> {
             viewController.onCreate();
             stage.sizeToScene();
+            final Preferences preferences = Preferences.userRoot().node(NODE_NAME).node(viewClass.getSimpleName());
+            stage.setX(preferences.getDouble(WINDOW_POSITION_X, stage.getX()));
+            stage.setY(preferences.getDouble(WINDOW_POSITION_Y, stage.getY()));
+            stage.setWidth(preferences.getDouble(WINDOW_WIDTH, stage.getWidth()));
+            stage.setHeight(preferences.getDouble(WINDOW_HEIGHT, stage.getHeight()));
         });
         stage.setOnHidden(event -> {
+            final Preferences preferences = Preferences.userRoot().node(NODE_NAME).node(viewClass.getSimpleName());
+            preferences.putDouble(WINDOW_POSITION_X, stage.getX());
+            preferences.putDouble(WINDOW_POSITION_Y, stage.getY());
+            preferences.putDouble(WINDOW_WIDTH, stage.getWidth());
+            preferences.putDouble(WINDOW_HEIGHT, stage.getHeight());
             viewController.onDestroy();
         });
     }
