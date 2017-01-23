@@ -67,6 +67,7 @@ multipleStartScripts {
         'picamera-b': 'com.easternedgerobotics.rov.PicameraB',
         'rov': 'com.easternedgerobotics.rov.Rov',
         'topside': 'com.easternedgerobotics.rov.Topside',
+        'reset-gui': 'com.easternedgerobotics.rov.ResetGUI',
     ]
 }
 
