@@ -2,7 +2,8 @@
 NETWORK_INTERFACES = [
     "en3: Thunderbolt Ethernet",
     "en0: Ethernet",
-    "Killer e2200 PCI-E Gigabit Ethernet Controller (NDIS 6.20)",
+    "Intel(R) 82579V Gigabit Network Connection",
+    "Killer e2200 Gigabit Ethernet Controller"
 ]
 
 def interface_name(interface)
