@@ -7,6 +7,7 @@ apply plugin: 'application'
 apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
+apply plugin: 'idea'
 
 applicationDefaultJvmArgs = [
     '-Xloggc:gc.log', '-XX:+PrintGCApplicationStoppedTime', '-XX:+PrintGCTimeStamps'
