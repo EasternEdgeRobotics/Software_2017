@@ -9,6 +9,7 @@ import rx.subscriptions.CompositeSubscription;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,7 +23,7 @@ public final class TaskManager {
 
     private final CompositeSubscription subscriptions = new CompositeSubscription();
 
-    private volatile boolean isStarted;
+    private final AtomicBoolean isStarted = new AtomicBoolean(false);
 
     public TaskManager(final long sleepDuration, final TimeUnit unit, final Scheduler clock) {
         this.clock = clock;
@@ -30,11 +31,11 @@ public final class TaskManager {
     }
 
     public void start() {
-        isStarted = true;
+        isStarted.set(true);
     }
 
     public void stop() {
-        isStarted = false;
+        isStarted.set(false);
         clock.createWorker().schedule(() -> initialStateSetters.forEach(Runnable::run));
     }
 
@@ -48,7 +49,7 @@ public final class TaskManager {
         final Consumer<S> consumer
     ) {
         subscriptions.add(interval.startWith(0L)
-            .filter(t -> isStarted)
+            .filter(t -> isStarted.get())
             .map(t -> supplier.get())
             .subscribe(consumer::accept, Logger::warn));
         return this;
@@ -62,7 +63,7 @@ public final class TaskManager {
         initialStateSetters.add(() -> consumer.accept(initial));
         subscriptions.add(interval.startWith(0L)
             .withLatestFrom(source.startWith(initial), (t, v) -> v)
-            .filter(v -> isStarted)
+            .filter(v -> isStarted.get())
             .subscribe(consumer::accept, Logger::warn));
         return this;
     }
@@ -77,7 +78,7 @@ public final class TaskManager {
             .withLatestFrom(
                 Observable.combineLatest(source1.startWith(initial1), source2.startWith(initial2), Pair::new),
                 (t, v) -> v)
-            .filter(v -> isStarted)
+            .filter(v -> isStarted.get())
             .subscribe(p -> consumer.accept(p.getFirst(), p.getSecond()), Logger::warn));
         return this;
     }
