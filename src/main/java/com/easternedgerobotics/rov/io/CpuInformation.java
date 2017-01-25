@@ -10,6 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public final class CpuInformation {
+    /**
+     * Returns raspberry pi CPU information. Returns default CPU value if not on a raspberry pi.
+     *
+     * @return the current CPU value.
+     */
     public CpuValue pollCpu() {
         if (Files.notExists(Paths.get("/opt/vc/bin/vcgencmd"))) {
             return new CpuValue();

@@ -46,6 +46,6 @@ public final class IndividualMotorTest {
 
         Thread.sleep(1000);
         System.out.println("Motor is stopped");
-        motor.writeZero();
+        motor.write(new TestSpeedValue(0f));
     }
 }

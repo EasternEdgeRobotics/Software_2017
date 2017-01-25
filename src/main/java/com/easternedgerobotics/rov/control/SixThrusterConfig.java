@@ -14,6 +14,13 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
+    /**
+     * Based on a six thruster configuration take motion and power values and convert them to thruster values.
+     *
+     * @param motion the desired direction.
+     * @param motionPower the scalar components applied to each direction.
+     * @return an array of six thruster values.
+     */
     public final SpeedValue[] update(final MotionValue motion, final MotionPowerValue motionPower) {
         float starboardFore = 0;
         float portFore = 0;

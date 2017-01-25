@@ -32,16 +32,11 @@ public final class Motor {
     }
 
     /**
-     * Write the latest {@code SpeedValue} for this motor to the device.
+     * Write the a {@code SpeedValue} to the device.
+     *
+     * @param value the desired speed.
      */
     public final void write(final SpeedValue value) {
         device.write(value.getSpeed());
-    }
-
-    /**
-     * Write zero to the motor.
-     */
-    public final void writeZero() {
-        device.writeZero();
     }
 }

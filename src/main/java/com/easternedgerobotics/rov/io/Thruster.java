@@ -32,7 +32,9 @@ public final class Thruster {
     }
 
     /**
-     * Write the latest {@code SpeedValue} for this thruster to the device.
+     * Write a {@code SpeedValue} to the device.
+     *
+     * @param value the desired speed value.
      */
     public final void apply(final SpeedValue value) {
         device.write(value.getSpeed());

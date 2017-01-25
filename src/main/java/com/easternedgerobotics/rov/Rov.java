@@ -65,8 +65,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class Rov {
     static final long MAX_HEARTBEAT_GAP = 5;
 
-    static final long CPU_POLL_INTERVAL = 1;
-
     static final long SENSOR_POLL_INTERVAL = 10;
 
     static final long SLEEP_DURATION = 100;
@@ -109,8 +107,6 @@ final class Rov {
 
     static final boolean ALT_IMU_SA0_HIGH = false;
 
-    private final EventPublisher eventPublisher;
-
     private final AtomicBoolean dead = new AtomicBoolean();
 
     private final Subject<Void, Void> killSwitch = PublishSubject.create();
@@ -126,7 +122,6 @@ final class Rov {
         final List<MaestroChannel> channels,
         final AltIMU imu
     ) {
-        this.eventPublisher = eventPublisher;
         unsafeTasks = new TaskManager(SLEEP_DURATION, TimeUnit.MILLISECONDS, io);
         sensorTasks = new TaskManager(SENSOR_POLL_INTERVAL, TimeUnit.MILLISECONDS, io);
 
