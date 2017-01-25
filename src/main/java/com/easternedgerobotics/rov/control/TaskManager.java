@@ -9,9 +9,8 @@ import rx.subscriptions.CompositeSubscription;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class TaskManager {
@@ -44,17 +43,19 @@ public final class TaskManager {
         subscriptions.unsubscribe();
     }
 
-    public <S> Observable<S> handle(final Supplier<S> supplier) {
-        return Observable.<S>create(subscriber -> {
-            subscriptions.add(interval.startWith(0L)
-                .filter(t -> isStarted)
-                .map(t -> supplier.get())
-                .doOnError(Logger::warn)
-                .subscribe(subscriber::onNext));
-        }).share();
+    public <S> TaskManager manage(
+        final Supplier<S> supplier,
+        final Consumer<S> consumer
+    ) {
+        subscriptions.add(interval.startWith(0L)
+            .filter(t -> isStarted)
+            .map(t -> supplier.get())
+            .doOnError(Logger::warn)
+            .subscribe(consumer::accept));
+        return this;
     }
 
-    public <C, O extends C> void handle(
+    public <C, O extends C> TaskManager manage(
         final Observable<O> source,
         final O initial,
         final Consumer<C> consumer
@@ -65,39 +66,21 @@ public final class TaskManager {
             .filter(v -> isStarted)
             .doOnError(Logger::warn)
             .subscribe(consumer::accept));
+        return this;
     }
 
-    public <C, O extends C, S> Observable<S> handle(
-        final Observable<O> source,
-        final O initial,
-        final Function<C, S> modifier
-    ) {
-        return Observable.<S>create(subscriber -> {
-            initialStateSetters.add(() -> modifier.apply(initial));
-            subscriptions.add(interval.startWith(0L)
-                .withLatestFrom(source.startWith(initial), (t, v) -> v)
-                .filter(v -> isStarted)
-                .map(modifier::apply)
-                .doOnError(Logger::warn)
-                .subscribe(subscriber::onNext));
-        }).share();
-    }
-
-    public <C1, O1 extends C1, C2, O2 extends C2, S> Observable<S> handle(
+    public <C1, O1 extends C1, C2, O2 extends C2> TaskManager manage(
         final Observable<O1> source1, final O1 initial1,
         final Observable<O2> source2, final O2 initial2,
-        final BiFunction<C1, C2, S> modifier
+        final BiConsumer<C1, C2> consumer
     ) {
-        return Observable.<S>create(subscriber -> {
-            initialStateSetters.add(() -> modifier.apply(initial1, initial2));
-            subscriptions.add(interval.startWith(0L)
-                .withLatestFrom(
-                    Observable.combineLatest(source1.startWith(initial1), source2.startWith(initial2), Pair::new),
-                    (t, v) -> v)
-                .filter(v -> isStarted)
-                .map(p -> modifier.apply(p.getFirst(), p.getSecond()))
-                .doOnError(Logger::warn)
-                .subscribe(subscriber::onNext));
-        }).share();
+        initialStateSetters.add(() -> consumer.accept(initial1, initial2));
+        subscriptions.add(interval.startWith(0L)
+            .withLatestFrom(
+                Observable.combineLatest(source1.startWith(initial1), source2.startWith(initial2), Pair::new),
+                (t, v) -> v)
+            .filter(v -> isStarted)
+            .subscribe(p -> consumer.accept(p.getFirst(), p.getSecond())));
+        return this;
     }
 }

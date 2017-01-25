@@ -57,10 +57,10 @@ import rx.subjects.Subject;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 final class Rov {
     static final long MAX_HEARTBEAT_GAP = 5;
@@ -147,65 +147,59 @@ final class Rov {
 
         Logger.debug("Wiring up operation critical items; Thrusters, Motors, Lights");
 
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(MotionValue.class), new MotionValue(),
-            eventPublisher.valuesOfType(MotionPowerValue.class), new MotionPowerValue(),
-            new SixThrusterConfig()::update).flatMap(Observable::from).subscribe(eventPublisher::emit);
+        final SixThrusterConfig thrusterConfig = new SixThrusterConfig();
+        unsafeTasks
+            .manage(eventPublisher.valuesOfType(MotionValue.class), new MotionValue(),
+                eventPublisher.valuesOfType(MotionPowerValue.class), new MotionPowerValue(),
+                (m, mp) -> Arrays.stream(thrusterConfig.update(m, mp)).forEach(eventPublisher::emit));
 
         final Range thrusterRange = new Range(Thruster.MAX_REV, Thruster.MAX_FWD);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(PortAftSpeedValue.class), new PortAftSpeedValue(),
-            new Thruster(channels.get(PORT_AFT_CHANNEL).setOutputRange(thrusterRange))::apply);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(StarboardAftSpeedValue.class), new StarboardAftSpeedValue(),
-            new Thruster(channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(thrusterRange))::apply);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(PortForeSpeedValue.class), new PortForeSpeedValue(),
-            new Thruster(channels.get(PORT_FORE_CHANNEL).setOutputRange(thrusterRange))::apply);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(StarboardForeSpeedValue.class), new StarboardForeSpeedValue(),
-            new Thruster(channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(thrusterRange))::apply);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(PortVertSpeedValue.class), new PortVertSpeedValue(),
-            new Thruster(channels.get(PORT_VERT_CHANNEL).setOutputRange(thrusterRange))::apply);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(StarboardVertSpeedValue.class), new StarboardVertSpeedValue(),
-            new Thruster(channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(thrusterRange))::apply);
+        unsafeTasks
+            .manage(eventPublisher.valuesOfType(PortAftSpeedValue.class), new PortAftSpeedValue(),
+                new Thruster(channels.get(PORT_AFT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .manage(eventPublisher.valuesOfType(StarboardAftSpeedValue.class), new StarboardAftSpeedValue(),
+                new Thruster(channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .manage(eventPublisher.valuesOfType(PortForeSpeedValue.class), new PortForeSpeedValue(),
+                new Thruster(channels.get(PORT_FORE_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .manage(eventPublisher.valuesOfType(StarboardForeSpeedValue.class), new StarboardForeSpeedValue(),
+                new Thruster(channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .manage(eventPublisher.valuesOfType(PortVertSpeedValue.class), new PortVertSpeedValue(),
+                new Thruster(channels.get(PORT_VERT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .manage(eventPublisher.valuesOfType(StarboardVertSpeedValue.class), new StarboardVertSpeedValue(),
+                new Thruster(channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(thrusterRange))::apply);
 
         final Range motorRange = new Range(Motor.MAX_REV, Motor.MAX_FWD);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(CameraSpeedValueA.class), new CameraSpeedValueA(),
-            new Motor(channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(motorRange))::write);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(CameraSpeedValueB.class), new CameraSpeedValueB(),
-            new Motor(channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(motorRange))::write);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(ToolingSpeedValue.class), new ToolingSpeedValue(),
-            new Motor(channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(motorRange))::write);
+        unsafeTasks
+            .manage(eventPublisher.valuesOfType(CameraSpeedValueA.class), new CameraSpeedValueA(),
+                new Motor(channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(motorRange))::write)
+            .manage(eventPublisher.valuesOfType(CameraSpeedValueB.class), new CameraSpeedValueB(),
+                new Motor(channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(motorRange))::write)
+            .manage(eventPublisher.valuesOfType(ToolingSpeedValue.class), new ToolingSpeedValue(),
+                new Motor(channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(motorRange))::write);
 
         final Range lightRange = new Range(Light.MAX_REV, Light.MAX_FWD);
-        unsafeTasks.handle(
-            eventPublisher.valuesOfType(LightSpeedValue.class), new LightSpeedValue(),
-            new Light(channels.get(LIGHT_CHANNEL).setOutputRange(lightRange))::write);
+        unsafeTasks
+            .manage(eventPublisher.valuesOfType(LightSpeedValue.class), new LightSpeedValue(),
+                new Light(channels.get(LIGHT_CHANNEL).setOutputRange(lightRange))::write);
+
+        unsafeTasks.stop();
 
         Logger.debug("Wiring up operation sensor items; Voltage, Current, IMU, CPU Info");
 
-        Stream.of(
-            sensorTasks.handle(VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL))::read),
-            sensorTasks.handle(VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL))::read),
-            sensorTasks.handle(VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))::read),
-            sensorTasks.handle(CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL))::read),
-            sensorTasks.handle(CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL))::read),
-            sensorTasks.handle(CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))::read),
-            sensorTasks.handle(() -> imu.pressure()),
-            sensorTasks.handle(() -> imu.rotation()),
-            sensorTasks.handle(() -> imu.acceleration()),
-            sensorTasks.handle(() -> imu.angularVelocity()),
-            sensorTasks.handle(() -> imu.temperature()),
-            sensorTasks.handle(new CpuInformation()::pollCpu)
-        ).forEach(o -> o.subscribe(eventPublisher::emit));
+        sensorTasks
+            .manage(VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL))::read, eventPublisher::emit)
+            .manage(VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL))::read, eventPublisher::emit)
+            .manage(VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))::read, eventPublisher::emit)
+            .manage(CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL))::read, eventPublisher::emit)
+            .manage(CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL))::read, eventPublisher::emit)
+            .manage(CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))::read, eventPublisher::emit)
+            .manage(() -> imu.pressure(), eventPublisher::emit)
+            .manage(() -> imu.rotation(), eventPublisher::emit)
+            .manage(() -> imu.acceleration(), eventPublisher::emit)
+            .manage(() -> imu.angularVelocity(), eventPublisher::emit)
+            .manage(() -> imu.temperature(), eventPublisher::emit)
+            .manage(new CpuInformation()::pollCpu, eventPublisher::emit);
 
-        unsafeTasks.stop();
         sensorTasks.start();
     }
 
