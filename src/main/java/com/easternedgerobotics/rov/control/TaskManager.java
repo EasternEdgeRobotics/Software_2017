@@ -38,7 +38,7 @@ public final class TaskManager {
         clock.createWorker().schedule(() -> initialStateSetters.forEach(Runnable::run));
     }
 
-    public void unsubscribe() {
+    public void dispose() {
         stop();
         subscriptions.unsubscribe();
     }
@@ -50,8 +50,7 @@ public final class TaskManager {
         subscriptions.add(interval.startWith(0L)
             .filter(t -> isStarted)
             .map(t -> supplier.get())
-            .doOnError(Logger::warn)
-            .subscribe(consumer::accept));
+            .subscribe(consumer::accept, Logger::warn));
         return this;
     }
 
@@ -64,8 +63,7 @@ public final class TaskManager {
         subscriptions.add(interval.startWith(0L)
             .withLatestFrom(source.startWith(initial), (t, v) -> v)
             .filter(v -> isStarted)
-            .doOnError(Logger::warn)
-            .subscribe(consumer::accept));
+            .subscribe(consumer::accept, Logger::warn));
         return this;
     }
 
@@ -80,7 +78,7 @@ public final class TaskManager {
                 Observable.combineLatest(source1.startWith(initial1), source2.startWith(initial2), Pair::new),
                 (t, v) -> v)
             .filter(v -> isStarted)
-            .subscribe(p -> consumer.accept(p.getFirst(), p.getSecond())));
+            .subscribe(p -> consumer.accept(p.getFirst(), p.getSecond()), Logger::warn));
         return this;
     }
 }

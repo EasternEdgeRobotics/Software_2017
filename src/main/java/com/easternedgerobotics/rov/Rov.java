@@ -219,8 +219,8 @@ final class Rov {
                 break;
             }
         }
-        unsafeTasks.stop();
-        sensorTasks.stop();
+        unsafeTasks.dispose();
+        sensorTasks.dispose();
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
