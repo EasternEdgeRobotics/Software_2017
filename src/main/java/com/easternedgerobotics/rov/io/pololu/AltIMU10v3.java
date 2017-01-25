@@ -15,8 +15,7 @@ import com.pi4j.io.i2c.I2CBus;
 
 import java.io.IOException;
 
-public final class AltIMU10v3
-    implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
+public final class AltIMU10v3 implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
     /**
      * Digital barometer instance.
      */
