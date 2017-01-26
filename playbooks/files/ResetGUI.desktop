@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=9.0.0
-Name=Control Software
+Name=Reset GUI
 Exec=/opt/topside-9.0.0/bin/reset-gui
 Path=/opt/topside-9.0.0
 Terminal=false
