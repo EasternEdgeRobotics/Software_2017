@@ -85,10 +85,9 @@ final class LPS331AP {
     /**
      * Read pressure from register data.
      *
-     * @param tick ignored.
      * @return the current pressure data.
      */
-    InternalPressureValue pollPressure(final long tick) {
+    InternalPressureValue pollPressure() {
         try {
             // Read bytes from OUT_X_L to OUT_Z_H inclusive.
             final byte[] pressureBytes = device.read(PRESS_POUT_XL_REH, PRESSURE_READ_SIZE);
@@ -113,10 +112,9 @@ final class LPS331AP {
     /**
      * Read temperature from register data.
      *
-     * @param tick ignored.
      * @return the current temperature data.
      */
-    InternalTemperatureValue pollTemperature(final long tick) {
+    InternalTemperatureValue pollTemperature() {
         try {
             // Read bytes from OUT_X_L to OUT_Z_H inclusive.
             final byte[] temperatureBytes = device.read(TEMP_OUT_L, TEMP_READ_SIZE);

@@ -1,20 +1,13 @@
 package com.easternedgerobotics.rov.integration;
 
-import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
-import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.math.Range;
-import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.TestSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
-import rx.broadcast.BasicOrder;
-import rx.broadcast.UdpBroadcast;
 
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -32,36 +25,27 @@ public final class IndividualMotorTest {
         final Serial serial = SerialFactory.createInstance();
         serial.open("/dev/ttyACM0", baudRate);
 
-        final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
-        final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
-            new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new BasicOrder<>()));
-
         final Motor motor = new Motor(
-            eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),
             new Maestro<>(serial, deviceNumber).get(channel).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)));
 
         System.out.println("Test Started");
         System.out.println("Motor is stopped");
         Thread.sleep(1000);
 
-        eventPublisher.emit(new TestSpeedValue(.5f));
         Thread.sleep(1000);
         System.out.println("Motor on half power clockwise");
-        motor.write();
+        motor.write(new TestSpeedValue(.5f));
 
-        eventPublisher.emit(new TestSpeedValue(0f));
         Thread.sleep(1000);
         System.out.println("Motor is stopped");
-        motor.write();
+        motor.write(new TestSpeedValue(0f));
 
-        eventPublisher.emit(new TestSpeedValue(-.5f));
         Thread.sleep(1000);
         System.out.println("Motor on half power counter-clockwise");
-        motor.write();
+        motor.write(new TestSpeedValue(-.5f));
 
         Thread.sleep(1000);
         System.out.println("Motor is stopped");
-        motor.writeZero();
+        motor.write(new TestSpeedValue(0f));
     }
 }

@@ -5,7 +5,6 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.math.Range;
-import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.TestSpeedValue;
 
 import com.pi4j.io.serial.Serial;
@@ -27,7 +26,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings({"checkstyle:magicnumber"})
@@ -84,15 +82,12 @@ public class IndividualThrusterTest {
         final byte maestroDeviceNumber = 0x01;
         final Serial serial = SerialFactory.createInstance();
         final Thruster thruster = new Thruster(
-            eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class),
             new Maestro<>(serial, maestroDeviceNumber)
                 .get(address)
                 .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)));
-        final Consumer<SpeedValue> consumer = val -> thruster.write();
 
         serial.open("/dev/ttyACM0", 115_200);
-        eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class).subscribe(consumer::accept);
-        eventPublisher.emit(new TestSpeedValue(1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
+        thruster.apply(new TestSpeedValue(1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
 
         TimeUnit.SECONDS.sleep(duration);
         thruster.writeZero();

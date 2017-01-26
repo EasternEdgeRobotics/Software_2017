@@ -58,10 +58,9 @@ final class L3GD20H {
     /**
      * Read angular velocity from register data.
      *
-     * @param tick ignored.
      * @return the current angular velocity data.
      */
-    AngularVelocityValue pollAngularVelocity(final long tick) {
+    AngularVelocityValue pollAngularVelocity() {
         try {
             // Read bytes from OUT_X_L to OUT_Z_H inclusive.
             final byte[] velocityBytes = device.read(OUT_X_L, READ_SIZE);

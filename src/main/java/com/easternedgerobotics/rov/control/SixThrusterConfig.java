@@ -1,11 +1,11 @@
 package com.easternedgerobotics.rov.control;
 
-import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
 import com.easternedgerobotics.rov.value.PortVertSpeedValue;
+import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
@@ -14,20 +14,14 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class SixThrusterConfig {
-    private MotionPowerValue motionPower = new MotionPowerValue();
-
-    private MotionValue motion = new MotionValue();
-
-    private EventPublisher eventPublisher;
-
-    public SixThrusterConfig(final EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-
-        eventPublisher.valuesOfType(MotionValue.class).subscribe(m -> motion = m);
-        eventPublisher.valuesOfType(MotionPowerValue.class).subscribe(m -> motionPower = m);
-    }
-
-    public final void update() {
+    /**
+     * Based on a six thruster configuration take motion and power values and convert them to thruster values.
+     *
+     * @param motion the desired direction.
+     * @param motionPower the scalar components applied to each direction.
+     * @return an array of six thruster values.
+     */
+    public final SpeedValue[] update(final MotionValue motion, final MotionPowerValue motionPower) {
         float starboardFore = 0;
         float portFore = 0;
         float starboardAft = 0;
@@ -117,21 +111,14 @@ public class SixThrusterConfig {
             }
         }
 
-        eventPublisher.emit(new PortAftSpeedValue(absIfZero(portAft)));
-        eventPublisher.emit(new StarboardAftSpeedValue(absIfZero(starboardAft)));
-        eventPublisher.emit(new PortForeSpeedValue(absIfZero(portFore)));
-        eventPublisher.emit(new StarboardForeSpeedValue(absIfZero(starboardFore)));
-        eventPublisher.emit(new PortVertSpeedValue(absIfZero(portVert)));
-        eventPublisher.emit(new StarboardVertSpeedValue(absIfZero(starboardVert)));
-    }
-
-    public final void updateZero() {
-        eventPublisher.emit(new PortAftSpeedValue(0));
-        eventPublisher.emit(new StarboardAftSpeedValue(0));
-        eventPublisher.emit(new PortForeSpeedValue(0));
-        eventPublisher.emit(new StarboardForeSpeedValue(0));
-        eventPublisher.emit(new PortVertSpeedValue(0));
-        eventPublisher.emit(new StarboardVertSpeedValue(0));
+        return new SpeedValue[]{
+            new PortAftSpeedValue(absIfZero(portAft)),
+            new StarboardAftSpeedValue(absIfZero(starboardAft)),
+            new PortForeSpeedValue(absIfZero(portFore)),
+            new StarboardForeSpeedValue(absIfZero(starboardFore)),
+            new PortVertSpeedValue(absIfZero(portVert)),
+            new StarboardVertSpeedValue(absIfZero(starboardVert))
+        };
     }
 
     @SuppressWarnings({"checkstyle:magicnumber"})
