@@ -1,14 +1,24 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.io.ADC;
+import com.easternedgerobotics.rov.io.Accelerometer;
+import com.easternedgerobotics.rov.io.Barometer;
+import com.easternedgerobotics.rov.io.Gyroscope;
+import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.PWM;
+import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
+import com.easternedgerobotics.rov.value.AccelerationValue;
+import com.easternedgerobotics.rov.value.AngularVelocityValue;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.InternalPressureValue;
+import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
+import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import org.hamcrest.CoreMatchers;
@@ -42,6 +52,63 @@ class MockMaestro extends AbstractList<Channel> {
     }
 }
 
+class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
+    private AccelerationValue acceleration = new AccelerationValue();
+
+    private InternalPressureValue pressure = new InternalPressureValue();
+
+    private AngularVelocityValue angularVelocity = new AngularVelocityValue();
+
+    private RotationValue rotation = new RotationValue();
+
+    private InternalTemperatureValue temperature = new InternalTemperatureValue();
+
+    public void setAcceleration(final AccelerationValue acceleration) {
+        this.acceleration = acceleration;
+    }
+
+    public void setPressure(final InternalPressureValue pressure) {
+        this.pressure = pressure;
+    }
+
+    public void setAngularVelocity(final AngularVelocityValue angularVelocity) {
+        this.angularVelocity = angularVelocity;
+    }
+
+    public void setRotation(final RotationValue rotation) {
+        this.rotation = rotation;
+    }
+
+    public void setTemperature(final InternalTemperatureValue temperature) {
+        this.temperature = temperature;
+    }
+
+    @Override
+    public AccelerationValue acceleration() {
+        return acceleration;
+    }
+
+    @Override
+    public InternalPressureValue pressure() {
+        return pressure;
+    }
+
+    @Override
+    public AngularVelocityValue angularVelocity() {
+        return angularVelocity;
+    }
+
+    @Override
+    public RotationValue rotation() {
+        return rotation;
+    }
+
+    @Override
+    public InternalTemperatureValue temperature() {
+        return temperature;
+    }
+}
+
 @SuppressWarnings({"checkstyle:magicnumber"})
 public class RovTest {
     @Test
@@ -49,7 +116,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
 
@@ -66,7 +134,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(false));
@@ -85,7 +154,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         scheduler.advanceTimeBy(Rov.MAX_HEARTBEAT_GAP, TimeUnit.SECONDS);
@@ -103,7 +173,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
@@ -129,7 +200,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
@@ -167,7 +239,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
@@ -182,7 +255,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
@@ -197,7 +271,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
@@ -212,7 +287,8 @@ public class RovTest {
         final TestScheduler scheduler = new TestScheduler();
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
-        final Rov rov = new Rov(eventPublisher, maestro);
+        final MockAltIMU imu = new MockAltIMU();
+        final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
         eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));

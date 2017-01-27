@@ -3,8 +3,18 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
+import com.easternedgerobotics.rov.io.Accelerometer;
+import com.easternedgerobotics.rov.io.Barometer;
+import com.easternedgerobotics.rov.io.Gyroscope;
+import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.PWM;
+import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.math.Range;
+import com.easternedgerobotics.rov.value.AccelerationValue;
+import com.easternedgerobotics.rov.value.AngularVelocityValue;
+import com.easternedgerobotics.rov.value.InternalPressureValue;
+import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.RotationValue;
 
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
@@ -64,6 +74,33 @@ final class NullMaestro extends AbstractList<NullChannel> {
     }
 }
 
+class NullAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
+    @Override
+    public AccelerationValue acceleration() {
+        return new AccelerationValue();
+    }
+
+    @Override
+    public InternalPressureValue pressure() {
+        return new InternalPressureValue();
+    }
+
+    @Override
+    public AngularVelocityValue angularVelocity() {
+        return new AngularVelocityValue();
+    }
+
+    @Override
+    public RotationValue rotation() {
+        return new RotationValue();
+    }
+
+    @Override
+    public InternalTemperatureValue temperature() {
+        return new InternalTemperatureValue();
+    }
+}
+
 public final class RovSimulator {
     private RovSimulator() {
         // ???
@@ -75,7 +112,7 @@ public final class RovSimulator {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final Rov rov = new Rov(eventPublisher, new NullMaestro());
+        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU());
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
