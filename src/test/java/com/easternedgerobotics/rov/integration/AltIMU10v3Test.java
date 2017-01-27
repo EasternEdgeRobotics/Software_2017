@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov.integration;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
+import com.easternedgerobotics.rov.io.pololu.PololuBus;
 import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AngularVelocityValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
@@ -10,7 +11,6 @@ import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.RotationValue;
 
 import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CFactory;
 import rx.Observable;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
@@ -31,16 +31,19 @@ public final class AltIMU10v3Test {
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new BasicOrder<>()));
 
-        final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
         // We want to ground SA0 because its easier than putting power to it
         // Therefore the last address bit will be low
-        final AltIMU10v3 imu = new AltIMU10v3(bus, false, Observable.interval(100, TimeUnit.MILLISECONDS));
+        final AltIMU10v3 imu = new AltIMU10v3(new PololuBus(I2CBus.BUS_1), false);
 
-        imu.pressure().subscribe(eventPublisher::emit);
-        imu.rotation().subscribe(eventPublisher::emit);
-        imu.acceleration().subscribe(eventPublisher::emit);
-        imu.angularVelocity().subscribe(eventPublisher::emit);
-        imu.temperature().subscribe(eventPublisher::emit);
+        final Observable<Long> readRate = Observable.interval(100, TimeUnit.MILLISECONDS);
+
+        readRate.subscribe(tick -> {
+            eventPublisher.emit(imu.pressure());
+            eventPublisher.emit(imu.rotation());
+            eventPublisher.emit(imu.acceleration());
+            eventPublisher.emit(imu.angularVelocity());
+            eventPublisher.emit(imu.temperature());
+        });
 
         Observable.zip(
             eventPublisher.valuesOfType(InternalPressureValue.class),
