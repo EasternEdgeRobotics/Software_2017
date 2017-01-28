@@ -112,11 +112,11 @@ public final class RovSimulator {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU());
+        final Rov rov = new Rov(Schedulers.io(), Schedulers.computation(),
+            eventPublisher, new NullMaestro(), new NullAltIMU());
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
-        rov.init(Schedulers.io(), Schedulers.computation());
         Logger.info("Started");
         eventPublisher.await();
     }
