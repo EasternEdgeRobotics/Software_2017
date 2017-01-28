@@ -1,6 +1,5 @@
 package com.easternedgerobotics.rov.control;
 
-import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.test.CollectionAssert;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
@@ -16,11 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import rx.schedulers.TestScheduler;
-import rx.subjects.TestSubject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -144,26 +138,10 @@ public class SixThrusterConfigTest {
 
     @Test
     public final void updateSixThrustersWithMotionAndFullPowerDoesEmitCorrectThrusterValue() {
-        final EventPublisher eventPublisher = Mockito.mock(EventPublisher.class);
-        final TestScheduler testScheduler = new TestScheduler();
-        final TestSubject<MotionValue> motionValues = TestSubject.create(testScheduler);
-        final TestSubject<MotionPowerValue> motionPowerValues = TestSubject.create(testScheduler);
-
-        Mockito.when(eventPublisher.valuesOfType(MotionValue.class)).thenReturn(motionValues);
-        Mockito.when(eventPublisher.valuesOfType(MotionPowerValue.class)).thenReturn(motionPowerValues);
-
-        final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(eventPublisher);
-
-        motionPowerValues.onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
-        motionValues.onNext(motionValue);
-        testScheduler.triggerActions();
-
-        sixThrusterConfig.update();
-
-        final ArgumentCaptor<SpeedValue> captor = ArgumentCaptor.forClass(SpeedValue.class);
-        Mockito.verify(eventPublisher, Mockito.times(6)).emit(captor.capture());
-        CollectionAssert.assertItemsMatchPredicateInOrder(
-            captor.getAllValues(), expectedThrusterValues, (a, b) ->
-                a.getClass().equals(b.getClass()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
+        final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig();
+        final List<SpeedValue> computedValues = Arrays.asList(
+            sixThrusterConfig.update(motionValue, new MotionPowerValue(1, 1, 1, 1, 1, 1, 1)));
+        CollectionAssert.assertItemsMatchPredicateInOrder(computedValues, expectedThrusterValues,
+            (a, b) -> a.getClass().equals(b.getClass()) && Math.abs(a.getSpeed() - b.getSpeed()) <= 0.0001);
     }
 }
