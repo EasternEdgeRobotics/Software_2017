@@ -11,12 +11,11 @@ import com.easternedgerobotics.rov.value.VideoFlipValueB;
 
 import org.pmw.tinylog.Logger;
 import rx.Observable;
-import rx.Observer;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-public final class JoystickController implements Observer<Joystick> {
+public final class JoystickController {
     static final int CAMERA_A_MOTOR_FORWARD_JOYSTICK_BUTTON = 4;
 
     static final int CAMERA_A_MOTOR_REVERSE_JOYSTICK_BUTTON = 6;
@@ -49,17 +48,9 @@ public final class JoystickController implements Observer<Joystick> {
         this.motionFunction = motionFunction;
     }
 
-    @Override
-    public void onCompleted() {
-        // ???
-    }
-
-    @Override
-    public void onError(final Throwable e) {
-        Logger.warn(e);
-    }
-
-    @Override
+    /**
+     * Initializes this controller to read from {@code joystick}.
+     */
     public void onNext(final Joystick joystick) {
         final MotionReverser reverser = new MotionReverser();
 
