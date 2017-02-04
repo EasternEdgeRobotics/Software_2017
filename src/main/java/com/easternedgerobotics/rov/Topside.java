@@ -10,7 +10,7 @@ import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
 import com.easternedgerobotics.rov.io.PilotPanel;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
-import com.easternedgerobotics.rov.io.joystick.Joysticks;
+import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.video.VideoPlayer;
 
@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
+import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -26,9 +27,12 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 public final class Topside extends Application {
     private static final float MAX_SLIDER_VALUE = 100f;
+
+    private static final long JOYSTICK_RECOVERY_INTERVAL = 1000;
 
     private EventPublisher eventPublisher;
 
@@ -61,8 +65,11 @@ public final class Topside extends Application {
             }
         });
 
-        Joysticks.logitechExtreme3dPro().subscribe(
-            new JoystickController(eventPublisher, new ExponentialMotionScale()));
+        LogitechExtremeJoystickSource.create(
+            JOYSTICK_RECOVERY_INTERVAL,
+            TimeUnit.MILLISECONDS,
+            Schedulers.io()
+            ).subscribe(new JoystickController(eventPublisher, new ExponentialMotionScale())::onNext);
         pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
             .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
