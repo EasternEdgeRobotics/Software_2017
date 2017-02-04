@@ -4,26 +4,25 @@ import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
+import com.easternedgerobotics.rov.io.Accelerometer;
+import com.easternedgerobotics.rov.io.Barometer;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.CurrentSensor;
-import com.easternedgerobotics.rov.io.LM35;
+import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Light;
-import com.easternedgerobotics.rov.io.MPX4250AP;
+import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
-import com.easternedgerobotics.rov.io.TMP36;
+import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.VoltageSensor;
+import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
+import com.easternedgerobotics.rov.io.pololu.PololuBus;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
-import com.easternedgerobotics.rov.value.ExternalPressureValueA;
-import com.easternedgerobotics.rov.value.ExternalPressureValueB;
-import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
-import com.easternedgerobotics.rov.value.InternalPressureValue;
-import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
@@ -34,6 +33,7 @@ import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
+import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
 import org.apache.commons.cli.CommandLine;
@@ -66,6 +66,8 @@ final class Rov {
 
     static final long CPU_POLL_INTERVAL = 1;
 
+    static final long SENSOR_POLL_INTERVAL = 10;
+
     static final long SLEEP_DURATION = 100;
 
     static final byte MAESTRO_DEVICE_NUMBER = 0x01;
@@ -90,16 +92,6 @@ final class Rov {
 
     static final byte LIGHT_CHANNEL = 23;
 
-    static final byte INTERNAL_TEMPERATURE_SENSOR_CHANNEL = 1;
-
-    static final byte EXTERNAL_TEMPERATURE_SENSOR_CHANNEL = 3;
-
-    static final byte INTERNAL_PRESSURE_SENSOR_CHANNEL = 2;
-
-    static final byte EXTERNAL_PRESSURE_SENSOR_A_CHANNEL = 4;
-
-    static final byte EXTERNAL_PRESSURE_SENSOR_B_CHANNEL = 5;
-
     static final byte VOLTAGE_SENSOR_05V_CHANNEL = 8;
 
     static final byte VOLTAGE_SENSOR_12V_CHANNEL = 7;
@@ -112,15 +104,9 @@ final class Rov {
 
     static final byte CURRENT_SENSOR_48V_CHANNEL = 9;
 
-    private final LM35 internalTemperatureSensor;
+    static final int ALT_IMU_I2C_BUS = I2CBus.BUS_1;
 
-    private final TMP36 externalTemperatureSensor;
-
-    private final MPX4250AP internalPressureSensor;
-
-    private final MPX4250AP externalPressureSensorA;
-
-    private final MPX4250AP externalPressureSensorB;
+    static final boolean ALT_IMU_SA0_HIGH = false;
 
     private final SixThrusterConfig thrusterConfig;
 
@@ -134,15 +120,27 @@ final class Rov {
 
     private final List<CurrentSensor> currentSensors;
 
+    private final Accelerometer accelerometer;
+
+    private final Barometer barometer;
+
+    private final Thermometer thermometer;
+
+    private final Gyroscope gyroscope;
+
+    private final Magnetometer magnetometer;
+
     private final EventPublisher eventPublisher;
 
     private final AtomicBoolean dead = new AtomicBoolean();
 
     private final Subject<Void, Void> killSwitch = PublishSubject.create();
 
-    <T extends ADC & PWM> Rov(
+    <AltIMU extends Accelerometer & Barometer & Thermometer & Gyroscope & Magnetometer,
+            MaestroChannel extends ADC & PWM> Rov(
         final EventPublisher eventPublisher,
-        final List<T> channels
+        final List<MaestroChannel> channels,
+        final AltIMU imu
     ) {
         this.eventPublisher = eventPublisher;
 
@@ -225,28 +223,23 @@ final class Rov {
             )
         );
 
-        this.voltageSensors = Collections.unmodifiableList(Arrays.asList(
+        voltageSensors = Collections.unmodifiableList(Arrays.asList(
             VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL)),
             VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL)),
             VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))
         ));
 
-        this.currentSensors = Collections.unmodifiableList(Arrays.asList(
+        currentSensors = Collections.unmodifiableList(Arrays.asList(
             CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL)),
             CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL)),
             CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))
         ));
 
-        this.internalTemperatureSensor = new LM35(
-            channels.get(INTERNAL_TEMPERATURE_SENSOR_CHANNEL));
-        this.externalTemperatureSensor = new TMP36(
-            channels.get(EXTERNAL_TEMPERATURE_SENSOR_CHANNEL));
-        this.internalPressureSensor = new MPX4250AP(
-            channels.get(INTERNAL_PRESSURE_SENSOR_CHANNEL));
-        this.externalPressureSensorA = new MPX4250AP(
-            channels.get(EXTERNAL_PRESSURE_SENSOR_A_CHANNEL));
-        this.externalPressureSensorB = new MPX4250AP(
-            channels.get(EXTERNAL_PRESSURE_SENSOR_B_CHANNEL));
+        barometer = () -> imu.pressure();
+        magnetometer = () -> imu.rotation();
+        accelerometer = () -> imu.acceleration();
+        gyroscope = () -> imu.angularVelocity();
+        thermometer = () -> imu.temperature();
     }
 
     void shutdown() {
@@ -289,6 +282,17 @@ final class Rov {
             .observeOn(io)
             .takeUntil(killSwitch)
             .subscribe(this::beat, RuntimeException::new, () -> dead.set(true));
+
+        final Observable<Long> sensorInterval = Observable.interval(SENSOR_POLL_INTERVAL, TimeUnit.MILLISECONDS, io);
+        sensorInterval.subscribe(tick -> {
+            eventPublisher.emit(barometer.pressure());
+            eventPublisher.emit(accelerometer.acceleration());
+            eventPublisher.emit(gyroscope.angularVelocity());
+            eventPublisher.emit(magnetometer.rotation());
+            eventPublisher.emit(thermometer.temperature());
+            voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
+            currentSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
+        });
     }
 
     private void thrustersUpdate() {
@@ -311,14 +315,6 @@ final class Rov {
             lights.forEach(Light::flash);
             motors.forEach(Motor::writeZero);
         }
-
-        voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
-        currentSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
-        eventPublisher.emit(new InternalTemperatureValue(internalTemperatureSensor.read()));
-        eventPublisher.emit(new ExternalTemperatureValue(externalTemperatureSensor.read()));
-        eventPublisher.emit(new InternalPressureValue(internalPressureSensor.read()));
-        eventPublisher.emit(new ExternalPressureValueA(externalPressureSensorA.read()));
-        eventPublisher.emit(new ExternalPressureValueB(externalPressureSensorB.read()));
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
@@ -362,7 +358,10 @@ final class Rov {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final Serial serial = SerialFactory.createInstance();
-            final Rov rov = new Rov(eventPublisher, new Maestro<>(serial, MAESTRO_DEVICE_NUMBER));
+            final Rov rov = new Rov(
+                eventPublisher,
+                new Maestro<>(serial, MAESTRO_DEVICE_NUMBER),
+                new AltIMU10v3(new PololuBus(ALT_IMU_I2C_BUS), ALT_IMU_SA0_HIGH));
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
