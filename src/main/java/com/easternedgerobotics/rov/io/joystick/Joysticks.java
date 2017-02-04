@@ -1,24 +1,18 @@
 package com.easternedgerobotics.rov.io.joystick;
 
-import net.java.games.input.Component;
+import com.esotericsoftware.minlog.Log;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Event;
-import net.java.games.input.EventQueue;
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public final class Joysticks {
+final class Joysticks {
     static void load(final Path directory, final String resource) {
         try {
             final ClassLoader loader = Joysticks.class.getClassLoader();
@@ -56,51 +50,27 @@ public final class Joysticks {
 
     }
 
-    public static Observable<Joystick> logitechExtreme3dPro() {
-        final String name = ".*Logitech.*Extreme.*3D.*";
-        final Observable<Controller> joystick = availableControllers()
-            .takeFirst(controller -> Pattern.matches(name, controller.getName()));
-
-        return joystick.map(js -> new LogitechExtremeJoystick(
-            events(js),
-            axes(js),
-            buttons(js)
-        ));
-    }
-
-    private static Observable<Event> events(final Controller controller) {
-        final Observable<Event> events = Observable.create(subscriber -> {
-            final EventQueue eventQueue = controller.getEventQueue();
-            while (!subscriber.isUnsubscribed()) {
-                if (!controller.poll()) {
-                    subscriber.onError(new JoystickDisconnectedException());
-                    return;
-                }
-
-                final Event event = new Event();
-                if (!eventQueue.getNextEvent(event)) {
-                    continue;
-                }
-                subscriber.onNext(event);
-            }
-        });
-
-        return events.subscribeOn(Schedulers.io()).share();
-    }
-
-    private static List<Component> axes(final Controller controller) {
-        return Stream.of(controller.getComponents())
-            .filter(component -> component.getIdentifier() instanceof Component.Identifier.Axis)
-            .collect(Collectors.toList());
-    }
-
-    private static List<Component> buttons(final Controller controller) {
-        return Stream.of(controller.getComponents())
-            .filter(component -> component.getIdentifier() instanceof Component.Identifier.Button)
-            .collect(Collectors.toList());
-    }
-
-    private static Observable<Controller> availableControllers() {
-        return Observable.defer(() -> Observable.from(ControllerEnvironment.getDefaultEnvironment().getControllers()));
+    /**
+     * Returns a fresh array of available controllers.
+     * Array is made fresh by instantiating a {@code DefaultControllerEnvironment}
+     *
+     * @return An array containing all available controllers
+     */
+    static Controller[] availableControllers() {
+        try {
+            // Device list is never updated unless this hidden object is instantiated
+            @SuppressWarnings("unchecked")
+            final Constructor<ControllerEnvironment> constructor = (Constructor<ControllerEnvironment>)
+                    Class.forName("net.java.games.input.DefaultControllerEnvironment").getDeclaredConstructors()[0];
+            constructor.setAccessible(true);
+            return constructor.newInstance().getControllers();
+        } catch (final InvocationTargetException
+                | ClassNotFoundException
+                | IllegalAccessException
+                | InstantiationException e
+        ) {
+            Log.error("Unable to scan for joysticks");
+            return new Controller[]{};
+        }
     }
 }
