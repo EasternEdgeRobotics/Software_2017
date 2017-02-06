@@ -5,31 +5,66 @@ import com.easternedgerobotics.rov.value.MotionValue;
 import net.java.games.input.Component;
 import net.java.games.input.Event;
 import rx.Observable;
+import rx.Scheduler;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-public class LogitechExtremeJoystick implements Joystick {
-    public static final int AXIS_INDEX_HEAVE = 3;
+class LogitechExtremeJoystick implements Joystick {
+    /**
+     * Delay required to avoid incorrect axis value events on re-connect.
+     */
+    static final long INITIAL_INPUT_DELAY = 1000;
 
-    public static final int AXIS_INDEX_SWAY = 0;
-
-    public static final int AXIS_INDEX_SURGE = 1;
-
-    public static final int AXIS_INDEX_YAW = 2;
-
+    /**
+     * Event objects being emitted by the joystick source.
+     */
     private final Observable<Event> events;
 
-    private final List<Component> axes;
-
+    /**
+     * A list of buttons found on the Logitech Extreme Joystick.
+     */
     private final List<Component> buttons;
 
+    /**
+     * Scheduler used to skip startup joystick events.
+     */
+    private final Scheduler scheduler;
+
+    /**
+     * Latest value polled for heave.
+     */
+    private float heave;
+
+    /**
+     * Latest value polled for sway.
+     */
+    private float sway;
+
+    /**
+     * Latest value polled for surge.
+     */
+    private float surge;
+
+    /**
+     * Latest value polled for yaw.
+     */
+    private float yaw;
+
+    /**
+     * Create a Logitech Extreme Joystick object.
+     *
+     * @param scheduler the scheduler to use during timed operations.
+     * @param events events from the device.
+     * @param buttons all active buttons on the device.
+     */
     public LogitechExtremeJoystick(
+        final Scheduler scheduler,
         final Observable<Event> events,
-        final List<Component> axes,
         final List<Component> buttons
     ) {
+        this.scheduler = scheduler;
         this.events = events.share();
-        this.axes = axes;
         this.buttons = buttons;
     }
 
@@ -54,26 +89,32 @@ public class LogitechExtremeJoystick implements Joystick {
     @Override
     public final Observable<MotionValue> axes() {
         final Observable<Boolean> joystickTrigger = button(1).startWith(false);
-
-        return Observable.switchOnNext(
-            joystickTrigger.map(press ->
-                events.filter(this::isAxisEvent).map(e -> createMotionValue(press))));
+        final Observable<Component> components = events.map(Event::getComponent)
+            .filter(c -> c.getIdentifier() instanceof Component.Identifier.Axis)
+            .skip(INITIAL_INPUT_DELAY, TimeUnit.MILLISECONDS, scheduler);
+        return components.withLatestFrom(joystickTrigger, this::createMotionValue);
     }
 
-    private boolean isAxisEvent(final Event event) {
-        return event.getComponent().getIdentifier() instanceof Component.Identifier.Axis;
-    }
-
-    private MotionValue createMotionValue(final boolean rolling) {
-        final float heave = axes.get(AXIS_INDEX_HEAVE).getPollData();
-        final float sway = -axes.get(AXIS_INDEX_SWAY).getPollData();
-        final float surge = axes.get(AXIS_INDEX_SURGE).getPollData();
-        final float yaw = axes.get(AXIS_INDEX_YAW).getPollData();
-
+    /**
+     * Map the current axes values into a motion value.
+     *
+     * @param component the latest axis component to be updated.
+     * @param rolling if the ROV is in a roll operation.
+     * @return the latest motion value.
+     */
+    private MotionValue createMotionValue(final Component component, final boolean rolling) {
+        if (component.getIdentifier() == Component.Identifier.Axis.X) {
+            sway = -component.getPollData();
+        } else if (component.getIdentifier() == Component.Identifier.Axis.Y) {
+            surge = component.getPollData();
+        } else if (component.getIdentifier() == Component.Identifier.Axis.RZ) {
+            yaw = component.getPollData();
+        } else if (component.getIdentifier() == Component.Identifier.Axis.SLIDER) {
+            heave = component.getPollData();
+        }
         if (rolling) {
             return new MotionValue(heave, 0, surge, 0, yaw, -sway);
         }
-
         return new MotionValue(heave, sway, surge, 0, yaw, 0);
     }
 }

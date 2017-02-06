@@ -27,14 +27,15 @@ public final class LogitechExtremeJoystickSource {
      *
      * @param sleepDuration The polling interval for recovering a disconnected joystick.
      * @param unit The unit of time for {@code sleepDuration}.
-     * @param clock The scheduler for joystick recovery.
+     * @param scheduler The scheduler for joystick recovery.
      *
      * @return An {@code Observable} that sources {@code Joystick}s.
      */
     public static Observable<Joystick> create(
             final long sleepDuration,
             final TimeUnit unit,
-            final Scheduler scheduler) {
+            final Scheduler scheduler
+    ) {
         final Observable<Long> interval = Observable.interval(sleepDuration, unit, scheduler);
         final LogitechExtremeJoystickSource logitechSource = new LogitechExtremeJoystickSource(interval, scheduler);
         return logitechSource.getSource();
@@ -47,8 +48,8 @@ public final class LogitechExtremeJoystickSource {
                 controller = connect();
                 if (controller != null) {
                     return new LogitechExtremeJoystick(
+                        scheduler,
                         createEvents(controller),
-                        createAxes(controller),
                         createButtons(controller));
                 }
             }
@@ -85,12 +86,6 @@ public final class LogitechExtremeJoystickSource {
             .takeUntil(event -> !controller.poll())
             .filter(event -> event != null)
             .share();
-    }
-
-    private static List<Component> createAxes(final Controller controller) {
-        return Stream.of(controller.getComponents())
-            .filter(component -> component.getIdentifier() instanceof Component.Identifier.Axis)
-            .collect(Collectors.toList());
     }
 
     private static List<Component> createButtons(final Controller controller) {
