@@ -7,11 +7,35 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 import rx.schedulers.Schedulers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("InnerAssignment")
 public final class CpuInformation {
     private final Observable<Long> interval;
+
+    private static final boolean RASPBIAN;
+
+    static {
+        boolean raspbian = false;
+        final File file = new File("/etc", "os-release");
+        if (file.exists()) {
+            try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+                String line;
+                while (!raspbian && (line = br.readLine()) != null) {
+                    line = line.toLowerCase();
+                    raspbian = line.contains("raspbian") && line.contains("name");
+                }
+            } catch (final Exception e) {
+                raspbian = false;
+            }
+        }
+        RASPBIAN = raspbian;
+    }
 
     /**
      * Constructs a CpuInformation instance that polls CPU properties at the specified interval.
@@ -33,11 +57,16 @@ public final class CpuInformation {
     }
 
     private CpuValue pollCpu(final long tick) {
-        try {
-            return new CpuValue(
-                SystemInfo.getClockFrequencyArm(), SystemInfo.getCpuTemperature(), SystemInfo.getCpuVoltage());
-        } catch (final InterruptedException | IOException e) {
-            throw Exceptions.propagate(e);
+        if (RASPBIAN) {
+            try {
+                return new CpuValue(
+                    SystemInfo.getClockFrequencyArm(),
+                    SystemInfo.getCpuTemperature(),
+                    SystemInfo.getCpuVoltage());
+            } catch (final InterruptedException | IOException e) {
+                throw Exceptions.propagate(e);
+            }
         }
+        return new CpuValue();
     }
 }
