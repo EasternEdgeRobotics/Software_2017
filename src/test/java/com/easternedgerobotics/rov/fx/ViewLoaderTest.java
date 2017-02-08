@@ -5,13 +5,21 @@ import com.easternedgerobotics.rov.test.JfxApplicationThreadRule;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.awt.GraphicsEnvironment;
 import java.util.Collections;
 import java.util.prefs.BackingStoreException;
 
 public class ViewLoaderTest {
+    @BeforeClass
+    public static void assumeHeadless() {
+        Assume.assumeFalse("Test only valid on non-headless system", GraphicsEnvironment.isHeadless());
+    }
+
     @Rule
     public JfxApplicationThreadRule jfxRule = new JfxApplicationThreadRule();
 
