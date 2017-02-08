@@ -3,36 +3,22 @@ package com.easternedgerobotics.rov.io;
 import com.easternedgerobotics.rov.value.CpuValue;
 
 import com.pi4j.system.SystemInfo;
-import rx.Observable;
 import rx.exceptions.Exceptions;
-import rx.schedulers.Schedulers;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public final class CpuInformation {
-    private final Observable<Long> interval;
-
     /**
-     * Constructs a CpuInformation instance that polls CPU properties at the specified interval.
+     * Returns raspberry pi CPU information. Returns default CPU value if not on a raspberry pi.
      *
-     * @param interval the interval at which to poll the CPU properties.
-     * @param timeUnit the {@code TimeUnit} the interval is specified in.
+     * @return the current CPU value.
      */
-    public CpuInformation(final long interval, final TimeUnit timeUnit) {
-        this.interval = Observable.interval(interval, timeUnit);
-    }
-
-    /**
-     * Returns an observable stream of CPU values.
-     *
-     * @return a stream of CPU values.
-     */
-    public final Observable<CpuValue> observe() {
-        return interval.observeOn(Schedulers.io()).map(this::pollCpu);
-    }
-
-    private CpuValue pollCpu(final long tick) {
+    public CpuValue pollCpu() {
+        if (Files.notExists(Paths.get("/opt/vc/bin/vcgencmd"))) {
+            return new CpuValue();
+        }
         try {
             return new CpuValue(
                 SystemInfo.getClockFrequencyArm(), SystemInfo.getCpuTemperature(), SystemInfo.getCpuVoltage());

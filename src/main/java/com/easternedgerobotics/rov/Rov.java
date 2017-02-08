@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.control.DataMediation;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
@@ -24,10 +25,11 @@ import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
+import com.easternedgerobotics.rov.value.MotionPowerValue;
+import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
 import com.easternedgerobotics.rov.value.PortVertSpeedValue;
-import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
@@ -56,7 +58,6 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -64,9 +65,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class Rov {
     static final long MAX_HEARTBEAT_GAP = 5;
 
-    static final long CPU_POLL_INTERVAL = 1;
-
-    static final long SENSOR_POLL_INTERVAL = 10;
+    static final long POLLING_INTERVAL = 10;
 
     static final long SLEEP_DURATION = 100;
 
@@ -108,138 +107,102 @@ final class Rov {
 
     static final boolean ALT_IMU_SA0_HIGH = false;
 
-    private final SixThrusterConfig thrusterConfig;
-
-    private final List<Thruster> thrusters;
-
-    private final List<Motor> motors;
-
-    private final List<Light> lights;
-
-    private final List<VoltageSensor> voltageSensors;
-
-    private final List<CurrentSensor> currentSensors;
-
-    private final Accelerometer accelerometer;
-
-    private final Barometer barometer;
-
-    private final Thermometer thermometer;
-
-    private final Gyroscope gyroscope;
-
-    private final Magnetometer magnetometer;
-
-    private final EventPublisher eventPublisher;
-
     private final AtomicBoolean dead = new AtomicBoolean();
 
     private final Subject<Void, Void> killSwitch = PublishSubject.create();
 
+    private final DataMediation physicalOperations;
+
+    private final DataMediation pollingOperations;
+
     <AltIMU extends Accelerometer & Barometer & Thermometer & Gyroscope & Magnetometer,
             MaestroChannel extends ADC & PWM> Rov(
+        final Scheduler io, final Scheduler clock,
         final EventPublisher eventPublisher,
         final List<MaestroChannel> channels,
         final AltIMU imu
     ) {
-        this.eventPublisher = eventPublisher;
+        physicalOperations = new DataMediation(SLEEP_DURATION, TimeUnit.MILLISECONDS, io);
+        pollingOperations = new DataMediation(POLLING_INTERVAL, TimeUnit.MILLISECONDS, io);
 
-        final PortAftSpeedValue portAft = new PortAftSpeedValue();
-        final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
-        final PortForeSpeedValue portFore = new PortForeSpeedValue();
-        final StarboardForeSpeedValue starboardFore = new StarboardForeSpeedValue();
-        final PortVertSpeedValue portVert = new PortVertSpeedValue();
-        final StarboardVertSpeedValue starboardVert = new StarboardVertSpeedValue();
+        Logger.debug("Wiring up heartbeat, timeout, and operation controller state");
 
-        this.thrusterConfig = new SixThrusterConfig(eventPublisher);
+        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
+            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
+            .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
+            .concatWith(Observable.never());
 
-        this.motors = Collections.unmodifiableList(Arrays.asList(
-            new Motor(
-                eventPublisher
-                    .valuesOfType(CameraSpeedValueA.class)
-                    .startWith(new CameraSpeedValueA())
-                    .cast(SpeedValue.class),
-                channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
-            new Motor(
-                eventPublisher
-                    .valuesOfType(CameraSpeedValueB.class)
-                    .startWith(new CameraSpeedValueB())
-                    .cast(SpeedValue.class),
-                channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
-            new Motor(
-                eventPublisher
-                    .valuesOfType(ToolingSpeedValue.class)
-                    .startWith(new ToolingSpeedValue())
-                    .cast(SpeedValue.class),
-                channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
-        ));
+        final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
 
-        this.thrusters = Collections.unmodifiableList(Arrays.asList(
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(PortAftSpeedValue.class)
-                    .startWith(portAft)
-                    .cast(SpeedValue.class),
-                channels.get(PORT_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(StarboardAftSpeedValue.class)
-                    .startWith(starboardAft)
-                    .cast(SpeedValue.class),
-                channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(PortForeSpeedValue.class)
-                    .startWith(portFore)
-                    .cast(SpeedValue.class),
-                channels.get(PORT_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(StarboardForeSpeedValue.class)
-                    .startWith(starboardFore)
-                    .cast(SpeedValue.class),
-                channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(PortVertSpeedValue.class)
-                    .startWith(portVert)
-                    .cast(SpeedValue.class),
-                channels.get(PORT_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
-            new Thruster(
-                eventPublisher
-                    .valuesOfType(StarboardVertSpeedValue.class)
-                    .startWith(starboardVert)
-                    .cast(SpeedValue.class),
-                channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
-        ));
+        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock).withLatestFrom(
+            heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
+            .observeOn(io)
+            .subscribe(this::beat, Logger::error, () -> dead.set(true));
 
-        this.lights = Collections.singletonList(
-            new Light(
-                eventPublisher
-                    .valuesOfType(LightSpeedValue.class)
-                    .startWith(new LightSpeedValue())
-                    .cast(SpeedValue.class),
-                channels.get(LIGHT_CHANNEL).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
-            )
-        );
+        Logger.debug("Wiring up operation critical items; Thrusters, Motors, Lights");
 
-        voltageSensors = Collections.unmodifiableList(Arrays.asList(
-            VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL)),
-            VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL)),
-            VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))
-        ));
+        final SixThrusterConfig thrusterConfig = new SixThrusterConfig();
+        physicalOperations
+            .mediate(eventPublisher.valuesOfType(MotionValue.class), new MotionValue(),
+                eventPublisher.valuesOfType(MotionPowerValue.class), new MotionPowerValue(),
+                (m, mp) -> Arrays.stream(thrusterConfig.update(m, mp)).forEach(eventPublisher::emit));
 
-        currentSensors = Collections.unmodifiableList(Arrays.asList(
-            CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL)),
-            CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL)),
-            CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))
-        ));
+        final Range thrusterRange = new Range(Thruster.MAX_REV, Thruster.MAX_FWD);
+        physicalOperations
+            .mediate(eventPublisher.valuesOfType(PortAftSpeedValue.class), new PortAftSpeedValue(),
+                new Thruster(channels.get(PORT_AFT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .mediate(eventPublisher.valuesOfType(StarboardAftSpeedValue.class), new StarboardAftSpeedValue(),
+                new Thruster(channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .mediate(eventPublisher.valuesOfType(PortForeSpeedValue.class), new PortForeSpeedValue(),
+                new Thruster(channels.get(PORT_FORE_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .mediate(eventPublisher.valuesOfType(StarboardForeSpeedValue.class), new StarboardForeSpeedValue(),
+                new Thruster(channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .mediate(eventPublisher.valuesOfType(PortVertSpeedValue.class), new PortVertSpeedValue(),
+                new Thruster(channels.get(PORT_VERT_CHANNEL).setOutputRange(thrusterRange))::apply)
+            .mediate(eventPublisher.valuesOfType(StarboardVertSpeedValue.class), new StarboardVertSpeedValue(),
+                new Thruster(channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(thrusterRange))::apply);
 
-        barometer = () -> imu.pressure();
-        magnetometer = () -> imu.rotation();
-        accelerometer = () -> imu.acceleration();
-        gyroscope = () -> imu.angularVelocity();
-        thermometer = () -> imu.temperature();
+        final Range motorRange = new Range(Motor.MAX_REV, Motor.MAX_FWD);
+        physicalOperations
+            .mediate(eventPublisher.valuesOfType(CameraSpeedValueA.class), new CameraSpeedValueA(),
+                new Motor(channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(motorRange))::write)
+            .mediate(eventPublisher.valuesOfType(CameraSpeedValueB.class), new CameraSpeedValueB(),
+                new Motor(channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(motorRange))::write)
+            .mediate(eventPublisher.valuesOfType(ToolingSpeedValue.class), new ToolingSpeedValue(),
+                new Motor(channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(motorRange))::write);
+
+        final Range lightRange = new Range(Light.MAX_REV, Light.MAX_FWD);
+        physicalOperations
+            .mediate(eventPublisher.valuesOfType(LightSpeedValue.class), new LightSpeedValue(),
+                new Light(channels.get(LIGHT_CHANNEL).setOutputRange(lightRange))::write);
+
+        physicalOperations.setIdle();
+
+        Logger.debug("Wiring up operation sensor items; Voltage, Current, IMU, CPU Info");
+
+        pollingOperations
+            .mediate(VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))::read, eventPublisher::emit)
+            .mediate(() -> imu.pressure(), eventPublisher::emit)
+            .mediate(() -> imu.rotation(), eventPublisher::emit)
+            .mediate(() -> imu.acceleration(), eventPublisher::emit)
+            .mediate(() -> imu.angularVelocity(), eventPublisher::emit)
+            .mediate(() -> imu.temperature(), eventPublisher::emit)
+            .mediate(new CpuInformation()::pollCpu, eventPublisher::emit);
+
+        pollingOperations.setActive();
+    }
+
+    private void beat(final HeartbeatValue heartbeat) {
+        if (heartbeat.getOperational()) {
+            physicalOperations.setActive();
+        } else {
+            physicalOperations.setIdle();
+        }
     }
 
     void shutdown() {
@@ -250,71 +213,8 @@ final class Rov {
                 break;
             }
         }
-
-        motors.forEach(Motor::writeZero);
-        lights.forEach(Light::writeZero);
-        thrusters.forEach(Thruster::writeZero);
-    }
-
-    /**
-     * Initialises the ROV, attaching the hardware updates to their event source. The ROV will "timeout"
-     * if communication with the topside is lost or the received heartbeat value indicates a non-operational
-     * status and will shutdown.
-     * @param io the scheduler to use for device I/O
-     * @param clock the scheduler to use for timing
-     */
-    void init(final Scheduler io, final Scheduler clock) {
-        Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
-            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
-            .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
-            .concatWith(Observable.never());
-
-        final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
-        final CpuInformation cpuInformation = new CpuInformation(CPU_POLL_INTERVAL, TimeUnit.SECONDS);
-
-        thrusters.forEach(Thruster::writeZero);
-
-        cpuInformation.observe().subscribe(eventPublisher::emit, Logger::warn);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock)
-            .withLatestFrom(
-                heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
-            .observeOn(io)
-            .takeUntil(killSwitch)
-            .subscribe(this::beat, RuntimeException::new, () -> dead.set(true));
-
-        final Observable<Long> sensorInterval = Observable.interval(SENSOR_POLL_INTERVAL, TimeUnit.MILLISECONDS, io);
-        sensorInterval.subscribe(tick -> {
-            eventPublisher.emit(barometer.pressure());
-            eventPublisher.emit(accelerometer.acceleration());
-            eventPublisher.emit(gyroscope.angularVelocity());
-            eventPublisher.emit(magnetometer.rotation());
-            eventPublisher.emit(thermometer.temperature());
-            voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
-            currentSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
-        });
-    }
-
-    private void thrustersUpdate() {
-        thrusterConfig.update();
-        thrusters.forEach(Thruster::write);
-    }
-
-    private void softShutdown() {
-        thrusterConfig.updateZero();
-        thrusters.forEach(Thruster::writeZero);
-    }
-
-    private void beat(final HeartbeatValue heartbeat) {
-        if (heartbeat.getOperational()) {
-            thrustersUpdate();
-            lights.forEach(Light::write);
-            motors.forEach(Motor::write);
-        } else {
-            softShutdown();
-            lights.forEach(Light::flash);
-            motors.forEach(Motor::writeZero);
-        }
+        physicalOperations.dispose();
+        pollingOperations.dispose();
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {
@@ -358,15 +258,13 @@ final class Rov {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final Serial serial = SerialFactory.createInstance();
-            final Rov rov = new Rov(
+            serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
+            final Rov rov = new Rov(Schedulers.io(), Schedulers.computation(),
                 eventPublisher,
                 new Maestro<>(serial, MAESTRO_DEVICE_NUMBER),
                 new AltIMU10v3(new PololuBus(ALT_IMU_I2C_BUS), ALT_IMU_SA0_HIGH));
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
-
-            serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
-            rov.init(Schedulers.io(), Schedulers.computation());
 
             Logger.info("Started");
             eventPublisher.await();
