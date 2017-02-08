@@ -1,9 +1,13 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.test.OrgPwmTinylogSuppressionRule;
+import com.easternedgerobotics.rov.test.SunUtilLoggingSuppressionRule;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -12,6 +16,12 @@ public class MotionPowerProfileTest {
     private static final String PROFILE_TEST_NODE = "test-profiles";
 
     private static final int PROFILE_COUNT = 9;
+
+    @Rule
+    public final TestRule motionPowerProfileLoggerRule = new OrgPwmTinylogSuppressionRule(MotionPowerProfile.class);
+
+    @Rule
+    public final TestRule javaUtilPrefsRule = new SunUtilLoggingSuppressionRule("java.util.prefs");
 
     @Test
     public final void doProfilesStartEmpty() {
