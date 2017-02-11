@@ -7,6 +7,7 @@ import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thermometer;
+import com.easternedgerobotics.rov.test.OrgPwmTinylogSuppressionRule;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
 import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AngularVelocityValue;
@@ -22,7 +23,9 @@ import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 import rx.schedulers.TestScheduler;
@@ -111,6 +114,9 @@ class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Ma
 
 @SuppressWarnings({"checkstyle:magicnumber"})
 public class RovTest {
+    @Rule
+    public final TestRule rovLoggerRule = new OrgPwmTinylogSuppressionRule(Rov.class);
+
     @Test
     public final void doesInitializeThrustersWithZero() {
         final TestScheduler scheduler = new TestScheduler();
