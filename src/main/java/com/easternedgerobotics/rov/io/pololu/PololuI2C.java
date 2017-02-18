@@ -3,7 +3,7 @@ package com.easternedgerobotics.rov.io.pololu;
 import com.easternedgerobotics.rov.io.I2C;
 
 import com.pi4j.io.i2c.I2CDevice;
-import rx.exceptions.Exceptions;
+import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
@@ -41,7 +41,7 @@ final class PololuI2C implements I2C {
         try {
             device.write(writeAddress, value);
         } catch (final IOException e) {
-            throw Exceptions.propagate(e);
+            Logger.warn(e);
         } finally {
             lock.unlock();
         }
@@ -53,7 +53,7 @@ final class PololuI2C implements I2C {
         try {
             device.write(writeAddress, buffer, 0, buffer.length);
         } catch (final IOException e) {
-            throw Exceptions.propagate(e);
+            Logger.warn(e);
         } finally {
             lock.unlock();
         }
@@ -65,7 +65,8 @@ final class PololuI2C implements I2C {
         try {
             return (byte) device.read(readAddress);
         } catch (final IOException e) {
-            throw Exceptions.propagate(e);
+            Logger.warn(e);
+            return 0;
         } finally {
             lock.unlock();
         }
@@ -79,7 +80,8 @@ final class PololuI2C implements I2C {
             device.read(multiReadAddress(readAddress), readBuffer, 0, readBuffer.length);
             return readBuffer;
         } catch (final IOException e) {
-            throw Exceptions.propagate(e);
+            Logger.warn(e);
+            return new byte[readLength];
         } finally {
             lock.unlock();
         }
