@@ -23,8 +23,8 @@ public class SliderView implements View {
 
     @Inject
     public SliderView() {
-        final int tickInterval = 10;
-        final int spacing = 10;
+        final int tickInterval = 20;
+        final int spacing = 15;
 
         slider.setOrientation(Orientation.VERTICAL);
         slider.setMajorTickUnit(tickInterval);
