@@ -1,7 +1,7 @@
 # See also: <http://docs.ansible.com/ansible/intro_inventory.html#list-of-behavioral-inventory-parameters>
 
 [captain]
-192.168.88.3 ansible_user=vagrant ansible_ssh_pass=vagrant
+192.168.88.3 ansible_user=ubuntu ansible_ssh_pass=eedge
 
 [topside]
 192.168.88.2 ansible_user=eedge ansible_ssh_pass=eedge ansible_sudo_pass=eedge
