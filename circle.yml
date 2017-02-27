@@ -6,15 +6,30 @@ machine:
   java:
     version: oraclejdk8
 dependencies:
+  # Save a backup of installed apps to speed up building
+  cache_directories:
+    - "gradle"
+    - "/home/ubuntu/.gradle/caches/"
   pre:
-    - sudo add-apt-repository -y ppa:cwchien/gradle
-    - sudo apt-get update
-    - sudo apt-get install gradle-2.14
+    - |
+      # Download gradle and install
+      if ! [[ -d gradle ]]; then
+        wget https://services.gradle.org/distributions/gradle-3.4-bin.zip
+        unzip gradle-3.4-bin.zip
+        mv gradle-3.4 gradle
+        # Force CCI to cache grade plugin jars
+        gradle/bin/gradle build
+        gradle/bin/gradle jacocoTestReport
+      fi
+    # Force CCI to cache normal dependency jars
+    - gradle/bin/gradle dependencies
+  override:
+    - echo "Disable inference"
 general:
   artifacts:
     - build/reports
 test:
   pre:
-    - gradle check
+    - gradle/bin/gradle check
   override:
-    - gradle jacocoTestReport
+    - gradle/bin/gradle jacocoTestReport
