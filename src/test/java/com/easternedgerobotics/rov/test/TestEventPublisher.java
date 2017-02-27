@@ -3,7 +3,7 @@ package com.easternedgerobotics.rov.test;
 import com.easternedgerobotics.rov.event.EventPublisher;
 
 import rx.Observable;
-import rx.observers.TestObserver;
+import rx.observers.TestSubscriber;
 import rx.schedulers.TestScheduler;
 import rx.subjects.TestSubject;
 
@@ -20,8 +20,8 @@ public final class TestEventPublisher implements EventPublisher {
         this.subjects = new HashMap<>();
     }
 
-    public final <T> TestObserver<T> testObserver(final Class<T> clazz) {
-        return new TestObserver<>(subject(clazz));
+    public final <T> TestSubscriber<T> testObserver(final Class<T> clazz) {
+        return new TestSubscriber<>(subject(clazz));
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import rx.Observable;
 import rx.observers.TestSubscriber;
@@ -51,7 +51,7 @@ public final class JoystickControllerButtonTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);

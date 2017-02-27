@@ -37,10 +37,10 @@ public class MainViewController implements ViewController {
         subscriptions.add(
             Observable.interval(HEARTBEAT_GAP, TimeUnit.SECONDS, Schedulers.io())
                 .withLatestFrom(
-                    JavaFxObservable.fromObservableValue(view.button.selectedProperty()).startWith(false),
+                    JavaFxObservable.valuesOf(view.button.selectedProperty()).startWith(false),
                     (tick, beat) -> beat)
                 .subscribe(this::heartbeat));
-        subscriptions.add(JavaFxObservable.fromObservableValue(view.button.selectedProperty())
+        subscriptions.add(JavaFxObservable.valuesOf(view.button.selectedProperty())
             .subscribe(this::onSelected));
         subscriptions.add(pilotPanel.emergencyStopClick().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(this::onEmergencyStopClick));
