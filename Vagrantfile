@@ -46,15 +46,19 @@ Vagrant.configure(2) do |config|
     config.vm.define "captain", autostart: false do |captain|
         network captain, ip: "192.168.88.3"
 
-        captain.vm.provision "shell",
-            privileged: false,
-            name: "Install Ansible",
-            inline: %(
-                sudo apt-get -y install cowsay
-                sudo apt-add-repository -y ppa:ansible/ansible
-                sudo apt-get update
-                sudo apt-get -y install ansible
-            )
+        config.vm.provision "shell" do |shell|
+            shell.name = "Update Default Password",
+            shell.inline = "echo 'ubuntu:eedge' | chpasswd"
+        end
+
+        config.vm.provision "shell" do |shell|
+            shell.name = "Install Ansible"
+            shell.inline = "\
+                apt-get -y install cowsay;\
+                apt-add-repository -y ppa:ansible/ansible;\
+                apt-get update;\
+                apt-get -y install ansible;"
+        end
 
         captain.vm.provider "virtualbox" do |virtualbox|
             virtualbox.memory = "2048"
@@ -76,7 +80,6 @@ Vagrant.configure(2) do |config|
     end
 
     # All machines
-    config.vm.synced_folder ".", "/home/vagrant/workspace"
-    config.vm.synced_folder ".", "/vagrant", disabled: true
-    config.vm.box = "ubuntu/wily64"
+    config.vm.synced_folder ".", "/home/ubuntu/workspace"
+    config.vm.box = "ubuntu/xenial64"
 end

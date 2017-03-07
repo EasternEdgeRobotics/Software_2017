@@ -32,8 +32,8 @@
     - name: Install Squid Proxy
       apt: name=squid3 state=latest
     - name: Configure Squid Proxy
-      copy: src=files/conf/squid.conf dest=/etc/squid3/squid.conf mode=644 owner=root group=root
+      copy: src=files/conf/squid.conf dest=/etc/squid/squid.conf mode=644 owner=root group=root
       notify: Restart Squid
   handlers:
     - name: Restart Squid
-      service: name=squid3 state=restarted
+      service: name=squid state=restarted
