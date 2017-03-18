@@ -7,7 +7,7 @@ import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import rx.Observable;
 import rx.observers.TestSubscriber;
@@ -52,7 +52,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -82,7 +82,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -112,7 +112,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -142,7 +142,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -172,7 +172,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -202,7 +202,7 @@ public final class JoystickControllerTest {
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
             .thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> !argument.equals(index))))
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> !argument.equals(index))))
             .thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(index)))
             .thenReturn(subj);
@@ -233,7 +233,7 @@ public final class JoystickControllerTest {
 
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes()).thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> (
             !argument.equals(index) && !argument.equals(flipIndexA)
         )))).thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraA);
@@ -269,7 +269,7 @@ public final class JoystickControllerTest {
 
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes()).thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> (
             !argument.equals(index) && !argument.equals(flipIndexA)
         )))).thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraB);
@@ -305,7 +305,7 @@ public final class JoystickControllerTest {
 
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes()).thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> (
             !argument.equals(index) && !argument.equals(flipIndexA)
         )))).thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraA);
@@ -341,7 +341,7 @@ public final class JoystickControllerTest {
 
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes()).thenReturn(Observable.never());
-        Mockito.when(joystick.button(Matchers.intThat(argument -> (
+        Mockito.when(joystick.button(ArgumentMatchers.intThat(argument -> (
             !argument.equals(index) && !argument.equals(flipIndexA)
         )))).thenReturn(Observable.never());
         Mockito.when(joystick.button(Mockito.eq(flipIndexA))).thenReturn(videoFlipCameraB);

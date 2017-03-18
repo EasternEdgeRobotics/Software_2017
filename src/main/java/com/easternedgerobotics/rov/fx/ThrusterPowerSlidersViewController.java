@@ -186,7 +186,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
     }
 
     private Observable<Float> values(final SliderView sliderView) {
-        return JavaFxObservable.fromObservableValue(sliderView.slider.valueProperty())
+        return JavaFxObservable.valuesOf(sliderView.slider.valueProperty())
             .map((value) -> (float) (value.floatValue() / SliderView.MAX_VALUE));
     }
 

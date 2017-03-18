@@ -42,17 +42,18 @@ public final class LogitechExtremeJoystickSource {
 
     private LogitechExtremeJoystickSource(final Observable<Long> interval, final Scheduler scheduler) {
         this.scheduler = scheduler;
-        joystickSource = Observable.create(sub -> sub.add(interval.subscribe(tick -> {
+        joystickSource = interval.<Joystick>map(tick -> {
             if (controller == null || !controller.poll()) {
                 controller = connect();
                 if (controller != null) {
-                    sub.onNext(new LogitechExtremeJoystick(
+                    return new LogitechExtremeJoystick(
                         createEvents(controller),
                         createAxes(controller),
-                        createButtons(controller)));
+                        createButtons(controller));
                 }
             }
-        })));
+            return null;
+        }).filter(joystick -> joystick != null);
     }
 
     private Observable<Joystick> getSource() {
@@ -70,21 +71,20 @@ public final class LogitechExtremeJoystickSource {
     }
 
     private Observable<Event> createEvents(final Controller controller) {
-        final Observable<Event> events = Observable.create(subscriber -> {
-            final EventQueue eventQueue = controller.getEventQueue();
-            subscriber.add(Observable.interval(0, TimeUnit.MILLISECONDS, scheduler).subscribe(tick -> {
-                if (controller.poll()) {
-                    final Event event = new Event();
-                    if (eventQueue.getNextEvent(event)) {
-                        subscriber.onNext(event);
-                    }
-                } else {
-                    subscriber.unsubscribe();
+        final EventQueue eventQueue = controller.getEventQueue();
+        final Observable<Event> events = Observable.interval(0, TimeUnit.MILLISECONDS, scheduler).map(tick -> {
+            if (controller.poll()) {
+                final Event event = new Event();
+                if (eventQueue.getNextEvent(event)) {
+                    return event;
                 }
-            }));
+            }
+            return null;
         });
-
-        return events.subscribeOn(scheduler).share();
+        return events.subscribeOn(scheduler)
+            .takeUntil(event -> !controller.poll())
+            .filter(event -> event != null)
+            .share();
     }
 
     private static List<Component> createAxes(final Controller controller) {
