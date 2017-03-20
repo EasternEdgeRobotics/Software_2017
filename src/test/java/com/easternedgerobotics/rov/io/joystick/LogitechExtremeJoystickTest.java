@@ -2,7 +2,10 @@ package com.easternedgerobotics.rov.io.joystick;
 
 import com.easternedgerobotics.rov.value.MotionValue;
 
+import kotlin.Pair;
 import net.java.games.input.Component;
+import net.java.games.input.Component.Identifier.Axis;
+import net.java.games.input.Component.Identifier.Button;
 import net.java.games.input.Event;
 import org.junit.Test;
 import rx.observers.TestSubscriber;
@@ -12,6 +15,7 @@ import rx.subjects.TestSubject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -20,25 +24,28 @@ public class LogitechExtremeJoystickTest {
     @SuppressWarnings({"checkstyle:magicnumber"})
     public final void axesDoesTransformAxisEventsIntoJoystickAxesValues() {
         final List<Component> joystickButtons = joystickButtons();
-        final List<Component> joystickAxes = joystickAxes(new float[][] {
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-            {0, 0, 0, 0, 0, 0},
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-        });
+        final Map<Component.Identifier, Component> axes = joystickAxes(Arrays.asList(
+            new Pair<>(Axis.X, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.Y, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.RZ, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.SLIDER, new float[]{1, 2, 3, 4, 5, 6})
+        ));
 
         final TestScheduler scheduler = new TestScheduler();
         final TestSubject<Event> events = TestSubject.create(scheduler);
 
-        events.onNext(event(joystickAxes.get(0)), 100);
-        events.onNext(event(joystickAxes.get(0)), 200);
-        events.onNext(event(joystickAxes.get(0)), 300);
-
         final TestSubscriber<MotionValue> joystickSubscriber = new TestSubscriber<>();
-        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(events, joystickAxes, joystickButtons);
+        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(scheduler, events, joystickButtons);
 
-        joystick.axes().subscribe(joystickSubscriber);
+        joystick.axes().buffer(4).map(l -> l.get(3)).subscribe(joystickSubscriber);
+
+        scheduler.advanceTimeBy(LogitechExtremeJoystick.INITIAL_INPUT_DELAY, TimeUnit.MILLISECONDS);
+
+        for (final Component.Identifier id : Arrays.asList(Axis.X, Axis.Y, Axis.RZ, Axis.SLIDER)) {
+            events.onNext(event(axes.get(id)), 100);
+            events.onNext(event(axes.get(id)), 200);
+            events.onNext(event(axes.get(id)), 300);
+        }
 
         scheduler.advanceTimeBy(300, TimeUnit.MILLISECONDS);
 
@@ -50,29 +57,33 @@ public class LogitechExtremeJoystickTest {
     @SuppressWarnings({"checkstyle:magicnumber"})
     public final void axesDoesIncludeRollWhileTriggerIsBeingHeld() {
         final List<Component> joystickButtons = joystickButtons();
-        final List<Component> joystickAxes = joystickAxes(new float[][] {
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-        });
+        final Map<Component.Identifier, Component> axes = joystickAxes(Arrays.asList(
+            new Pair<>(Axis.X, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.Y, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.RZ, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.SLIDER, new float[]{1, 2, 3, 4, 5, 6})
+        ));
 
         final TestScheduler scheduler = new TestScheduler();
         final TestSubject<Event> events = TestSubject.create(scheduler);
 
-        events.onNext(event(joystickAxes.get(0)), 100);
-        events.onNext(event(joystickAxes.get(0)), 200);
-        events.onNext(eventWithValue(joystickButtons.get(0), 1), 300);
-        events.onNext(event(joystickAxes.get(0)), 400);
-        events.onNext(event(joystickAxes.get(0)), 500);
-        events.onNext(event(joystickAxes.get(0)), 600);
-        events.onNext(eventWithValue(joystickButtons.get(0), 0), 700);
-        events.onNext(event(joystickAxes.get(0)), 800);
-
         final TestSubscriber<MotionValue> joystickSubscriber = new TestSubscriber<>();
-        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(events, joystickAxes, joystickButtons);
+        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(scheduler, events, joystickButtons);
 
-        joystick.axes().subscribe(joystickSubscriber);
+        joystick.axes().buffer(4).map(l -> l.get(3)).subscribe(joystickSubscriber);
+
+        scheduler.advanceTimeBy(LogitechExtremeJoystick.INITIAL_INPUT_DELAY, TimeUnit.MILLISECONDS);
+
+        for (final Component.Identifier id : Arrays.asList(Axis.X, Axis.Y, Axis.RZ, Axis.SLIDER)) {
+            events.onNext(event(axes.get(id)), 100);
+            events.onNext(event(axes.get(id)), 200);
+            events.onNext(event(axes.get(id)), 400);
+            events.onNext(event(axes.get(id)), 500);
+            events.onNext(event(axes.get(id)), 600);
+            events.onNext(event(axes.get(id)), 800);
+        }
+        events.onNext(eventWithValue(joystickButtons.get(0), 1), 300);
+        events.onNext(eventWithValue(joystickButtons.get(0), 0), 700);
 
         scheduler.advanceTimeBy(800, TimeUnit.MILLISECONDS);
 
@@ -92,26 +103,29 @@ public class LogitechExtremeJoystickTest {
     @SuppressWarnings({"checkstyle:magicnumber"})
     public final void buttonDoesFilterOutButtonByGivenIndex() {
         final List<Component> joystickButtons = joystickButtons();
-        final List<Component> joystickAxes = joystickAxes(new float[][] {
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-            {0, 0, 0, 0, 0, 0},
-            {1, 2, 3, 4, 5, 6},
-            {1, 2, 3, 4, 5, 6},
-        });
+        final Map<Component.Identifier, Component> axes = joystickAxes(Arrays.asList(
+            new Pair<>(Axis.X, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.Y, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.RZ, new float[]{1, 2, 3, 4, 5, 6}),
+            new Pair<>(Axis.SLIDER, new float[]{1, 2, 3, 4, 5, 6})
+        ));
 
         final TestScheduler scheduler = new TestScheduler();
         final TestSubject<Event> events = TestSubject.create(scheduler);
 
-        events.onNext(event(joystickAxes.get(0)), 100);
-        events.onNext(event(joystickAxes.get(0)), 200);
-        events.onNext(eventWithValue(joystickButtons.get(0), 1f), 300);
-        events.onNext(event(joystickAxes.get(0)), 400);
-
         final TestSubscriber<Boolean> buttonSubscriber = new TestSubscriber<>();
-        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(events, joystickAxes, joystickButtons);
+        final LogitechExtremeJoystick joystick = new LogitechExtremeJoystick(scheduler, events, joystickButtons);
 
         joystick.button(1).subscribe(buttonSubscriber);
+
+        scheduler.advanceTimeBy(LogitechExtremeJoystick.INITIAL_INPUT_DELAY, TimeUnit.MILLISECONDS);
+
+        for (final Component.Identifier id : Arrays.asList(Axis.X, Axis.Y, Axis.RZ, Axis.SLIDER)) {
+            events.onNext(event(axes.get(id)), 100);
+            events.onNext(event(axes.get(id)), 200);
+            events.onNext(event(axes.get(id)), 400);
+        }
+        events.onNext(eventWithValue(joystickButtons.get(0), 1f), 300);
 
         scheduler.advanceTimeBy(400, TimeUnit.MILLISECONDS);
 
@@ -123,7 +137,7 @@ public class LogitechExtremeJoystickTest {
         return Collections.singletonList(new TestComponent() {
             @Override
             public Identifier getIdentifier() {
-                return Identifier.Button.TRIGGER;
+                return Button.TRIGGER;
             }
         });
     }
@@ -133,25 +147,25 @@ public class LogitechExtremeJoystickTest {
      *
      * <p>
      * The components returned will return the given values when asked for their poll
-     * data. For example, the 0th float array given will correspond to the 0th axis'
+     * data. For example, the Axis.X float array given will correspond to the Axis.X axis'
      * poll data.
      * <p>
-     * See {@see Joystick#logitechExtreme3dPro} for the order of the axes on the joystick.
      *
-     * @param values an array of float arrays representing the poll data for the axes.
+     * @param axes a list of component id paired with float arrays representing the poll data for the axes.
      * @return axis {@link Component}s returning the given data for their poll data.
      */
-    private List<Component> joystickAxes(final float[][] values) {
-        return Arrays.stream(values).map(this::axisWithPollValues).collect(Collectors.toList());
+    private Map<Component.Identifier, Component> joystickAxes(final List<Pair<Component.Identifier, float[]>> axes) {
+        return axes.stream().map(p -> axisWithPollValues(p.getFirst(), p.getSecond()))
+            .collect(Collectors.toMap(Component::getIdentifier, c -> c));
     }
 
-    private Component axisWithPollValues(final float... values) {
+    private Component axisWithPollValues(final Component.Identifier id, final float... values) {
         return new TestComponent() {
             private int callCount = 0;
 
             @Override
             public Identifier getIdentifier() {
-                return Identifier.Axis.UNKNOWN;
+                return id;
             }
 
             @Override
