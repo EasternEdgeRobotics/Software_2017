@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
@@ -112,7 +113,7 @@ public final class RovSimulator {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU());
+        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU(), new MockRovConfig());
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 

@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.RovConfig;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
@@ -33,7 +35,6 @@ import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
 
-import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
 import org.apache.commons.cli.CommandLine;
@@ -62,51 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class Rov {
-    static final long MAX_HEARTBEAT_GAP = 5;
-
-    static final long CPU_POLL_INTERVAL = 1;
-
-    static final long SENSOR_POLL_INTERVAL = 10;
-
-    static final long SLEEP_DURATION = 100;
-
-    static final byte MAESTRO_DEVICE_NUMBER = 0x01;
-
-    static final byte PORT_AFT_CHANNEL = 15;
-
-    static final byte STARBOARD_AFT_CHANNEL = 12;
-
-    static final byte PORT_FORE_CHANNEL = 16;
-
-    static final byte STARBOARD_FORE_CHANNEL = 13;
-
-    static final byte PORT_VERT_CHANNEL = 17;
-
-    static final byte STARBOARD_VERT_CHANNEL = 14;
-
-    static final byte CAMERA_A_MOTOR_CHANNEL = 18;
-
-    static final byte CAMERA_B_MOTOR_CHANNEL = 19;
-
-    static final byte TOOLING_MOTOR_CHANNEL = 22;
-
-    static final byte LIGHT_CHANNEL = 23;
-
-    static final byte VOLTAGE_SENSOR_05V_CHANNEL = 8;
-
-    static final byte VOLTAGE_SENSOR_12V_CHANNEL = 7;
-
-    static final byte VOLTAGE_SENSOR_48V_CHANNEL = 6;
-
-    static final byte CURRENT_SENSOR_05V_CHANNEL = 11;
-
-    static final byte CURRENT_SENSOR_12V_CHANNEL = 10;
-
-    static final byte CURRENT_SENSOR_48V_CHANNEL = 9;
-
-    static final int ALT_IMU_I2C_BUS = I2CBus.BUS_1;
-
-    static final boolean ALT_IMU_SA0_HIGH = false;
+    private final RovConfig config;
 
     private final SixThrusterConfig thrusterConfig;
 
@@ -140,9 +97,11 @@ final class Rov {
             MaestroChannel extends ADC & PWM> Rov(
         final EventPublisher eventPublisher,
         final List<MaestroChannel> channels,
-        final AltIMU imu
+        final AltIMU imu,
+        final RovConfig rovConfig
     ) {
         this.eventPublisher = eventPublisher;
+        this.config = rovConfig;
 
         final PortAftSpeedValue portAft = new PortAftSpeedValue();
         final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
@@ -159,19 +118,22 @@ final class Rov {
                     .valuesOfType(CameraSpeedValueA.class)
                     .startWith(new CameraSpeedValueA())
                     .cast(SpeedValue.class),
-                channels.get(CAMERA_A_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+                channels.get(config.cameraAMotorChannel())
+                    .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
             new Motor(
                 eventPublisher
                     .valuesOfType(CameraSpeedValueB.class)
                     .startWith(new CameraSpeedValueB())
                     .cast(SpeedValue.class),
-                channels.get(CAMERA_B_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+                channels.get(config.cameraBMotorChannel())
+                    .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
             new Motor(
                 eventPublisher
                     .valuesOfType(ToolingSpeedValue.class)
                     .startWith(new ToolingSpeedValue())
                     .cast(SpeedValue.class),
-                channels.get(TOOLING_MOTOR_CHANNEL).setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
+                channels.get(config.toolingMotorChannel())
+                    .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
@@ -180,37 +142,43 @@ final class Rov {
                     .valuesOfType(PortAftSpeedValue.class)
                     .startWith(portAft)
                     .cast(SpeedValue.class),
-                channels.get(PORT_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
+                channels.get(config.portAftChannel())
+                    .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardAftSpeedValue.class)
                     .startWith(starboardAft)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_AFT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
+                channels.get(config.starboardAftChannel())
+                    .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortForeSpeedValue.class)
                     .startWith(portFore)
                     .cast(SpeedValue.class),
-                channels.get(PORT_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
+                channels.get(config.portForeChannel())
+                    .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardForeSpeedValue.class)
                     .startWith(starboardFore)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_FORE_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
+                channels.get(config.starboardForeChannel())
+                    .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(PortVertSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
-                channels.get(PORT_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
+                channels.get(config.portVertChannel())
+                    .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(StarboardVertSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
-                channels.get(STARBOARD_VERT_CHANNEL).setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
+                channels.get(config.starboardVertChannel())
+                    .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
         ));
 
         this.lights = Collections.singletonList(
@@ -219,20 +187,20 @@ final class Rov {
                     .valuesOfType(LightSpeedValue.class)
                     .startWith(new LightSpeedValue())
                     .cast(SpeedValue.class),
-                channels.get(LIGHT_CHANNEL).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
+                channels.get(config.lightChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
             )
         );
 
         voltageSensors = Collections.unmodifiableList(Arrays.asList(
-            VoltageSensor.V05.apply(channels.get(VOLTAGE_SENSOR_05V_CHANNEL)),
-            VoltageSensor.V12.apply(channels.get(VOLTAGE_SENSOR_12V_CHANNEL)),
-            VoltageSensor.V48.apply(channels.get(VOLTAGE_SENSOR_48V_CHANNEL))
+            VoltageSensor.V05.apply(channels.get(config.voltageSensor05VChannel())),
+            VoltageSensor.V12.apply(channels.get(config.voltageSensor12VChannel())),
+            VoltageSensor.V48.apply(channels.get(config.voltageSensor48VChannel()))
         ));
 
         currentSensors = Collections.unmodifiableList(Arrays.asList(
-            CurrentSensor.V05.apply(channels.get(CURRENT_SENSOR_05V_CHANNEL)),
-            CurrentSensor.V12.apply(channels.get(CURRENT_SENSOR_12V_CHANNEL)),
-            CurrentSensor.V48.apply(channels.get(CURRENT_SENSOR_48V_CHANNEL))
+            CurrentSensor.V05.apply(channels.get(config.currentSensor05VChannel())),
+            CurrentSensor.V12.apply(channels.get(config.currentSensor12VChannel())),
+            CurrentSensor.V48.apply(channels.get(config.currentSensor48VChannel()))
         ));
 
         barometer = () -> imu.pressure();
@@ -266,24 +234,27 @@ final class Rov {
     void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
-            .delay(MAX_HEARTBEAT_GAP, TimeUnit.SECONDS, clock)
+            .delay(config.maxHeartbeatGap(), TimeUnit.SECONDS, clock)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
 
         final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
-        final CpuInformation cpuInformation = new CpuInformation(CPU_POLL_INTERVAL, TimeUnit.SECONDS);
+        final CpuInformation cpuInformation = new CpuInformation(config.cpuPollInterval(), TimeUnit.SECONDS);
 
         thrusters.forEach(Thruster::writeZero);
 
         cpuInformation.observe().subscribe(eventPublisher::emit, Logger::warn);
-        Observable.interval(SLEEP_DURATION, TimeUnit.MILLISECONDS, clock)
+        Observable.interval(config.sleepDuration(), TimeUnit.MILLISECONDS, clock)
             .withLatestFrom(
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
             .observeOn(io)
             .takeUntil(killSwitch)
             .subscribe(this::beat, RuntimeException::new, () -> dead.set(true));
 
-        final Observable<Long> sensorInterval = Observable.interval(SENSOR_POLL_INTERVAL, TimeUnit.MILLISECONDS, io);
+        final Observable<Long> sensorInterval = Observable.interval(
+                config.sensorPollInterval(),
+                TimeUnit.MILLISECONDS,
+                io);
         sensorInterval.subscribe(tick -> {
             eventPublisher.emit(barometer.pressure());
             eventPublisher.emit(accelerometer.acceleration());
@@ -358,10 +329,12 @@ final class Rov {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final Serial serial = SerialFactory.createInstance();
+            final RovConfig rovConfig = new Config("defaultConfig.yml", "config.yml").getConfig("rov", RovConfig.class);
             final Rov rov = new Rov(
                 eventPublisher,
-                new Maestro<>(serial, MAESTRO_DEVICE_NUMBER),
-                new AltIMU10v3(new PololuBus(ALT_IMU_I2C_BUS), ALT_IMU_SA0_HIGH));
+                new Maestro<>(serial, rovConfig.maestroDeviceNumber()),
+                new AltIMU10v3(new PololuBus(rovConfig.i2cBus()), rovConfig.altImuSa0High()),
+                rovConfig);
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
