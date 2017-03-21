@@ -14,23 +14,20 @@ import java.nio.file.Paths;
 public final class Config {
     private final ConfigurationProvider configProvider;
 
-    public Config() {
+    public Config(final String defaultConfigFilename, final String overrideConfigFilename) {
         final Environment environment = new ImmutableEnvironment("./");
         final ConfigurationSource defaultConfigSource = new FilesConfigurationSource(() ->
-            Paths.get("defaultConfig.yml")
+            Paths.get(defaultConfigFilename)
         );
         final ConfigurationProvider defaultConfigProvider = new ConfigurationProviderBuilder()
             .withEnvironment(environment)
             .withConfigurationSource(defaultConfigSource)
             .build();
 
-        if (new File(defaultConfigProvider.getProperty("configFile", String.class)).exists()) {
+        if (new File(overrideConfigFilename).exists()) {
             final ConfigurationSource configSource = new MergeConfigurationSource(
                 defaultConfigSource,
-                new FilesConfigurationSource(() ->
-                    Paths.get(defaultConfigProvider.getProperty("configFile", String.class)
-                )
-            ));
+                new FilesConfigurationSource(() -> Paths.get(overrideConfigFilename)));
             configProvider = new ConfigurationProviderBuilder()
                 .withEnvironment(environment)
                 .withConfigurationSource(configSource)

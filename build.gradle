@@ -40,6 +40,7 @@ dependencies {
     compile 'net.java.jinput:jinput:2.0.6'
     compile 'org.cfg4j:cfg4j-core:4.4.0'
     compile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.6'
+    compile 'org.slf4j:slf4j-nop:1.7.24'
     compile 'org.tinylog:tinylog:1.2'
     compile 'rxbroadcast:rxbroadcast:1.1.0'
     testCompile 'junit:junit:4.12'

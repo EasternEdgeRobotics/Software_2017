@@ -1,4 +1,3 @@
-configFile: config.yml
 rov:
   maxHeartbeatGap: 5
   cpuPollInterval: 1
