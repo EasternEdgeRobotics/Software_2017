@@ -144,7 +144,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(false));
+        eventPublisher.emit(new HeartbeatValue(false));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL), Mockito.times(2)).writeZero();
@@ -183,7 +183,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
+        eventPublisher.emit(new HeartbeatValue(true));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).writeZero();
@@ -210,9 +210,9 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(MotionPowerValue.class).onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
-        eventPublisher.testObserver(MotionValue.class).onNext(new MotionValue(0, 0, 1, 0, 0, 0));
+        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
+        eventPublisher.emit(new MotionValue(0, 0, 1, 0, 0, 0));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
@@ -249,8 +249,8 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(CameraSpeedValueA.class).onNext(new CameraSpeedValueA(1));
+        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new CameraSpeedValueA(1));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.CAMERA_A_MOTOR_CHANNEL)).write(1);
@@ -265,8 +265,8 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(CameraSpeedValueB.class).onNext(new CameraSpeedValueB(1));
+        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new CameraSpeedValueB(1));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.CAMERA_B_MOTOR_CHANNEL)).write(1);
@@ -281,8 +281,8 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(ToolingSpeedValue.class).onNext(new ToolingSpeedValue(1));
+        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new ToolingSpeedValue(1));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.TOOLING_MOTOR_CHANNEL)).write(1);
@@ -297,8 +297,8 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.testObserver(HeartbeatValue.class).onNext(new HeartbeatValue(true));
-        eventPublisher.testObserver(LightSpeedValue.class).onNext(new LightSpeedValue(1));
+        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new LightSpeedValue(1));
         scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(Rov.LIGHT_CHANNEL)).write(1);
