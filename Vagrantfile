@@ -3,7 +3,8 @@ NETWORK_INTERFACES = [
     "en3: Thunderbolt Ethernet",
     "en0: Ethernet",
     "Intel(R) 82579V Gigabit Network Connection",
-    "Killer e2200 Gigabit Ethernet Controller"
+    "Killer e2200 Gigabit Ethernet Controller",
+    "Realtek PCIe GBE Family Controller"
 ]
 
 def interface_name(interface)
