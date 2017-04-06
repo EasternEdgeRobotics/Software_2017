@@ -106,7 +106,7 @@ public final class Topside extends Application {
         sensorStage.show();
 
         pilotPanel.start();
-        Logger.info("Started");
+        Logger.info("yogfgfv");
     }
 
     @Override
