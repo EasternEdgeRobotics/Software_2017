@@ -68,7 +68,7 @@ final class Rov {
 
     static final long SENSOR_POLL_INTERVAL = 10;
 
-    static final long SLEEP_DURATION = 100;
+    static final long SLEEP_DURATION = 99;
 
     static final byte MAESTRO_DEVICE_NUMBER = 0x01;
 
