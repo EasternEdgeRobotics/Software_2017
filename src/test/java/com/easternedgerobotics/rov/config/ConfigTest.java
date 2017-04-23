@@ -33,8 +33,10 @@ public class ConfigTest {
                 + "  longParam: 5\n");
             overrideWriter.close();
 
-            final TestConfig testConfig = new Config(defaultConfigFile.getName(), configFile.getName())
-                .getConfig("test", TestConfig.class);
+            final TestConfig testConfig = new Config(
+                defaultConfigFile.getCanonicalPath(),
+                configFile.getCanonicalPath()
+            ).getConfig("test", TestConfig.class);
             Assert.assertEquals("a string", testConfig.stringParam());
             Assert.assertEquals(5, testConfig.longParam());
             Assert.assertEquals(2, testConfig.intParam());

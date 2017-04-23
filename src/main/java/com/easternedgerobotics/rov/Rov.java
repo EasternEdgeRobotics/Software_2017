@@ -2,6 +2,7 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.RovConfig;
+import com.easternedgerobotics.rov.config.RovLaunchConfig;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
@@ -291,45 +292,44 @@ final class Rov {
     public static void main(final String[] args) throws InterruptedException, IOException {
         final String app = "rov";
         final HelpFormatter formatter = new HelpFormatter();
-        final Option broadcast = Option.builder("b")
-            .longOpt("broadcast")
+        final Option defaultConfig = Option.builder("d")
+            .longOpt("default")
             .hasArg()
-            .argName("ADDRESS")
-            .desc("use ADDRESS to broadcast messages")
+            .argName("DEFAULT")
+            .desc("name of the default config file")
             .required()
             .build();
-        final Option serialPort = Option.builder("s")
-            .longOpt("serial-port")
+        final Option config = Option.builder("c")
+            .longOpt("config")
             .hasArg()
-            .argName("FILE")
-            .desc("read and write to FILE as serial device")
-            .required()
-            .build();
-        final Option baudRate = Option.builder("r")
-            .type(Integer.class)
-            .longOpt("baud-rate")
-            .hasArg()
-            .argName("BPS")
-            .desc("the baud rate to use")
+            .argName("CONFIG")
+            .desc("name of the overriding config file")
             .required()
             .build();
 
         final Options options = new Options();
-        options.addOption(broadcast);
-        options.addOption(serialPort);
-        options.addOption(baudRate);
+        options.addOption(defaultConfig);
+        options.addOption(config);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
-            final InetAddress broadcastAddress = InetAddress.getByName(arguments.getOptionValue("b"));
+            final RovLaunchConfig launchConfig = new Config(
+                arguments.getOptionValue("d"),
+                arguments.getOptionValue("c")
+            ).getConfig("rovLaunch", RovLaunchConfig.class);
+
+            final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
             final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             final Serial serial = SerialFactory.createInstance();
-            final RovConfig rovConfig = new Config("defaultConfig.yml", "config.yml").getConfig("rov", RovConfig.class);
+            final RovConfig rovConfig = new Config(
+                    arguments.getOptionValue("d"),
+                    arguments.getOptionValue("c")
+            ).getConfig("rov", RovConfig.class);
             final Rov rov = new Rov(
                 eventPublisher,
                 new Maestro<>(serial, rovConfig.maestroDeviceNumber()),
@@ -338,7 +338,7 @@ final class Rov {
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
-            serial.open(arguments.getOptionValue("s"), Integer.parseInt(arguments.getOptionValue("r")));
+            serial.open(launchConfig.serialPort(), launchConfig.baudRate());
             rov.init(Schedulers.io(), Schedulers.computation());
 
             Logger.info("Started");

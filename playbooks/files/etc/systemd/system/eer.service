@@ -5,11 +5,7 @@ Description=Eastern Edge Robotics Control Software
 User={{ ansible_user }}
 TimeoutStartSec=0
 Restart=on-failure
-{% if inventory_hostname in groups['rasprime'] %}
-ExecStart=/opt/eer-9.0.0/bin/{{ entry_point }} --broadcast 192.168.88.255 --serial-port /dev/ttyACM0 --baud-rate 115200
-{% else %}
-ExecStart=/opt/eer-9.0.0/bin/{{ entry_point }} --broadcast 192.168.88.255
-{% endif %}
+ExecStart=/opt/eer-{{ version }}/bin/{{ entry_point }} --default /opt/eer-{{ version }}/defaultConfig.yml --config /opt/eer-{{ version }}/config.yml
 
 [Install]
 WantedBy=multi-user.target

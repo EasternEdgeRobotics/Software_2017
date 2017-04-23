@@ -15,21 +15,24 @@ public final class Config {
     private final ConfigurationProvider configProvider;
 
     public Config(final String defaultConfigFilename, final String overrideConfigFilename) {
-        final Environment environment = new ImmutableEnvironment("./");
+        final File defaultConfigFile = new File(defaultConfigFilename);
+        final Environment defaultEnvironment = new ImmutableEnvironment(defaultConfigFile.getParent());
         final ConfigurationSource defaultConfigSource = new FilesConfigurationSource(() ->
-            Paths.get(defaultConfigFilename)
+            Paths.get(defaultConfigFile.getName())
         );
         final ConfigurationProvider defaultConfigProvider = new ConfigurationProviderBuilder()
-            .withEnvironment(environment)
+            .withEnvironment(defaultEnvironment)
             .withConfigurationSource(defaultConfigSource)
             .build();
 
+        final File overrideConfigFile = new File(overrideConfigFilename);
+        final Environment overrideEnvironment = new ImmutableEnvironment(defaultConfigFile.getParent());
         if (new File(overrideConfigFilename).exists()) {
             final ConfigurationSource configSource = new MergeConfigurationSource(
                 defaultConfigSource,
-                new FilesConfigurationSource(() -> Paths.get(overrideConfigFilename)));
+                new FilesConfigurationSource(() -> Paths.get(overrideConfigFile.getName())));
             configProvider = new ConfigurationProviderBuilder()
-                .withEnvironment(environment)
+                .withEnvironment(overrideEnvironment)
                 .withConfigurationSource(configSource)
                 .build();
         } else {

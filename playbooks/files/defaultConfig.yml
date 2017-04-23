@@ -1,4 +1,17 @@
+rovLaunch:
+  broadcast: 192.168.88.255
+  serialPort: /dev/ttyACM0
+  baudRate: 115200
+piCameraALaunch:
+  broadcast: 192.168.88.255
+piCameraBLaunch:
+  broadcast: 192.168.88.255
 rov:
+  maxHeartbeatGap: 5
+  cpuPollInterval: 1
+  sensorPollInterval: 10
+  sleepDuration: 100
+  maestroDeviceNumber: 0x01
   portAftChannel: 15
   starboardAftChannel: 12
   portForeChannel: 16
@@ -15,4 +28,5 @@ rov:
   currentSensor05VChannel: 11
   currentSensor12VChannel: 10
   currentSensor48VChannel: 9
-  
+  altImuSa0High: false
+  i2cBus: 1
