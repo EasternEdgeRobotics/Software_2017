@@ -1,8 +1,10 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
+import com.easternedgerobotics.rov.config.VideoPlayerConfig;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
@@ -49,14 +51,12 @@ public final class Topside extends Application {
 
     @Override
     public void init() throws SocketException, UnknownHostException {
-        final LaunchConfig launchConfig = new Config(
+        final Config configSource = new Config(
             getParameters().getNamed().get("default"),
             getParameters().getNamed().get("config")
-        ).getConfig("launch", LaunchConfig.class);
-        final TopsidesConfig config = new Config(
-            getParameters().getNamed().get("default"),
-            getParameters().getNamed().get("config")
-        ).getConfig("topsides", TopsidesConfig.class);
+        );
+        final LaunchConfig launchConfig = configSource.getConfig("launch", LaunchConfig.class);
+        final TopsidesConfig config = configSource.getConfig("topsides", TopsidesConfig.class);
         final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
         final int broadcastPort = launchConfig.defaultBroadcastPort();
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
@@ -64,7 +64,11 @@ public final class Topside extends Application {
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
         pilotPanel = new PilotPanel(config.pilotPanelName(), config.pilotPanelPort());
         profile = new MotionPowerProfile(config.profilePref());
-        videoPlayer = new VideoPlayer(eventPublisher, config.mpv());
+        videoPlayer = new VideoPlayer(
+            eventPublisher,
+            config.mpv(),
+            configSource.getConfig("videoPlayer", VideoPlayerConfig.class)
+        );
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
@@ -77,7 +81,11 @@ public final class Topside extends Application {
             JOYSTICK_RECOVERY_INTERVAL,
             TimeUnit.MILLISECONDS,
             Schedulers.io()
-            ).subscribe(new JoystickController(eventPublisher, new ExponentialMotionScale())::onNext);
+        ).subscribe(new JoystickController(
+            eventPublisher,
+            new ExponentialMotionScale(),
+            configSource.getConfig("joystick", JoystickConfig.class)
+        )::onNext);
         pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
             .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 

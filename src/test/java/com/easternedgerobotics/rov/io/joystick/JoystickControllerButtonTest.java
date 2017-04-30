@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.io.joystick;
 
+import com.easternedgerobotics.rov.config.JoystickConfig;
+import com.easternedgerobotics.rov.config.MockJoystickConfig;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoFlipValueB;
@@ -24,9 +26,10 @@ import java.util.function.Function;
 public final class JoystickControllerButtonTest {
     @Parameters(name = "Joystick button #{0} should emit a value of {1}")
     public static Collection<Object[]> data() {
+        final JoystickConfig config = new MockJoystickConfig();
         return Arrays.asList(new Object[][] {
-            {JoystickController.CAMERA_A_VIDEO_FLIP_JOYSTICK_BUTTON, VideoFlipValueA.class},
-            {JoystickController.CAMERA_B_VIDEO_FLIP_JOYSTICK_BUTTON, VideoFlipValueB.class},
+            {config.cameraAVideoFlipButton(), VideoFlipValueA.class},
+            {config.cameraBVideoFlipButton(), VideoFlipValueB.class},
         });
     }
 
@@ -46,7 +49,11 @@ public final class JoystickControllerButtonTest {
         final TestSubscriber subscriber = new TestSubscriber();
         final TestSubject subj = TestSubject.create(scheduler);
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
-        final JoystickController joystickController = new JoystickController(eventPublisher, Function.identity());
+        final JoystickController joystickController = new JoystickController(
+            eventPublisher,
+            Function.identity(),
+            new MockJoystickConfig()
+        );
 
         final Joystick joystick = Mockito.mock(Joystick.class);
         Mockito.when(joystick.axes())
