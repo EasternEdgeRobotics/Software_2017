@@ -1,8 +1,8 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.RovConfig;
-import com.easternedgerobotics.rov.config.RovLaunchConfig;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
@@ -315,13 +315,13 @@ final class Rov {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
-            final RovLaunchConfig launchConfig = new Config(
+            final LaunchConfig launchConfig = new Config(
                 arguments.getOptionValue("d"),
                 arguments.getOptionValue("c")
-            ).getConfig("rovLaunch", RovLaunchConfig.class);
+            ).getConfig("launch", LaunchConfig.class);
 
             final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
-            final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+            final int broadcastPort = launchConfig.defaultBroadcastPort();
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));

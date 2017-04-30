@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
@@ -48,12 +49,16 @@ public final class Topside extends Application {
 
     @Override
     public void init() throws SocketException, UnknownHostException {
+        final LaunchConfig launchConfig = new Config(
+            getParameters().getNamed().get("default"),
+            getParameters().getNamed().get("config")
+        ).getConfig("launch", LaunchConfig.class);
         final TopsidesConfig config = new Config(
             getParameters().getNamed().get("default"),
             getParameters().getNamed().get("config")
         ).getConfig("topsides", TopsidesConfig.class);
-        final InetAddress broadcastAddress = InetAddress.getByName(config.broadcast());
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+        final int broadcastPort = launchConfig.defaultBroadcastPort();
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));

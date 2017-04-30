@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.integration;
 
+import com.easternedgerobotics.rov.config.LaunchConfig;
+import com.easternedgerobotics.rov.config.MockLaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Motor;
@@ -25,15 +27,16 @@ public final class IndividualMotorTest {
     }
 
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
+        final LaunchConfig launchConfig = new MockLaunchConfig();
         final byte deviceNumber = Byte.parseByte(args[0]);
         final byte channel = Byte.parseByte(args[1]);
-        final int baudRate = 115200;
+        final int baudRate = launchConfig.baudRate();
 
         final Serial serial = SerialFactory.createInstance();
-        serial.open("/dev/ttyACM0", baudRate);
+        serial.open(launchConfig.serialPort(), baudRate);
 
-        final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+        final int broadcastPort = launchConfig.defaultBroadcastPort();
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new BasicOrder<>()));
 

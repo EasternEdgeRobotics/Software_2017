@@ -1,7 +1,9 @@
 package com.easternedgerobotics.rov.config;
 
-public interface RovLaunchConfig {
+public interface LaunchConfig {
     String broadcast();
+
+    int defaultBroadcastPort();
 
     String serialPort();
 
