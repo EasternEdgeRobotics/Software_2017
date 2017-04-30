@@ -27,7 +27,7 @@ public final class Config {
 
         final File overrideConfigFile = new File(overrideConfigFilename);
         final Environment overrideEnvironment = new ImmutableEnvironment(defaultConfigFile.getParent());
-        if (new File(overrideConfigFilename).exists()) {
+        if (overrideConfigFile.exists()) {
             final ConfigurationSource configSource = new MergeConfigurationSource(
                 defaultConfigSource,
                 new FilesConfigurationSource(() -> Paths.get(overrideConfigFile.getName())));

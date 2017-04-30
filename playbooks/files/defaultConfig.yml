@@ -30,3 +30,9 @@ rov:
   currentSensor48VChannel: 9
   altImuSa0High: false
   i2cBus: 1
+topsides:
+  broadcast: 192.168.88.255
+  pilotPanelName: Pilot Panel
+  pilotPanelPort: /dev/ttyACM0
+  profilePref: profiles
+  mpv: 192.168.88.2
