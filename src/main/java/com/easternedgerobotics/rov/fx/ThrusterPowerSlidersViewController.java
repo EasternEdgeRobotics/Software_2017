@@ -8,6 +8,7 @@ import com.easternedgerobotics.rov.value.MotionPowerValue;
 import javafx.scene.control.Slider;
 import rx.Observable;
 import rx.observables.JavaFxObservable;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import javax.inject.Inject;
@@ -130,7 +131,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
         );
 
         final SupressObservable<MotionPowerValue> external = new SupressObservable<>(
-            motionPowerValues, JAVA_FX_SCHEDULER, 2000);
+            motionPowerValues, Schedulers.io(), 2000);
 
         final SupressObservable<MotionPowerValue> internal = new SupressObservable<>(
             Observable.combineLatest(
@@ -142,10 +143,11 @@ public class ThrusterPowerSlidersViewController implements ViewController {
                 values(yawSliderView),
                 values(rollSliderView),
                 MotionPowerValue::new),
-            JAVA_FX_SCHEDULER, 2000);
+            Schedulers.io(), 2000);
 
         subscriptions.add(external.get()
             .startWith(new MotionPowerValue(0, 1, 1, 1, 1, 1, 1))
+            .observeOn(JAVA_FX_SCHEDULER)
             .subscribe(value -> {
                 internal.supress();
                 setSliderPower(globalSliderView.slider, value.getGlobal());
@@ -158,7 +160,7 @@ public class ThrusterPowerSlidersViewController implements ViewController {
             }));
 
         subscriptions.add(internal.get()
-            .startWith(new MotionPowerValue(0, 1, 1, 1, 1, 1, 1))
+            .observeOn(JAVA_FX_SCHEDULER)
             .subscribe(value -> {
                 external.supress();
                 eventPublisher.emit(value);
