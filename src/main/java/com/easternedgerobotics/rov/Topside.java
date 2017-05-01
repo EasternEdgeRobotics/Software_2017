@@ -12,11 +12,15 @@ import com.easternedgerobotics.rov.fx.MainView;
 import com.easternedgerobotics.rov.fx.SensorView;
 import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
+import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
-import com.easternedgerobotics.rov.io.PilotPanel;
+import com.easternedgerobotics.rov.io.ProfileController;
+import com.easternedgerobotics.rov.io.SliderController;
+import com.easternedgerobotics.rov.io.arduino.Arduino;
+import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
-import com.easternedgerobotics.rov.value.LightSpeedValue;
+import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.video.VideoPlayer;
 
 import javafx.application.Application;
@@ -35,19 +39,15 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public final class Topside extends Application {
-    private static final float MAX_SLIDER_VALUE = 100f;
-
-    private static final long JOYSTICK_RECOVERY_INTERVAL = 1000;
+    private TopsidesConfig config;
 
     private EventPublisher eventPublisher;
-
-    private PilotPanel pilotPanel;
 
     private VideoPlayer videoPlayer;
 
     private ViewLoader viewLoader;
 
-    private MotionPowerProfile profile;
+    private Arduino arduino;
 
     @Override
     public void init() throws SocketException, UnknownHostException {
@@ -56,29 +56,54 @@ public final class Topside extends Application {
             getParameters().getNamed().get("config")
         );
         final LaunchConfig launchConfig = configSource.getConfig("launch", LaunchConfig.class);
-        final TopsidesConfig config = configSource.getConfig("topsides", TopsidesConfig.class);
+        config = configSource.getConfig("topsides", TopsidesConfig.class);
+
         final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
         final int broadcastPort = launchConfig.defaultBroadcastPort();
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        pilotPanel = new PilotPanel(config.pilotPanelName(), config.pilotPanelPort());
-        profile = new MotionPowerProfile(config.profilePref());
+
         videoPlayer = new VideoPlayer(
             eventPublisher,
             config.mpv(),
             configSource.getConfig("videoPlayer", VideoPlayerConfig.class)
         );
+
+        arduino = new Arduino(
+            new ArduinoPort(
+                config.pilotPanelName(),
+                config.pilotPanelPort(),
+                config.pilotPanelTimeOut(),
+                config.pilotPanelBaud()),
+            config.pilotPanelInputs(),
+            config.pilotPanelOutputs(),
+            config.pilotPanelInputPullups());
+
+        final MotionPowerProfile profiles = new MotionPowerProfile(config.profilePref());
+
+        final EmergencyStopController emergencyStopController = new EmergencyStopController(
+            arduino, config.emergencyStopButtonAddress());
+
+        final SliderController sliderController = new SliderController(
+            arduino, Schedulers.io(), eventPublisher.valuesOfType(MotionPowerValue.class));
+        sliderController.getMotion().subscribe(eventPublisher::emit);
+        sliderController.getLights().subscribe(eventPublisher::emit);
+
+        final ProfileController profileController = new ProfileController(
+            arduino, config.pilotPanelInputs(), config.pilotPanelOutputs(), config.profileSwitchDuration(),
+            profiles, eventPublisher.valuesOfType(MotionPowerValue.class), Schedulers.io());
+        profileController.getMotion().subscribe(eventPublisher::emit);
+
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
-                put(PilotPanel.class, pilotPanel);
-                put(MotionPowerProfile.class, profile);
+                put(EmergencyStopController.class, emergencyStopController);
             }
         });
 
         LogitechExtremeJoystickSource.create(
-            JOYSTICK_RECOVERY_INTERVAL,
+            config.joystickRecoveryInterval(),
             TimeUnit.MILLISECONDS,
             Schedulers.io()
         ).subscribe(new JoystickController(
@@ -86,8 +111,6 @@ public final class Topside extends Application {
             new ExponentialMotionScale(),
             configSource.getConfig("joystick", JoystickConfig.class)
         )::onNext);
-        pilotPanel.lightPowerSlider().map(value -> value / MAX_SLIDER_VALUE)
-            .map(LightSpeedValue::new).subscribe(eventPublisher::emit);
 
         try {
             Logger.info("Initialising video player");
@@ -121,7 +144,7 @@ public final class Topside extends Application {
         sensorStage.initOwner(stage);
         sensorStage.show();
 
-        pilotPanel.start();
+        arduino.start(config.pilotPanelHeartbeatInterval(), config.pilotPanelHeartbeatTimeout(), TimeUnit.MILLISECONDS);
         Logger.info("Started");
     }
 
@@ -130,7 +153,7 @@ public final class Topside extends Application {
         Logger.info("Stopping");
         videoPlayer.stop();
         eventPublisher.stop();
-        pilotPanel.stop();
+        arduino.stop();
         Logger.info("Stopped");
     }
 
