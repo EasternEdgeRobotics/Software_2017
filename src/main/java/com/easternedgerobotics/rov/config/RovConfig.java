@@ -46,4 +46,6 @@ public interface RovConfig {
     boolean altImuSa0High();
 
     int i2cBus();
+
+    long shutdownTimeout();
 }

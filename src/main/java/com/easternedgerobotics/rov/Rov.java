@@ -90,7 +90,7 @@ final class Rov {
 
     private final EventPublisher eventPublisher;
 
-    private final AtomicBoolean dead = new AtomicBoolean();
+    private final AtomicBoolean dead = new AtomicBoolean(true);
 
     private final Subject<Void, Void> killSwitch = PublishSubject.create();
 
@@ -213,8 +213,10 @@ final class Rov {
 
     void shutdown() {
         Logger.info("Shutting down");
+        final long now = System.currentTimeMillis();
+        final long timeout = config.shutdownTimeout();
         killSwitch.onCompleted();
-        while (true) {
+        while (System.currentTimeMillis() - now < timeout) {
             if (dead.get()) {
                 break;
             }
@@ -250,7 +252,14 @@ final class Rov {
                 heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
             .observeOn(io)
             .takeUntil(killSwitch)
-            .subscribe(this::beat, RuntimeException::new, () -> dead.set(true));
+            .doOnSubscribe(() -> dead.set(false))
+            .subscribe(
+                this::beat,
+                e -> {
+                    dead.set(true);
+                    throw new RuntimeException(e);
+                },
+                () -> dead.set(true));
 
         final Observable<Long> sensorInterval = Observable.interval(
                 config.sensorPollInterval(),
