@@ -13,8 +13,6 @@ public interface TopsidesConfig {
 
     int pilotPanelHeartbeatTimeout();
 
-    byte[] pilotPanelInputs();
-
     byte[] pilotPanelOutputs();
 
     byte[] pilotPanelInputPullups();

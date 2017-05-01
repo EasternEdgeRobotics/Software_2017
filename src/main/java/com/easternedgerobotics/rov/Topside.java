@@ -76,7 +76,7 @@ public final class Topside extends Application {
                 config.pilotPanelPort(),
                 config.pilotPanelTimeOut(),
                 config.pilotPanelBaud()),
-            config.pilotPanelInputs(),
+            new byte[0],
             config.pilotPanelOutputs(),
             config.pilotPanelInputPullups());
 
@@ -91,7 +91,7 @@ public final class Topside extends Application {
         sliderController.getLights().subscribe(eventPublisher::emit);
 
         final ProfileController profileController = new ProfileController(
-            arduino, config.pilotPanelInputs(), config.pilotPanelOutputs(), config.profileSwitchDuration(),
+            arduino, config.pilotPanelInputPullups(), config.pilotPanelOutputs(), config.profileSwitchDuration(),
             profiles, eventPublisher.valuesOfType(MotionPowerValue.class), Schedulers.io());
         profileController.getMotion().subscribe(eventPublisher::emit);
 

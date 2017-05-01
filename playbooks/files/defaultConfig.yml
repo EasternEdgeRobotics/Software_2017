@@ -10,9 +10,8 @@ topsides:
   pilotPanelBaud: 115200
   pilotPanelHeartbeatInterval: 500
   pilotPanelHeartbeatTimeout: 5000
-  pilotPanelInputs: null
-  pilotPanelOutputs: 22,24,26,28,30,32,34,36,38,53
-  pilotPanelInputPullups: 23,25,27,29,31,33,35,37,39
+  pilotPanelOutputs: [22,24,26,28,30,32,34,36,38,53]
+  pilotPanelInputPullups: [23,25,27,29,31,33,35,37,39]
   joystickRecoveryInterval: 1000
   emergencyStopButtonAddress: 53
   profileSwitchDuration: 2000
