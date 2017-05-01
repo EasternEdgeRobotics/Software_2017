@@ -93,4 +93,8 @@ public final class MockRovConfig implements RovConfig {
     public int i2cBus() {
         return 1;
     }
+
+    public long shutdownTimeout() {
+        return 1;
+    }
 }

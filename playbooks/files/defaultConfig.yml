@@ -41,6 +41,7 @@ rov:
   currentSensor48VChannel: 9
   altImuSa0High: false
   i2cBus: 1
+  shutdownTimeout: 1000
 videoPlayer:
   cameraAVideoPort: 12345
   cameraBVideoPort: 12346
