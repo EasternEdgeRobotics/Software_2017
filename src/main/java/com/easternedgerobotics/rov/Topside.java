@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.LaunchConfig;
+import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
 import com.easternedgerobotics.rov.config.VideoPlayerConfig;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
@@ -86,7 +87,10 @@ public final class Topside extends Application {
             arduino, config.emergencyStopButtonAddress());
 
         final SliderController sliderController = new SliderController(
-            arduino, Schedulers.io(), eventPublisher.valuesOfType(MotionPowerValue.class));
+            arduino,
+            Schedulers.io(),
+            eventPublisher.valuesOfType(MotionPowerValue.class),
+            configSource.getConfig("slider", SliderConfig.class));
         sliderController.getMotion().subscribe(eventPublisher::emit);
         sliderController.getLights().subscribe(eventPublisher::emit);
 

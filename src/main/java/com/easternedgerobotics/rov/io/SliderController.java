@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.control.AnalogToPowerLevel;
 import com.easternedgerobotics.rov.control.SupressObservable;
 import com.easternedgerobotics.rov.event.Event;
@@ -12,73 +13,29 @@ import rx.Observable;
 import rx.Scheduler;
 
 public final class SliderController {
-    /**
-     * Index of the global power slider.
-     */
-    private static final byte GLOBAL_POWER_SLIDER_ADDRESS = 3;
-
-    /**
-     * Index of the heave power slider.
-     */
-    private static final byte HEAVE_POWER_SLIDER_ADDRESS = 2;
-
-    /**
-     * Index of the sway power slider.
-     */
-    private static final byte SWAY_POWER_SLIDER_ADDRESS = 1;
-
-    /**
-     * Index of the surge power slider.
-     */
-    private static final byte SURGE_POWER_SLIDER_ADDRESS = 0;
-
-    /**
-     * Index of the pitch power slider.
-     */
-    private static final byte PITCH_POWER_SLIDER_ADDRESS = -1;
-
-    /**
-     * Index of the yaw power slider.
-     */
-    private static final byte YAW_POWER_SLIDER_ADDRESS = 5;
-
-    /**
-     * Index of the roll power slider.
-     */
-    private static final byte ROLL_POWER_SLIDER_ADDRESS = 4;
-
-    /**
-     * Index of the light power slider.
-     */
-    private static final byte LIGHT_POWER_SLIDER_ADDRESS = 7;
-
     private final Observable<MotionPowerValue> motion;
 
     private final Observable<LightSpeedValue> lights;
 
-    /**
-     * Create a pilot panel instance for the Arduino Mega on the given com port.
-     *
-     * @param arduino the device to get the sliders from.
-     */
     public SliderController(
         final Arduino arduino,
         final Scheduler scheduler,
-        @Event final Observable<MotionPowerValue> motionPowerValues
+        @Event final Observable<MotionPowerValue> motionPowerValues,
+        final SliderConfig config
     ) {
         // Get an observable for each of the power sliders
-        final Observable<Float> global = arduino.analogPin(GLOBAL_POWER_SLIDER_ADDRESS)
+        final Observable<Float> global = arduino.analogPin(config.globalPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> heave = arduino.analogPin(HEAVE_POWER_SLIDER_ADDRESS)
+        final Observable<Float> heave = arduino.analogPin(config.heavePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> sway = arduino.analogPin(SWAY_POWER_SLIDER_ADDRESS)
+        final Observable<Float> sway = arduino.analogPin(config.swayPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> surge = arduino.analogPin(SURGE_POWER_SLIDER_ADDRESS)
+        final Observable<Float> surge = arduino.analogPin(config.surgePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
         final Observable<Float> pitch = Observable.just(0f).map(AnalogToPowerLevel::convert);
-        final Observable<Float> yaw = arduino.analogPin(YAW_POWER_SLIDER_ADDRESS)
+        final Observable<Float> yaw = arduino.analogPin(config.yawPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> roll = arduino.analogPin(ROLL_POWER_SLIDER_ADDRESS)
+        final Observable<Float> roll = arduino.analogPin(config.rollPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
 
         final SupressObservable<MotionPowerValue> external = new SupressObservable<>(
@@ -101,7 +58,7 @@ public final class SliderController {
             .doOnEach(val -> external.supress())
             .share();
 
-        lights = arduino.analogPin(LIGHT_POWER_SLIDER_ADDRESS)
+        lights = arduino.analogPin(config.lightPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert)
             .map(LightSpeedValue::new)
             .share();
@@ -115,3 +72,4 @@ public final class SliderController {
         return lights;
     }
 }
+

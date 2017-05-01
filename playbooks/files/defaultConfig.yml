@@ -55,3 +55,11 @@ joystick:
   cameraAVideoFlipButton: 8
   cameraBVideoFlipButton: 7
   motorRotationSpeed: 0.3f
+slider:
+  globalPowerSliderAddress: 3
+  heavePowerSliderAddress: 2
+  swayPowerSliderAddress: 1
+  surgePowerSliderAddress: 0
+  yawPowerSliderAddress: 5
+  rollPowerSliderAddress: 4
+  lightPowerSliderAddress: 7
