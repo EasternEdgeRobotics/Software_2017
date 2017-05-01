@@ -6,6 +6,15 @@ launch:
 topsides:
   pilotPanelName: Pilot Panel
   pilotPanelPort: /dev/ttyACM0
+  pilotPanelTimeOut: 2000
+  pilotPanelBaud: 115200
+  pilotPanelHeartbeatInterval: 500
+  pilotPanelHeartbeatTimeout: 5000
+  pilotPanelOutputs: [22,24,26,28,30,32,34,36,38,53]
+  pilotPanelInputPullups: [23,25,27,29,31,33,35,37,39]
+  joystickRecoveryInterval: 1000
+  emergencyStopButtonAddress: 53
+  profileSwitchDuration: 2000
   profilePref: profiles
   mpv: 192.168.88.2
 rov:
@@ -46,3 +55,11 @@ joystick:
   cameraAVideoFlipButton: 8
   cameraBVideoFlipButton: 7
   motorRotationSpeed: 0.3f
+slider:
+  globalPowerSliderAddress: 3
+  heavePowerSliderAddress: 2
+  swayPowerSliderAddress: 1
+  surgePowerSliderAddress: 0
+  yawPowerSliderAddress: 5
+  rollPowerSliderAddress: 4
+  lightPowerSliderAddress: 7

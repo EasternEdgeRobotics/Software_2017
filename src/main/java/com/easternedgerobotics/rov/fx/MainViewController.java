@@ -1,7 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.PilotPanel;
+import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 
 import rx.Observable;
@@ -20,15 +20,19 @@ public class MainViewController implements ViewController {
 
     private final EventPublisher eventPublisher;
 
-    private final PilotPanel pilotPanel;
+    private final EmergencyStopController emergencyStopController;
 
     private final CompositeSubscription subscriptions;
 
     @Inject
-    public MainViewController(final MainView view, final EventPublisher eventPublisher, final PilotPanel pilotPanel) {
+    public MainViewController(
+        final MainView view,
+        final EventPublisher eventPublisher,
+        final EmergencyStopController emergencyStopController
+    ) {
         this.view = view;
         this.eventPublisher = eventPublisher;
-        this.pilotPanel = pilotPanel;
+        this.emergencyStopController = emergencyStopController;
         this.subscriptions = new CompositeSubscription();
     }
 
@@ -42,7 +46,7 @@ public class MainViewController implements ViewController {
                 .subscribe(this::heartbeat));
         subscriptions.add(JavaFxObservable.valuesOf(view.button.selectedProperty())
             .subscribe(this::onSelected));
-        subscriptions.add(pilotPanel.emergencyStopClick().observeOn(JAVA_FX_SCHEDULER)
+        subscriptions.add(emergencyStopController.emergencyStop().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(this::onEmergencyStopClick));
     }
 

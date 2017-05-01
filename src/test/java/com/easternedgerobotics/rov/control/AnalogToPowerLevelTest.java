@@ -13,49 +13,49 @@ public class AnalogToPowerLevelTest {
     @Parameterized.Parameters(name = "Input {0} => Output {1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-            {-1.00f, 100},
-            {-0.75f, 100},
-            {-0.50f, 100},
-            {-0.25f, 100},
-            {0.00f,  100},
-            {0.05f,  100},
-            {0.10f,   94},
-            {0.15f,   89},
-            {0.20f,   83},
-            {0.25f,   78},
-            {0.30f,   72},
-            {0.35f,   67},
-            {0.40f,   61},
-            {0.45f,   56},
-            {0.50f,   50},
-            {0.55f,   45},
-            {0.60f,   39},
-            {0.65f,   34},
-            {0.70f,   28},
-            {0.75f,   23},
-            {0.80f,   17},
-            {0.85f,   11},
-            {0.90f,    6},
-            {0.95f,    1},
-            {1.00f,    0},
-            {1.25f,    0},
-            {1.50f,    0},
-            {1.75f,    0},
-            {2.00f,    0},
+            {-1.00f, 1.00f},
+            {-0.75f, 1.00f},
+            {-0.50f, 1.00f},
+            {-0.25f, 1.00f},
+            {0.00f,  1.00f},
+            {0.05f,  1.00f},
+            {0.10f,  0.94f},
+            {0.15f,  0.89f},
+            {0.20f,  0.83f},
+            {0.25f,  0.78f},
+            {0.30f,  0.72f},
+            {0.35f,  0.67f},
+            {0.40f,  0.61f},
+            {0.45f,  0.56f},
+            {0.50f,  0.50f},
+            {0.55f,  0.45f},
+            {0.60f,  0.39f},
+            {0.65f,  0.34f},
+            {0.70f,  0.28f},
+            {0.75f,  0.23f},
+            {0.80f,  0.17f},
+            {0.85f,  0.11f},
+            {0.90f,  0.06f},
+            {0.95f,  0.01f},
+            {1.00f,  0.00f},
+            {1.25f,  0.00f},
+            {1.50f,  0.00f},
+            {1.75f,  0.00f},
+            {2.00f,  0.00f},
         });
     }
 
     private final float input;
 
-    private final int expected;
+    private final float expected;
 
     public AnalogToPowerLevelTest(final Object input, final Object expected) {
-        this.input = (Float) input;
-        this.expected = (Integer) expected;
+        this.input = (float) input;
+        this.expected = (float) expected;
     }
 
     @Test
     public final void analogToPowerLevel() {
-        Assert.assertEquals(AnalogToPowerLevel.convert(input), expected);
+        Assert.assertEquals(AnalogToPowerLevel.convert(input), expected, 0.01);
     }
 }
