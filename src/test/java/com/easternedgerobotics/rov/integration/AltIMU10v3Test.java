@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.integration;
 
+import com.easternedgerobotics.rov.config.LaunchConfig;
+import com.easternedgerobotics.rov.config.MockLaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
@@ -26,8 +28,9 @@ public final class AltIMU10v3Test {
     }
 
     public static void main(final String[] args) throws IOException, InterruptedException {
-        final InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255");
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final LaunchConfig launchConfig = new MockLaunchConfig();
+        final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+        final int broadcastPort = launchConfig.defaultBroadcastPort();
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 new DatagramSocket(broadcastPort), broadcastAddress, broadcastPort, new BasicOrder<>()));
 

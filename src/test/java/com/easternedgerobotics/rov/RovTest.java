@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.MockRovConfig;
+import com.easternedgerobotics.rov.config.RovConfig;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.Accelerometer;
 import com.easternedgerobotics.rov.io.Barometer;
@@ -114,6 +116,8 @@ class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Ma
 
 @SuppressWarnings({"checkstyle:magicnumber"})
 public class RovTest {
+    private static final RovConfig ROV_CONFIG = new MockRovConfig();
+
     @Rule
     public final TestRule rovLoggerRule = new OrgPwmTinylogSuppressionRule(Rov.class);
 
@@ -123,16 +127,16 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).writeZero();
     }
 
     @Test
@@ -141,18 +145,18 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(false));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
     @Test
@@ -161,17 +165,17 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        scheduler.advanceTimeBy(Rov.MAX_HEARTBEAT_GAP, TimeUnit.SECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
     @Test
@@ -180,25 +184,18 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        eventPublisher.emit(new HeartbeatValue(false));
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).writeZero();
-
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
     @Test
@@ -207,37 +204,41 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(true));
         eventPublisher.emit(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
         eventPublisher.emit(new MotionValue(0, 0, 1, 0, 0, 0));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL)).writeZero();
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).writeZero();
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.STARBOARD_FORE_CHANNEL)).write(MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).write(
+            MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_VERT_CHANNEL), Mockito.times(2)).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).write(0);
 
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.STARBOARD_AFT_CHANNEL)).write(MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).write(
+            MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
 
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.PORT_FORE_CHANNEL)).write(MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).write(
+            MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
 
-        Mockito.verify(maestro.get(Rov.PORT_VERT_CHANNEL), Mockito.times(2)).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).write(0);
 
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).write(0);
-        Mockito.verify(maestro.get(Rov.PORT_AFT_CHANNEL)).write(MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).write(
+            MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
     }
 
     @Test
@@ -246,14 +247,14 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueA(1));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.CAMERA_A_MOTOR_CHANNEL)).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.cameraAMotorChannel())).write(1);
     }
 
     @Test
@@ -262,14 +263,14 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueB(1));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.CAMERA_B_MOTOR_CHANNEL)).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.cameraBMotorChannel())).write(1);
     }
 
     @Test
@@ -278,14 +279,14 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(true));
         eventPublisher.emit(new ToolingSpeedValue(1));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.TOOLING_MOTOR_CHANNEL)).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.toolingMotorChannel())).write(1);
     }
 
     @Test
@@ -294,13 +295,13 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new HeartbeatValue(true));
         eventPublisher.emit(new LightSpeedValue(1));
-        scheduler.advanceTimeBy(Rov.SLEEP_DURATION, TimeUnit.MILLISECONDS);
+        scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(Rov.LIGHT_CHANNEL)).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.lightChannel())).write(1);
     }
 }

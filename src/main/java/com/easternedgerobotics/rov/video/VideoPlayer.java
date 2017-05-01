@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.video;
 
+import com.easternedgerobotics.rov.config.VideoPlayerConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.VideoValueA;
 import com.easternedgerobotics.rov.value.VideoValueB;
@@ -8,10 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class VideoPlayer {
-    private static final int CAMERA_A_VIDEO_PORT = 12345;
-
-    private static final int CAMERA_B_VIDEO_PORT = 12346;
-
     private final EventPublisher eventPublisher;
 
     /**
@@ -19,19 +16,22 @@ public final class VideoPlayer {
      */
     private final String host;
 
+    private final VideoPlayerConfig config;
+
     private final List<UnixProcess> subprocesses;
 
-    public VideoPlayer(final EventPublisher eventPublisher, final String host) {
+    public VideoPlayer(final EventPublisher eventPublisher, final String host, final VideoPlayerConfig config) {
         this.eventPublisher = eventPublisher;
         this.host = host;
+        this.config = config;
         this.subprocesses = new LinkedList<>();
     }
 
     public final void init() {
-        subprocesses.add(UnixProcess.start("eer-video", String.valueOf(CAMERA_A_VIDEO_PORT)));
-        subprocesses.add(UnixProcess.start("eer-video", String.valueOf(CAMERA_B_VIDEO_PORT)));
-        eventPublisher.emit(new VideoValueA(host, CAMERA_A_VIDEO_PORT));
-        eventPublisher.emit(new VideoValueB(host, CAMERA_B_VIDEO_PORT));
+        subprocesses.add(UnixProcess.start("eer-video", String.valueOf(config.cameraAVideoPort())));
+        subprocesses.add(UnixProcess.start("eer-video", String.valueOf(config.cameraBVideoPort())));
+        eventPublisher.emit(new VideoValueA(host, config.cameraAVideoPort()));
+        eventPublisher.emit(new VideoValueB(host, config.cameraBVideoPort()));
     }
 
     public final void stop() {

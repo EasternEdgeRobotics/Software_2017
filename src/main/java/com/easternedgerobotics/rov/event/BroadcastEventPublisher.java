@@ -9,8 +9,6 @@ public final class BroadcastEventPublisher implements EventPublisher {
     /**
      * The default port to broadcast messages on.
      */
-    public static final int DEFAULT_BROADCAST_PORT = 10003;
-
     private final Broadcast broadcast;
 
     private final CountDownLatch countDownLatch;

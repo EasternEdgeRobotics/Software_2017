@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
@@ -56,23 +58,36 @@ final class PicameraA {
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
         final String app = "picamera-a";
         final HelpFormatter formatter = new HelpFormatter();
-        final Option broadcast = Option.builder("b")
-            .longOpt("broadcast")
+        final Option defaultConfig = Option.builder("d")
+            .longOpt("default")
             .hasArg()
-            .argName("ADDRESS")
-            .desc("use ADDRESS to broadcast messages")
+            .argName("DEFAULT")
+            .desc("name of the default config file")
+            .required()
+            .build();
+        final Option config = Option.builder("c")
+            .longOpt("config")
+            .hasArg()
+            .argName("CONFIG")
+            .desc("name of the overriding config file")
             .required()
             .build();
 
         final Options options = new Options();
-        options.addOption(broadcast);
+        options.addOption(defaultConfig);
+        options.addOption(config);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
-            final InetAddress broadcastAddress = InetAddress.getByName(arguments.getOptionValue("b"));
-            final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+            final LaunchConfig launchConfig = new Config(
+                arguments.getOptionValue("d"),
+                arguments.getOptionValue("c")
+            ).getConfig("launch", LaunchConfig.class);
+
+            final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+            final int broadcastPort = launchConfig.defaultBroadcastPort();
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));

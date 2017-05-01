@@ -1,5 +1,8 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.LaunchConfig;
+import com.easternedgerobotics.rov.config.MockLaunchConfig;
+import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
@@ -107,12 +110,13 @@ public final class RovSimulator {
     }
 
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
-        final InetAddress broadcastAddress = InetAddress.getByName(System.getProperty("broadcast", "192.168.88.255"));
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final LaunchConfig launchConfig = new MockLaunchConfig();
+        final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+        final int broadcastPort = launchConfig.defaultBroadcastPort();
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU());
+        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU(), new MockRovConfig());
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 

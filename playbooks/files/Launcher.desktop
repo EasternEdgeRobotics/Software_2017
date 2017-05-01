@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=9.0.0
 Name=Control Software
-Exec=/opt/eer-9.0.0/bin/topside
+Exec=/opt/eer-9.0.0/bin/topside --default /opt/eer-9.0.0/defaultConfig.yml --config /opt/eer-9.0.0/config.yml
 Path=/opt/eer-9.0.0
 Terminal=false
 Type=Application

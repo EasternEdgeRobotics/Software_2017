@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.integration;
 
+import com.easternedgerobotics.rov.config.LaunchConfig;
+import com.easternedgerobotics.rov.config.MockLaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Thruster;
@@ -52,6 +54,8 @@ public class IndividualThrusterTest {
 
     private final int duration;
 
+    private final LaunchConfig launchConfig;
+
     private DatagramSocket socket;
 
     private EventPublisher eventPublisher;
@@ -59,12 +63,13 @@ public class IndividualThrusterTest {
     public IndividualThrusterTest(final Byte address, final Integer duration) {
         this.address = address;
         this.duration = duration;
+        this.launchConfig = new MockLaunchConfig();
     }
 
     @Before
     public final void before() throws SocketException, UnknownHostException {
-        final InetAddress broadcastAddress = InetAddress.getByName("192.168.88.255");
-        final int broadcastPort = BroadcastEventPublisher.DEFAULT_BROADCAST_PORT;
+        final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
+        final int broadcastPort = launchConfig.defaultBroadcastPort();
         socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
@@ -90,7 +95,7 @@ public class IndividualThrusterTest {
                 .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)));
         final Consumer<SpeedValue> consumer = val -> thruster.write();
 
-        serial.open("/dev/ttyACM0", 115_200);
+        serial.open(launchConfig.serialPort(), launchConfig.baudRate());
         eventPublisher.valuesOfType(TestSpeedValue.class).cast(SpeedValue.class).subscribe(consumer::accept);
         eventPublisher.emit(new TestSpeedValue(1 * SAFE_FOR_AIR_THRUSTER_POWER_RATIO));
 
