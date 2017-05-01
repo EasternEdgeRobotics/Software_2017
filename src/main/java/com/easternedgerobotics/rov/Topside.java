@@ -5,13 +5,14 @@ import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
-import com.easternedgerobotics.rov.config.VideoPlayerConfig;
+import com.easternedgerobotics.rov.config.VideoDecoderConfig;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
 import com.easternedgerobotics.rov.fx.SensorView;
 import com.easternedgerobotics.rov.fx.ThrusterPowerSlidersView;
+import com.easternedgerobotics.rov.fx.VideoView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
@@ -22,7 +23,7 @@ import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
-import com.easternedgerobotics.rov.video.VideoPlayer;
+import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -31,7 +32,6 @@ import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 import rx.schedulers.Schedulers;
 
-import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -44,11 +44,11 @@ public final class Topside extends Application {
 
     private EventPublisher eventPublisher;
 
-    private VideoPlayer videoPlayer;
-
     private ViewLoader viewLoader;
 
     private Arduino arduino;
+
+    private VideoDecoder videoDecoder;
 
     @Override
     public void init() throws SocketException, UnknownHostException {
@@ -64,12 +64,6 @@ public final class Topside extends Application {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-
-        videoPlayer = new VideoPlayer(
-            eventPublisher,
-            config.mpv(),
-            configSource.getConfig("videoPlayer", VideoPlayerConfig.class)
-        );
 
         arduino = new Arduino(
             new ArduinoPort(
@@ -99,10 +93,14 @@ public final class Topside extends Application {
             profiles, eventPublisher.valuesOfType(MotionPowerValue.class), Schedulers.io());
         profileController.getMotion().subscribe(eventPublisher::emit);
 
+        videoDecoder = new VideoDecoder(
+            eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
+
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
                 put(EmergencyStopController.class, emergencyStopController);
+                put(VideoDecoder.class, videoDecoder);
             }
         });
 
@@ -115,19 +113,6 @@ public final class Topside extends Application {
             new ExponentialMotionScale(),
             configSource.getConfig("joystick", JoystickConfig.class)
         )::onNext);
-
-        try {
-            Logger.info("Initialising video player");
-            videoPlayer.init();
-        } catch (final RuntimeException e) {
-            if (!(e.getCause() instanceof IOException)) {
-                throw e;
-            }
-
-            Logger.warn("The video player could not be initialised");
-            Logger.warn(e);
-        }
-        Logger.info("Initialised");
     }
 
     @Override
@@ -148,16 +133,22 @@ public final class Topside extends Application {
         sensorStage.initOwner(stage);
         sensorStage.show();
 
+        final Stage cameraStage = viewLoader.load(VideoView.class);
+        cameraStage.setTitle("Cameras");
+        cameraStage.initOwner(stage);
+        cameraStage.show();
+
         arduino.start(config.pilotPanelHeartbeatInterval(), config.pilotPanelHeartbeatTimeout(), TimeUnit.MILLISECONDS);
+        videoDecoder.start();
         Logger.info("Started");
     }
 
     @Override
     public void stop() {
         Logger.info("Stopping");
-        videoPlayer.stop();
         eventPublisher.stop();
         arduino.stop();
+        videoDecoder.stop();
         Logger.info("Stopped");
     }
 
