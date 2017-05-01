@@ -10,7 +10,7 @@
     - name: Copy Control Software
       unarchive: src=../build/distributions/eer-{{ version }}.zip dest=/opt
     - name: Copy Config Files
-      template: src=files/{{ item }} dest=/opt/eer-{{ version }}/{{ item }} mode=755 owner=pi group=pi
+      template: src=files/{{ item }} dest=/opt/eer-{{ version }}/{{ item }} mode=755 owner={{ ansible_user }} group={{ ansible_user }}
       with_items:
         - config.yml
         - defaultConfig.yml
