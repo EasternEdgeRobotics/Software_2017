@@ -29,12 +29,12 @@ import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
-import com.easternedgerobotics.rov.value.PortVertSpeedValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
-import com.easternedgerobotics.rov.value.StarboardVertSpeedValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.VertAftSpeedValue;
+import com.easternedgerobotics.rov.value.VertForeSpeedValue;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
@@ -108,8 +108,8 @@ final class Rov {
         final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
         final PortForeSpeedValue portFore = new PortForeSpeedValue();
         final StarboardForeSpeedValue starboardFore = new StarboardForeSpeedValue();
-        final PortVertSpeedValue portVert = new PortVertSpeedValue();
-        final StarboardVertSpeedValue starboardVert = new StarboardVertSpeedValue();
+        final VertAftSpeedValue portVert = new VertAftSpeedValue();
+        final VertForeSpeedValue starboardVert = new VertForeSpeedValue();
 
         this.thrusterConfig = new SixThrusterConfig(eventPublisher);
 
@@ -168,14 +168,14 @@ final class Rov {
                     .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
-                    .valuesOfType(PortVertSpeedValue.class)
+                    .valuesOfType(VertAftSpeedValue.class)
                     .startWith(portVert)
                     .cast(SpeedValue.class),
                 channels.get(config.portVertChannel())
                     .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
-                    .valuesOfType(StarboardVertSpeedValue.class)
+                    .valuesOfType(VertForeSpeedValue.class)
                     .startWith(starboardVert)
                     .cast(SpeedValue.class),
                 channels.get(config.starboardVertChannel())
