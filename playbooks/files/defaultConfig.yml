@@ -47,7 +47,7 @@ videoDecoder:
   cameraAVideoPort: 12345
   cameraBVideoPort: 12346
   format: h264
-  frameRate: 48
+  frameRate: 96
   socketBacklog: 100
 joystick:
   cameraAMotorForwardButton: 4

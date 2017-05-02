@@ -77,11 +77,12 @@ public final class VideoDecoder {
             grabber.start();
 
             while (!Thread.currentThread().isInterrupted()) {
-                final Frame frame = grabber.grab();
+                final Frame frame = grabber.grab().clone();
                 if (frame != null) {
                     final BufferedImage bufferedImage = converter.convert(frame);
                     if (bufferedImage != null) {
                         images.onNext(SwingFXUtils.toFXImage(bufferedImage, null));
+                        grabber.flush();
                     }
                 }
             }
