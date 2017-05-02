@@ -32,11 +32,11 @@ public final class SliderController {
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
         final Observable<Float> surge = arduino.analogPin(config.surgePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> pitch = Observable.just(0f).map(AnalogToPowerLevel::convert);
+        final Observable<Float> pitch = arduino.analogPin(config.pitchPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
         final Observable<Float> yaw = arduino.analogPin(config.yawPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> roll = arduino.analogPin(config.rollPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
+        final Observable<Float> roll = Observable.just(0f).map(AnalogToPowerLevel::convert);
 
         final SupressObservable<MotionPowerValue> external = new SupressObservable<>(
             motionPowerValues, scheduler, 2000);
