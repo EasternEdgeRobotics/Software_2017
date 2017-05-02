@@ -99,10 +99,10 @@ class LogitechExtremeJoystick implements Joystick {
      * Map the current axes values into a motion value.
      *
      * @param component the latest axis component to be updated.
-     * @param rolling if the ROV is in a roll operation.
+     * @param pitching if the ROV is in a pitch operation.
      * @return the latest motion value.
      */
-    private MotionValue createMotionValue(final Component component, final boolean rolling) {
+    private MotionValue createMotionValue(final Component component, final boolean pitching) {
         if (component.getIdentifier() == Component.Identifier.Axis.X) {
             sway = -component.getPollData();
         } else if (component.getIdentifier() == Component.Identifier.Axis.Y) {
@@ -112,8 +112,8 @@ class LogitechExtremeJoystick implements Joystick {
         } else if (component.getIdentifier() == Component.Identifier.Axis.SLIDER) {
             heave = component.getPollData();
         }
-        if (rolling) {
-            return new MotionValue(heave, 0, surge, 0, yaw, -sway);
+        if (pitching) {
+            return new MotionValue(heave, sway, 0, -surge, yaw, 0);
         }
         return new MotionValue(heave, sway, surge, 0, yaw, 0);
     }

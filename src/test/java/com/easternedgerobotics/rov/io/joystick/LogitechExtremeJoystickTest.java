@@ -55,7 +55,7 @@ public class LogitechExtremeJoystickTest {
 
     @Test
     @SuppressWarnings({"checkstyle:magicnumber"})
-    public final void axesDoesIncludeRollWhileTriggerIsBeingHeld() {
+    public final void axesDoesIncludePitchWhileTriggerIsBeingHeld() {
         final List<Component> joystickButtons = joystickButtons();
         final Map<Component.Identifier, Component> axes = joystickAxes(Arrays.asList(
             new Pair<>(Axis.X, new float[]{1, 2, 3, 4, 5, 6}),
@@ -90,12 +90,12 @@ public class LogitechExtremeJoystickTest {
         joystickSubscriber.assertNoErrors();
         joystickSubscriber.assertValueCount(6);
         joystickSubscriber.assertReceivedOnNext(Arrays.asList(
-            new MotionValue(1, -1, 1, 0, 1, 0),
-            new MotionValue(2, -2, 2, 0, 2, 0),
-            new MotionValue(3,  0, 3, 0, 3, 3),
-            new MotionValue(4,  0, 4, 0, 4, 4),
-            new MotionValue(5,  0, 5, 0, 5, 5),
-            new MotionValue(6, -6, 6, 0, 6, 0)
+            new MotionValue(1, -1, 1,  0, 1, 0),
+            new MotionValue(2, -2, 2,  0, 2, 0),
+            new MotionValue(3, -3, 0, -3, 3, 0),
+            new MotionValue(4, -4, 0, -4, 4, 0),
+            new MotionValue(5, -5, 0, -5, 5, 0),
+            new MotionValue(6, -6, 6,  0, 6, 0)
         ));
     }
 

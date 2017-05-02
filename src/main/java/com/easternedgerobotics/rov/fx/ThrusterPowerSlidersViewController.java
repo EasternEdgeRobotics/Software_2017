@@ -118,16 +118,16 @@ public class ThrusterPowerSlidersViewController implements ViewController {
         heaveSliderView.displayNameLabel.setText("Heave");
         swaySliderView.displayNameLabel.setText("Sway");
         surgeSliderView.displayNameLabel.setText("Surge");
+        pitchSliderView.displayNameLabel.setText("Pitch");
         yawSliderView.displayNameLabel.setText("Yaw");
-        rollSliderView.displayNameLabel.setText("Roll");
 
         view.row.getChildren().addAll(
             globalSliderView.getParent(),
             heaveSliderView.getParent(),
             swaySliderView.getParent(),
             surgeSliderView.getParent(),
-            yawSliderView.getParent(),
-            rollSliderView.getParent()
+            pitchSliderView.getParent(),
+            yawSliderView.getParent()
         );
 
         final SupressObservable<MotionPowerValue> external = new SupressObservable<>(

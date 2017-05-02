@@ -9,9 +9,9 @@ public interface SliderConfig {
 
     byte surgePowerSliderAddress();
 
-    byte yawPowerSliderAddress();
+    byte pitchPowerSliderAddress();
 
-    byte rollPowerSliderAddress();
+    byte yawPowerSliderAddress();
 
     byte lightPowerSliderAddress();
 }

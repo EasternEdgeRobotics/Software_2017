@@ -61,6 +61,6 @@ slider:
   heavePowerSliderAddress: 2
   swayPowerSliderAddress: 1
   surgePowerSliderAddress: 0
+  pitchPowerSliderAddress: 4
   yawPowerSliderAddress: 5
-  rollPowerSliderAddress: 4
   lightPowerSliderAddress: 7
