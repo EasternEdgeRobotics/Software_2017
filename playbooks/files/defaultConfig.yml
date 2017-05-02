@@ -42,9 +42,13 @@ rov:
   altImuSa0High: false
   i2cBus: 1
   shutdownTimeout: 1000
-videoPlayer:
+videoDecoder:
+  host: 192.168.88.2
   cameraAVideoPort: 12345
   cameraBVideoPort: 12346
+  format: h264
+  frameRate: 96
+  socketBacklog: 100
 joystick:
   cameraAMotorForwardButton: 4
   cameraAMotorReverseButton: 6
