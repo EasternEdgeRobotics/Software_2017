@@ -39,14 +39,11 @@ public final class VideoDecoder {
     }
 
     public void start() {
-        if (threadA != null) {
-            threadA.interrupt();
-        }
-        if (threadB != null) {
-            threadB.interrupt();
-        }
+        stop();
         threadA = new Thread(() -> collectImages(config.cameraAVideoPort(), imagesA));
         threadB = new Thread(() -> collectImages(config.cameraBVideoPort(), imagesB));
+        threadA.setDaemon(true);
+        threadB.setDaemon(true);
         threadA.start();
         threadB.start();
         eventPublisher.emit(new VideoValueA(config.host(), config.cameraAVideoPort()));
@@ -54,8 +51,12 @@ public final class VideoDecoder {
     }
 
     public void stop() {
-        threadA.interrupt();
-        threadB.interrupt();
+        if (threadA != null) {
+            threadA.interrupt();
+        }
+        if (threadB != null) {
+            threadB.interrupt();
+        }
     }
 
     public Observable<Image> cameraAImages() {
@@ -76,7 +77,7 @@ public final class VideoDecoder {
             grabber.setFormat(config.format());
             grabber.start();
 
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!Thread.interrupted()) {
                 final Frame frame = grabber.grab().clone();
                 if (frame != null) {
                     final BufferedImage bufferedImage = converter.convert(frame);
