@@ -9,11 +9,17 @@
       file: path=/opt state=directory mode=0755
     - name: Copy Control Software
       unarchive: src=../build/distributions/eer-{{ version }}.zip dest=/opt
-    - name: Copy Config Files
-      template: src=files/{{ item }} dest=/opt/eer-{{ version }}/{{ item }} mode=755 owner={{ ansible_user }} group={{ ansible_user }}
-      with_items:
-        - config.yml
-        - defaultConfig.yml
+    - name: Copy Default Config File
+      copy: src=files/defaultConfig.yml dest=/opt/eer-{{ version }}/defaultConfig.yml mode=755 owner={{ ansible_user }} group={{ ansible_user }}
+    - name: Verify Custom Config Exists
+      command: touch /home/{{ ansible_user }}
+    - name: ensure file exists
+      copy:
+        content: ""
+        dest: /home/{{ ansible_user }}/config.yml
+        force: no
+        owner: {{ ansible_user }}
+        group: {{ ansible_user }}
 
 - hosts: rasprime:picamera
   become: yes
