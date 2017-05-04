@@ -10,7 +10,6 @@ import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.Accelerometer;
 import com.easternedgerobotics.rov.io.Barometer;
 import com.easternedgerobotics.rov.io.CpuInformation;
-import com.easternedgerobotics.rov.io.CurrentSensor;
 import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Light;
 import com.easternedgerobotics.rov.io.Magnetometer;
@@ -18,7 +17,6 @@ import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.PWM;
 import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.io.Thruster;
-import com.easternedgerobotics.rov.io.VoltageSensor;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
 import com.easternedgerobotics.rov.io.pololu.PololuBus;
@@ -74,10 +72,6 @@ final class Rov {
 
     private final List<Light> lights;
 
-    private final List<VoltageSensor> voltageSensors;
-
-    private final List<CurrentSensor> currentSensors;
-
     private final Accelerometer accelerometer;
 
     private final Barometer barometer;
@@ -108,8 +102,8 @@ final class Rov {
         final StarboardAftSpeedValue starboardAft = new StarboardAftSpeedValue();
         final PortForeSpeedValue portFore = new PortForeSpeedValue();
         final StarboardForeSpeedValue starboardFore = new StarboardForeSpeedValue();
-        final VertAftSpeedValue portVert = new VertAftSpeedValue();
-        final VertForeSpeedValue starboardVert = new VertForeSpeedValue();
+        final VertAftSpeedValue vertAft = new VertAftSpeedValue();
+        final VertForeSpeedValue vertFore = new VertForeSpeedValue();
 
         this.thrusterConfig = new SixThrusterConfig(eventPublisher);
 
@@ -169,16 +163,16 @@ final class Rov {
             new Thruster(
                 eventPublisher
                     .valuesOfType(VertAftSpeedValue.class)
-                    .startWith(portVert)
+                    .startWith(vertAft)
                     .cast(SpeedValue.class),
-                channels.get(config.portVertChannel())
+                channels.get(config.vertAftChannel())
                     .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV))),
             new Thruster(
                 eventPublisher
                     .valuesOfType(VertForeSpeedValue.class)
-                    .startWith(starboardVert)
+                    .startWith(vertFore)
                     .cast(SpeedValue.class),
-                channels.get(config.starboardVertChannel())
+                channels.get(config.vertForeChannel())
                     .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
         ));
 
@@ -191,18 +185,6 @@ final class Rov {
                 channels.get(config.lightChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
             )
         );
-
-        voltageSensors = Collections.unmodifiableList(Arrays.asList(
-            VoltageSensor.V05.apply(channels.get(config.voltageSensor05VChannel())),
-            VoltageSensor.V12.apply(channels.get(config.voltageSensor12VChannel())),
-            VoltageSensor.V48.apply(channels.get(config.voltageSensor48VChannel()))
-        ));
-
-        currentSensors = Collections.unmodifiableList(Arrays.asList(
-            CurrentSensor.V05.apply(channels.get(config.currentSensor05VChannel())),
-            CurrentSensor.V12.apply(channels.get(config.currentSensor12VChannel())),
-            CurrentSensor.V48.apply(channels.get(config.currentSensor48VChannel()))
-        ));
 
         barometer = () -> imu.pressure();
         magnetometer = () -> imu.rotation();
@@ -271,8 +253,6 @@ final class Rov {
             eventPublisher.emit(gyroscope.angularVelocity());
             eventPublisher.emit(magnetometer.rotation());
             eventPublisher.emit(thermometer.temperature());
-            voltageSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
-            currentSensors.forEach(sensor -> eventPublisher.emit(sensor.read()));
         });
     }
 

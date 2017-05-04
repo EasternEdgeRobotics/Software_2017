@@ -38,11 +38,11 @@ public final class MockRovConfig implements RovConfig {
         return 0x04;
     }
 
-    public byte portVertChannel() {
+    public byte vertAftChannel() {
         return 0x05;
     }
 
-    public byte starboardVertChannel() {
+    public byte vertForeChannel() {
         return 0x06;
     }
 
@@ -60,30 +60,6 @@ public final class MockRovConfig implements RovConfig {
 
     public byte lightChannel() {
         return 0x0a;
-    }
-
-    public byte voltageSensor05VChannel() {
-        return 0x0b;
-    }
-
-    public byte voltageSensor12VChannel() {
-        return 0x0c;
-    }
-
-    public byte voltageSensor48VChannel() {
-        return 0x0d;
-    }
-
-    public byte currentSensor05VChannel() {
-        return 0x0e;
-    }
-
-    public byte currentSensor12VChannel() {
-        return 0x0f;
-    }
-
-    public byte currentSensor48VChannel() {
-        return 0x10;
     }
 
     public boolean altImuSa0High() {
