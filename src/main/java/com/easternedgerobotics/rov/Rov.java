@@ -173,7 +173,7 @@ final class Rov {
                     .startWith(vertFore)
                     .cast(SpeedValue.class),
                 channels.get(config.vertForeChannel())
-                    .setOutputRange(new Range(Thruster.MAX_FWD, Thruster.MAX_REV)))
+                    .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)))
         ));
 
         this.lights = Collections.singletonList(
