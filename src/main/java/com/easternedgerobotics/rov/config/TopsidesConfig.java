@@ -24,6 +24,4 @@ public interface TopsidesConfig {
     long profileSwitchDuration();
 
     String profilePref();
-
-    String mpv();
 }

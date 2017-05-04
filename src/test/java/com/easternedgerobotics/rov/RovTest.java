@@ -132,10 +132,10 @@ public class RovTest {
         rov.init(scheduler, scheduler);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).writeZero();
     }
 
@@ -152,10 +152,10 @@ public class RovTest {
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
@@ -171,10 +171,10 @@ public class RovTest {
         scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
@@ -191,10 +191,10 @@ public class RovTest {
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel()), Mockito.times(2)).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel()), Mockito.times(2)).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel()), Mockito.times(2)).writeZero();
     }
 
@@ -214,17 +214,17 @@ public class RovTest {
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).writeZero();
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel())).writeZero();
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).writeZero();
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).write(0);
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).write(
             MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
 
-        Mockito.verify(maestro.get(ROV_CONFIG.starboardVertChannel()), Mockito.times(2)).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel()), Mockito.times(2)).write(0);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).write(0);
         Mockito.verify(maestro.get(ROV_CONFIG.starboardAftChannel())).write(
@@ -234,7 +234,7 @@ public class RovTest {
         Mockito.verify(maestro.get(ROV_CONFIG.portForeChannel())).write(
             MockitoHamcrest.floatThat(CoreMatchers.not(0f)));
 
-        Mockito.verify(maestro.get(ROV_CONFIG.portVertChannel()), Mockito.times(2)).write(0);
+        Mockito.verify(maestro.get(ROV_CONFIG.vertAftChannel()), Mockito.times(2)).write(0);
 
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).write(0);
         Mockito.verify(maestro.get(ROV_CONFIG.portAftChannel())).write(

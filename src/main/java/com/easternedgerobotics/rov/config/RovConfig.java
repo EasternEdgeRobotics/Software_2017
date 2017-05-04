@@ -19,9 +19,9 @@ public interface RovConfig {
 
     byte starboardForeChannel();
 
-    byte portVertChannel();
+    byte vertAftChannel();
 
-    byte starboardVertChannel();
+    byte vertForeChannel();
 
     byte cameraAMotorChannel();
 
@@ -30,18 +30,6 @@ public interface RovConfig {
     byte toolingMotorChannel();
 
     byte lightChannel();
-
-    byte voltageSensor05VChannel();
-
-    byte voltageSensor12VChannel();
-
-    byte voltageSensor48VChannel();
-
-    byte currentSensor05VChannel();
-
-    byte currentSensor12VChannel();
-
-    byte currentSensor48VChannel();
 
     boolean altImuSa0High();
 
