@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-set -u
-set -o pipefail
-
-HOST=$1
-PORT=$2
-exec python "$(command -v eer-camera-feed)" "$HOST" "$PORT"
