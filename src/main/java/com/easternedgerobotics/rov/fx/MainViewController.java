@@ -58,13 +58,13 @@ public class MainViewController implements ViewController {
         subscriptions.add(emergencyStopController.emergencyStop().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(this::onEmergencyStopClick));
 
-        JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty())
+        JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLauncher.launch(ThrusterPowerSlidersView.class, "Thruster Power"));
-        JavaFxObservable.valuesOf(view.sensorButton.pressedProperty())
+        JavaFxObservable.valuesOf(view.sensorButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLauncher.launch(SensorView.class, "Sensors 'n' stuff"));
-        JavaFxObservable.valuesOf(view.cameraButton.pressedProperty())
+        JavaFxObservable.valuesOf(view.cameraButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLauncher.launch(VideoView.class, "Cameras"));
-        JavaFxObservable.valuesOf(view.resetCameraButton.pressedProperty())
+        JavaFxObservable.valuesOf(view.resetCameraButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> videoDecoder.restart());
     }
 
