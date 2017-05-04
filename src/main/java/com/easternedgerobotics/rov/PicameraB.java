@@ -18,7 +18,6 @@ import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
-import rx.subscriptions.CompositeSubscription;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -27,32 +26,16 @@ import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 final class PicameraB {
-    private final EventPublisher eventPublisher;
+    private PicameraB() {
 
-    private final CompositeSubscription subscriptions;
-
-    private final CompositeSubscription flips;
-
-    private PicameraB(final EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-        this.subscriptions = new CompositeSubscription();
-        this.flips = new CompositeSubscription();
     }
 
-    private void initCameraB() {
-        subscriptions.add(
-            eventPublisher.valuesOfType(VideoValueB.class)
-                .map(value -> new PicameraVideo(value.getHost(), value.getPort()))
-                .scan((old, event) -> {
-                    flips.clear();
-                    old.stop();
-                    return event;
-                })
-                .delay(1, TimeUnit.SECONDS)
-                .subscribe(video -> {
-                    video.start();
-                    flips.add(eventPublisher.valuesOfType(VideoFlipValueB.class).subscribe(f -> video.flip()));
-                }));
+    private static void initCameraB(final EventPublisher eventPublisher) {
+        eventPublisher.valuesOfType(VideoFlipValueB.class)
+            .subscribe(f -> PicameraVideo.flip());
+        eventPublisher.valuesOfType(VideoValueB.class)
+            .throttleLast(1, TimeUnit.SECONDS)
+            .subscribe(value -> PicameraVideo.start(value.getHost(), value.getPort()));
     }
 
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
@@ -84,16 +67,15 @@ final class PicameraB {
             final LaunchConfig launchConfig = new Config(
                 arguments.getOptionValue("d"),
                 arguments.getOptionValue("c")
-            ).getConfig("piCameraBLaunch", LaunchConfig.class);
+            ).getConfig("launch", LaunchConfig.class);
 
             final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
             final int broadcastPort = launchConfig.defaultBroadcastPort();
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-            final PicameraB picamera = new PicameraB(eventPublisher);
-
-            picamera.initCameraB();
+            PicameraVideo.addShutdownHook();
+            initCameraB(eventPublisher);
             Logger.info("Started");
             eventPublisher.await();
         } catch (final ParseException e) {

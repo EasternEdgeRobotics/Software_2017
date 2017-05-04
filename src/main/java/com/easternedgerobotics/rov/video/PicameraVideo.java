@@ -1,61 +1,51 @@
 package com.easternedgerobotics.rov.video;
 
+import org.pmw.tinylog.Logger;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
 /**
- * The {@code PicameraVideo} class represents a external video process that transmits its video to a known recipient.
+ * Controls the eer-camera service from a static interface.
  */
 public final class PicameraVideo {
-    /**
-     * The address of the video player.
-     */
-    private final String host;
+    private PicameraVideo() {
 
-    /**
-     * The port on the destination for the video player.
-     */
-    private final int port;
-
-    /**
-     * The external video process.
-     */
-    private UnixProcess process;
-
-    /**
-     * Constructs a new {@code PicameraVideo} instance.
-     * @param host the address of the host of the video player
-     * @param port the port on the host of the video player
-     */
-    public PicameraVideo(final String host, final int port) {
-        this.host = host;
-        this.port = port;
     }
 
-    /**
-     * Start transmitting the video feed.
-     */
-    public final void start() {
-        process = UnixProcess.start("eer-camera", host, String.valueOf(port));
+    private static final Runtime RUNTIME = Runtime.getRuntime();
+
+    private static final String SERVICE = "eer-camera.service";
+
+    public static void addShutdownHook() {
+        RUNTIME.addShutdownHook(new Thread(PicameraVideo::stop));
     }
 
-    /**
-     * Flip the video feed.
-     */
-    public final void flip() {
-        if (process == null) {
-            throw new IllegalStateException("The process must be started before its video can be flipped.");
+    public static void stop() {
+        Logger.debug("Stopping video");
+        try {
+            RUNTIME.exec(new String[] {"systemctl", "stop", SERVICE});
+        } catch (final IOException e) {
+            Logger.error(e);
         }
-
-        process.sigusr1();
     }
 
-    /**
-     * Stop the video feed.
-     */
-    public final void stop() {
-        if (process == null) {
-            throw new IllegalStateException("The process must be started before it can be killed.");
+    public static void start(final String host, final int port) {
+        Logger.debug("Starting video");
+        try (final PrintWriter out = new PrintWriter("/run/eer/camera-environment")) {
+            out.println(String.format("host=%s\nport=%s", host, port));
+            RUNTIME.exec(new String[] {"systemctl", "restart", SERVICE});
+        } catch (final IOException e) {
+            Logger.error(e);
         }
+    }
 
-        process.kill();
-        process = null;
+    public static void flip() {
+        Logger.debug("Flipping video");
+        try {
+            RUNTIME.exec(new String[] {"systemctl", "kill", SERVICE, "--signal=SIGUSR1"});
+        } catch (final IOException e) {
+            Logger.error(e);
+        }
     }
 }

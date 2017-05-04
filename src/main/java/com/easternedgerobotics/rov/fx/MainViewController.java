@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov.fx;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import rx.Observable;
 import rx.observables.JavaFxObservable;
@@ -18,6 +19,10 @@ public class MainViewController implements ViewController {
 
     private final MainView view;
 
+    private final ViewLauncher viewLauncher;
+
+    private final VideoDecoder videoDecoder;
+
     private final EventPublisher eventPublisher;
 
     private final EmergencyStopController emergencyStopController;
@@ -27,10 +32,14 @@ public class MainViewController implements ViewController {
     @Inject
     public MainViewController(
         final MainView view,
+        final ViewLauncher viewLauncher,
+        final VideoDecoder videoDecoder,
         final EventPublisher eventPublisher,
         final EmergencyStopController emergencyStopController
     ) {
         this.view = view;
+        this.viewLauncher = viewLauncher;
+        this.videoDecoder = videoDecoder;
         this.eventPublisher = eventPublisher;
         this.emergencyStopController = emergencyStopController;
         this.subscriptions = new CompositeSubscription();
@@ -41,13 +50,22 @@ public class MainViewController implements ViewController {
         subscriptions.add(
             Observable.interval(HEARTBEAT_GAP, TimeUnit.SECONDS, Schedulers.io())
                 .withLatestFrom(
-                    JavaFxObservable.valuesOf(view.button.selectedProperty()).startWith(false),
+                    JavaFxObservable.valuesOf(view.startButton.selectedProperty()).startWith(false),
                     (tick, beat) -> beat)
                 .subscribe(this::heartbeat));
-        subscriptions.add(JavaFxObservable.valuesOf(view.button.selectedProperty())
+        subscriptions.add(JavaFxObservable.valuesOf(view.startButton.selectedProperty())
             .subscribe(this::onSelected));
         subscriptions.add(emergencyStopController.emergencyStop().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(this::onEmergencyStopClick));
+
+        JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> viewLauncher.launch(ThrusterPowerSlidersView.class, "Thruster Power"));
+        JavaFxObservable.valuesOf(view.sensorButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> viewLauncher.launch(SensorView.class, "Sensors 'n' stuff"));
+        JavaFxObservable.valuesOf(view.cameraButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> viewLauncher.launch(VideoView.class, "Cameras"));
+        JavaFxObservable.valuesOf(view.resetCameraButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> videoDecoder.restart());
     }
 
     @Override
@@ -58,9 +76,9 @@ public class MainViewController implements ViewController {
 
     private void onSelected(final boolean selected) {
         if (selected) {
-            view.button.setText("Stop");
+            view.startButton.setText("Stop");
         } else {
-            view.button.setText("Start");
+            view.startButton.setText("Start");
         }
     }
 
@@ -70,14 +88,14 @@ public class MainViewController implements ViewController {
 
     private void onEmergencyStopClick(final boolean stop) {
         if (!stop) {
-            view.button.setDisable(true);
-            view.button.setSelected(false);
-            view.button.setStyle("-fx-text-fill: red");
-            view.button.setText("Emergency Stop");
+            view.startButton.setDisable(true);
+            view.startButton.setSelected(false);
+            view.startButton.setStyle("-fx-text-fill: red");
+            view.startButton.setText("Emergency Stop");
         } else {
-            view.button.setDisable(false);
-            view.button.setStyle("-fx-text-fill: black");
-            view.button.setText("Start");
+            view.startButton.setDisable(false);
+            view.startButton.setStyle("-fx-text-fill: black");
+            view.startButton.setText("Start");
         }
     }
 }

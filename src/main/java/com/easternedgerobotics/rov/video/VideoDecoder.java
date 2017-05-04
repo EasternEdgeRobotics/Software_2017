@@ -11,6 +11,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
+import org.pmw.tinylog.Logger;
 import rx.Observable;
 import rx.Observer;
 import rx.subjects.PublishSubject;
@@ -33,15 +34,18 @@ public final class VideoDecoder {
 
     private Thread threadB;
 
+    private ServerSocket serverA;
+
+    private ServerSocket serverB;
+
     public VideoDecoder(final EventPublisher eventPublisher, final VideoDecoderConfig config) {
         this.eventPublisher = eventPublisher;
         this.config = config;
     }
 
     public void start() {
-        stop();
-        threadA = new Thread(() -> collectImages(config.cameraAVideoPort(), imagesA));
-        threadB = new Thread(() -> collectImages(config.cameraBVideoPort(), imagesB));
+        threadA = new Thread(this::collectImagesA);
+        threadB = new Thread(this::collectImagesB);
         threadA.setDaemon(true);
         threadB.setDaemon(true);
         threadA.start();
@@ -52,11 +56,32 @@ public final class VideoDecoder {
 
     public void stop() {
         if (threadA != null) {
-            threadA.interrupt();
+            try {
+                if (serverA != null) {
+                    serverA.close();
+                }
+                threadA.interrupt();
+                threadA.join();
+            } catch (final InterruptedException | IOException e) {
+                Logger.error(e);
+            }
         }
         if (threadB != null) {
-            threadB.interrupt();
+            try {
+                if (serverB != null) {
+                    serverB.close();
+                }
+                threadB.interrupt();
+                threadB.join();
+            } catch (final InterruptedException | IOException e) {
+                Logger.error(e);
+            }
         }
+    }
+
+    public void restart() {
+        stop();
+        start();
     }
 
     public Observable<Image> cameraAImages() {
@@ -67,16 +92,49 @@ public final class VideoDecoder {
         return imagesB;
     }
 
-    private void collectImages(final int port, final Observer<Image> images) {
+    private void collectImagesA() {
+        try {
+            serverA = new ServerSocket(config.cameraAVideoPort(), config.socketBacklog());
+            runGrabber(serverA, imagesA);
+        } catch (final IOException e) {
+            if (serverA != null) {
+                try {
+                    serverA.close();
+                } catch (final IOException closeException) {
+                    Logger.error(e);
+                    Logger.error(closeException);
+                }
+            }
+        }
+    }
+
+    private void collectImagesB() {
+        try {
+            serverB = new ServerSocket(config.cameraBVideoPort(), config.socketBacklog());
+            runGrabber(serverB, imagesB);
+        } catch (final IOException e) {
+            if (serverB != null) {
+                try {
+                    serverB.close();
+                } catch (final IOException closeException) {
+                    Logger.error(e);
+                    Logger.error(closeException);
+                }
+            }
+        }
+    }
+
+    private void runGrabber(
+        final ServerSocket server,
+        final Observer<Image> images
+    ) throws IOException {
         final Java2DFrameConverter converter = new Java2DFrameConverter();
-        try (final ServerSocket server = new ServerSocket(port, config.socketBacklog());
-            final Socket clientSocket = server.accept();
-            final FrameGrabber grabber = new FFmpegFrameGrabber(clientSocket.getInputStream())
+        try (final Socket clientSocket = server.accept();
+             final FrameGrabber grabber = new FFmpegFrameGrabber(clientSocket.getInputStream())
         ) {
             grabber.setFrameRate(config.frameRate());
             grabber.setFormat(config.format());
             grabber.start();
-
             while (!Thread.interrupted()) {
                 final Frame frame = grabber.grab().clone();
                 if (frame != null) {
@@ -87,8 +145,6 @@ public final class VideoDecoder {
                     }
                 }
             }
-        } catch (final IOException e) {
-            images.onError(e);
         }
     }
 }

@@ -1,0 +1,6 @@
+[Unit]
+Description=Eastern Edge Robotics Camera Feed Software
+
+[Service]
+EnvironmentFile=/run/eer/camera-environment
+ExecStart=/usr/bin/eer-camera-feed $host $port
