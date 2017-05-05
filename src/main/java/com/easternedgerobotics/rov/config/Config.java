@@ -10,29 +10,32 @@ import org.cfg4j.source.files.FilesConfigurationSource;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Collections;
 
 public final class Config {
     private final ConfigurationProvider configProvider;
 
     public Config(final String defaultConfigFilename, final String overrideConfigFilename) {
         final File defaultConfigFile = new File(defaultConfigFilename);
-        final Environment defaultEnvironment = new ImmutableEnvironment(defaultConfigFile.getParent());
+        final Environment rootEnvironment = new ImmutableEnvironment("/");
         final ConfigurationSource defaultConfigSource = new FilesConfigurationSource(() ->
-            Paths.get(defaultConfigFile.getName())
+            Collections.singletonList(Paths.get(defaultConfigFile.getAbsolutePath()))
         );
         final ConfigurationProvider defaultConfigProvider = new ConfigurationProviderBuilder()
-            .withEnvironment(defaultEnvironment)
+            .withEnvironment(rootEnvironment)
             .withConfigurationSource(defaultConfigSource)
             .build();
 
         final File overrideConfigFile = new File(overrideConfigFilename);
-        final Environment overrideEnvironment = new ImmutableEnvironment(defaultConfigFile.getParent());
         if (overrideConfigFile.exists()) {
             final ConfigurationSource configSource = new MergeConfigurationSource(
                 defaultConfigSource,
-                new FilesConfigurationSource(() -> Paths.get(overrideConfigFile.getName())));
+                new FilesConfigurationSource(() ->
+                    Collections.singletonList(Paths.get(overrideConfigFile.getAbsolutePath()))
+                )
+            );
             configProvider = new ConfigurationProviderBuilder()
-                .withEnvironment(overrideEnvironment)
+                .withEnvironment(rootEnvironment)
                 .withConfigurationSource(configSource)
                 .build();
         } else {
