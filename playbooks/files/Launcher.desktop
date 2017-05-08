@@ -1,8 +1,10 @@
 [Desktop Entry]
-Version=9.0.0
+Version={{ version }}
 Name=Control Software
-Exec=/opt/eer-9.0.0/bin/topside --default=/opt/eer-9.0.0/defaultConfig.yml --config=/opt/eer-9.0.0/config.yml
-Path=/opt/eer-9.0.0
+Path=/opt/eer-{{ version }}/
 Terminal=false
 Type=Application
 Categories=Application
+Exec=/usr/bin/java -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} \
+    --default=/opt/eer-{{ version }}/defaultConfig.yml \
+    --config=/home/{{ ansible_user }}/config.yml
