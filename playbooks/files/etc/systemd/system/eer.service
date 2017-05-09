@@ -5,7 +5,9 @@ Description=Eastern Edge Robotics Control Software
 TimeoutStartSec=0
 Restart=on-failure
 RuntimeDirectory=eer
-ExecStart=/opt/eer-{{ version }}/bin/{{ entry_point }} --default /opt/eer-{{ version }}/defaultConfig.yml --config /home/{{ ansible_user }}/config.yml
+ExecStart=/usr/bin/java -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} \
+    --default /opt/eer-{{ version }}/defaultConfig.yml \
+    --config /home/{{ ansible_user }}/config.yml
 
 [Install]
 WantedBy=multi-user.target

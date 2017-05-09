@@ -1,0 +1,11 @@
+- hosts: topside:rasprime:picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  tasks:
+    - name: Remove libs directory
+      file: path=/opt/eer-{{ version }}/libs state=absent recurse=no
+    - name: Make libs directory
+      file: path=/opt/eer-{{ version }}/libs state=directory mode=0755 owner={{ ansible_user }} group={{ ansible_user }}
+    - name: Copy Control Software Dependencies
+      unarchive: src=../build/distributions/eer-dependencies-{{ version }}.zip dest=/opt/eer-{{ version }}/libs

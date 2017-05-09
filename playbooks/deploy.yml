@@ -2,50 +2,41 @@
   become: yes
   become_method: sudo
   gather_facts: no
-  vars:
-    version: "9.0.0"
   tasks:
-    - name: Make opt directory
-      file: path=/opt state=directory mode=0755
     - name: Copy Control Software
-      unarchive: src=../build/distributions/eer-{{ version }}.zip dest=/opt
+      copy: src=../build/libs/eer-{{ version }}.jar dest=/opt/eer-{{ version }}/libs/eer-{{ version }}.jar
     - name: Copy Default Config File
       copy: src=files/defaultConfig.yml dest=/opt/eer-{{ version }}/defaultConfig.yml mode=755 owner={{ ansible_user }} group={{ ansible_user }}
     - name: Verify Custom Config Exists
-      command: touch /home/{{ ansible_user }}
-    - name: ensure file exists
-      copy:
-        content: ""
-        dest: /home/{{ ansible_user }}/config.yml
-        force: no
-        owner: {{ ansible_user }}
-        group: {{ ansible_user }}
+      file: path=/home/{{ ansible_user }}/config.yml state=touch mode=755 owner={{ ansible_user }} group={{ ansible_user }}
 
-- hosts: rasprime:picamera
+- hosts: rasprime
   become: yes
   become_method: sudo
   gather_facts: no
-  vars:
-    version: "9.0.0"
+  tasks:
+    - name: Copy unit file for systemd
+      template: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
+    - name: Reload systemd
+      command: systemctl daemon-reload
+    - name: Enable eer service
+      command: systemctl enable eer.service
+    - name: Restart eer service
+      service: name=eer state=restarted
+
+- hosts: picamera
+  become: yes
+  become_method: sudo
+  gather_facts: no
   tasks:
     - name: Copy unit file for systemd
       template: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
     - name: Copy camera unit file for systemd
       template: src=files/etc/systemd/system/eer-camera.service dest=/etc/systemd/system/eer-camera.service mode=644
-      notify:
-        - Reload systemd
-        - Enable eer service
-  handlers:
     - name: Reload systemd
       command: systemctl daemon-reload
     - name: Enable eer service
       command: systemctl enable eer.service
-
-- hosts: rasprime:picamera
-  become: yes
-  become_method: sudo
-  gather_facts: no
-  tasks:
     - name: Restart eer service
       service: name=eer state=restarted
 
@@ -53,4 +44,4 @@
   gather_facts: no
   tasks:
     - name: Make a pretty launcher for da NOOBS
-      copy: src=files/Launcher.desktop dest=~/Desktop mode=700
+      template: src=files/Launcher.desktop dest=~/Desktop mode=700

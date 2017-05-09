@@ -3,18 +3,12 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: com.easternedgerobotics.gradle.MultipleStartScripts
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'idea'
 
-applicationDefaultJvmArgs = [
-    '-Xloggc:gc.log', '-XX:+PrintGCApplicationStoppedTime', '-XX:+PrintGCTimeStamps'
-]
-applicationName = 'eer'
-version = '9.0.0'
-mainClassName = 'com.easternedgerobotics.rov.Topside'
+project.version = '9.0.0'
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 checkstyle {
@@ -56,22 +50,17 @@ allprojects {
     }
 }
 
+task buildZip(type: Zip) {
+    from configurations.runtime
+    baseName 'eer-dependencies'
+}
+
 test {
     testLogging {
         exceptionFormat = 'full'
         showStandardStreams = true
         events 'passed', 'skipped', 'failed'
     }
-}
-
-multipleStartScripts {
-    mainClasses = [
-        'picamera-a': 'com.easternedgerobotics.rov.PicameraA',
-        'picamera-b': 'com.easternedgerobotics.rov.PicameraB',
-        'rov': 'com.easternedgerobotics.rov.Rov',
-        'topside': 'com.easternedgerobotics.rov.Topside',
-        'reset-gui': 'com.easternedgerobotics.rov.ResetGUI',
-    ]
 }
 
 task testJar(type: Jar) {

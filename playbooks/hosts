@@ -1,14 +1,17 @@
 # See also: <http://docs.ansible.com/ansible/intro_inventory.html#list-of-behavioral-inventory-parameters>
 
+[all:vars]
+version=9.0.0
+
 [captain]
 192.168.88.3 ansible_user=ubuntu ansible_ssh_pass=eedge
 
 [topside]
-192.168.88.2 ansible_user=eedge ansible_ssh_pass=eedge ansible_sudo_pass=eedge
+192.168.88.2 ansible_user=eedge ansible_ssh_pass=eedge ansible_sudo_pass=eedge entry_point=com.easternedgerobotics.rov.Topside
 
 [rasprime]
-192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=rov
+192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.Rov
 
 [picamera]
-192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera-a
-192.168.88.6 ansible_user=pi ansible_ssh_pass=raspberry entry_point=picamera-b
+192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraA
+192.168.88.6 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraB
