@@ -20,7 +20,6 @@ import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
-import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import javafx.application.Application;
@@ -47,6 +46,12 @@ public final class Topside extends Application {
     private ViewLoader viewLoader;
 
     private Arduino arduino;
+
+    private EmergencyStopController emergencyStopController;
+
+    private SliderController sliderController;
+
+    private ProfileController profileController;
 
     private VideoDecoder videoDecoder;
 
@@ -77,21 +82,18 @@ public final class Topside extends Application {
 
         final MotionPowerProfile profiles = new MotionPowerProfile(config.profilePref());
 
-        final EmergencyStopController emergencyStopController = new EmergencyStopController(
+        emergencyStopController = new EmergencyStopController(
             arduino, config.emergencyStopButtonAddress());
 
-        final SliderController sliderController = new SliderController(
+        sliderController = new SliderController(
             arduino,
             Schedulers.io(),
-            eventPublisher.valuesOfType(MotionPowerValue.class),
+            eventPublisher,
             configSource.getConfig("slider", SliderConfig.class));
-        sliderController.getMotion().subscribe(eventPublisher::emit);
-        sliderController.getLights().subscribe(eventPublisher::emit);
 
-        final ProfileController profileController = new ProfileController(
+        profileController = new ProfileController(
             arduino, config.pilotPanelInputPullups(), config.pilotPanelOutputs(), config.profileSwitchDuration(),
-            profiles, eventPublisher.valuesOfType(MotionPowerValue.class), Schedulers.io());
-        profileController.getMotion().subscribe(eventPublisher::emit);
+            eventPublisher, profiles, Schedulers.io());
 
         videoDecoder = new VideoDecoder(
             eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
@@ -131,6 +133,8 @@ public final class Topside extends Application {
         Logger.info("Stopping");
         eventPublisher.stop();
         arduino.stop();
+        sliderController.stop();
+        profileController.stop();
         videoDecoder.stop();
         Logger.info("Stopped");
     }
