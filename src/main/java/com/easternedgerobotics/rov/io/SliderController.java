@@ -2,74 +2,92 @@ package com.easternedgerobotics.rov.io;
 
 import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.control.AnalogToPowerLevel;
-import com.easternedgerobotics.rov.control.SupressObservable;
-import com.easternedgerobotics.rov.event.Event;
+import com.easternedgerobotics.rov.control.SourceController;
+import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.arduino.Arduino;
+import com.easternedgerobotics.rov.value.AftPowerValue;
 import com.easternedgerobotics.rov.value.AnalogPinValue;
+import com.easternedgerobotics.rov.value.ForePowerValue;
+import com.easternedgerobotics.rov.value.GlobalPowerValue;
+import com.easternedgerobotics.rov.value.HeavePowerValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
-import com.easternedgerobotics.rov.value.MotionPowerValue;
+import com.easternedgerobotics.rov.value.PitchPowerValue;
+import com.easternedgerobotics.rov.value.SurgePowerValue;
+import com.easternedgerobotics.rov.value.SwayPowerValue;
+import com.easternedgerobotics.rov.value.YawPowerValue;
 
 import rx.Observable;
 import rx.Scheduler;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public final class SliderController {
-    private final Observable<MotionPowerValue> motion;
-
-    private final Observable<LightSpeedValue> lights;
+    private final CompositeSubscription subscription = new CompositeSubscription();
 
     public SliderController(
         final Arduino arduino,
         final Scheduler scheduler,
-        @Event final Observable<MotionPowerValue> motionPowerValues,
+        final EventPublisher eventPublisher,
         final SliderConfig config
     ) {
-        // Get an observable for each of the power sliders
-        final Observable<Float> global = arduino.analogPin(config.globalPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> heave = arduino.analogPin(config.heavePowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> sway = arduino.analogPin(config.swayPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> surge = arduino.analogPin(config.surgePowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> pitch = arduino.analogPin(config.pitchPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> yaw = arduino.analogPin(config.yawPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert);
-        final Observable<Float> roll = Observable.just(0f).map(AnalogToPowerLevel::convert);
+        final Observable<GlobalPowerValue> global = arduino.analogPin(config.globalPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(GlobalPowerValue::new);
 
-        final SupressObservable<MotionPowerValue> external = new SupressObservable<>(
-            motionPowerValues, scheduler, 2000);
+        final Observable<HeavePowerValue> heave = arduino.analogPin(config.heavePowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(HeavePowerValue::new);
 
-        // Keep track of the latest values in each component
-        final Observable<MotionPowerValue> combined = Observable.combineLatest(
-            global.mergeWith(external.get().map(MotionPowerValue::getGlobal)),
-            heave.mergeWith(external.get().map(MotionPowerValue::getHeave)),
-            sway.mergeWith(external.get().map(MotionPowerValue::getSway)),
-            surge.mergeWith(external.get().map(MotionPowerValue::getSurge)),
-            pitch.mergeWith(external.get().map(MotionPowerValue::getPitch)),
-            yaw.mergeWith(external.get().map(MotionPowerValue::getYaw)),
-            roll.mergeWith(external.get().map(MotionPowerValue::getRoll)),
-            MotionPowerValue::new);
+        final Observable<SwayPowerValue> sway = arduino.analogPin(config.swayPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(SwayPowerValue::new);
 
-        // Only trigger when sliders are moved
-        motion = Observable.merge(global, heave, sway, surge, pitch, yaw, roll)
-            .withLatestFrom(combined, (trigger, latest) -> latest)
-            .doOnEach(val -> external.supress())
-            .share();
+        final Observable<SurgePowerValue> surge = arduino.analogPin(config.surgePowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(SurgePowerValue::new);
 
-        lights = arduino.analogPin(config.lightPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert)
-            .map(LightSpeedValue::new)
-            .share();
+        final Observable<PitchPowerValue> pitch = arduino.analogPin(config.pitchPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(PitchPowerValue::new);
+
+        final Observable<YawPowerValue> yaw = arduino.analogPin(config.yawPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(YawPowerValue::new);
+
+        final Observable<AftPowerValue> aft = arduino.analogPin(config.aftPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(AftPowerValue::new);
+
+        final Observable<ForePowerValue> fore = arduino.analogPin(config.forePowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(ForePowerValue::new);
+
+        final Observable<LightSpeedValue> light = arduino.analogPin(config.lightPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(LightSpeedValue::new);
+
+        subscription.addAll(
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(GlobalPowerValue.class), v -> { }, scheduler,
+                global, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(HeavePowerValue.class), v -> { }, scheduler,
+                heave, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(SwayPowerValue.class), v -> { }, scheduler,
+                sway, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(SurgePowerValue.class), v -> { }, scheduler,
+                surge, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(PitchPowerValue.class), v -> { }, scheduler,
+                pitch, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(YawPowerValue.class), v -> { }, scheduler,
+                yaw, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(AftPowerValue.class), v -> { }, scheduler,
+                aft, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(ForePowerValue.class), v -> { }, scheduler,
+                fore, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(LightSpeedValue.class), v -> { }, scheduler,
+                light, eventPublisher::emit, Schedulers.io()));
     }
 
-    public Observable<MotionPowerValue> getMotion() {
-        return motion;
-    }
-
-    public Observable<LightSpeedValue> getLights() {
-        return lights;
+    public void stop() {
+        subscription.clear();
     }
 }
-
