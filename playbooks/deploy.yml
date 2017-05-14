@@ -33,6 +33,8 @@
       template: src=files/etc/systemd/system/eer.service dest=/etc/systemd/system/eer.service mode=644
     - name: Copy camera unit file for systemd
       template: src=files/etc/systemd/system/eer-camera.service dest=/etc/systemd/system/eer-camera.service mode=644
+    - name: Add camera script to PATH
+      template: src=files/usr/bin/eer-camera-feed dest=/usr/bin/eer-camera-feed mode=755 owner=root group=root
     - name: Reload systemd
       command: systemctl daemon-reload
     - name: Enable eer service
