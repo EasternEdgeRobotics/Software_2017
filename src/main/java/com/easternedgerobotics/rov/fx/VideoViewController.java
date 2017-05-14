@@ -11,11 +11,9 @@ public final class VideoViewController implements ViewController {
         final VideoView view
     ) {
         decoder.cameraAImages()
-            .subscribeOn(JAVA_FX_SCHEDULER)
             .repeat()
             .subscribe(view.cameraA::setImage);
         decoder.cameraBImages()
-            .subscribeOn(JAVA_FX_SCHEDULER)
             .repeat()
             .subscribe(view.cameraB::setImage);
     }

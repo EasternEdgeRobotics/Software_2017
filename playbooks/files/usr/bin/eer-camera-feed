@@ -10,7 +10,7 @@ with picamera.PiCamera() as camera:
         camera.hflip = not camera.hflip
     signal.signal(signal.SIGUSR1, flip_video)
     camera.resolution = (1296, 720)
-    camera.framerate = 48
+    camera.framerate = 24
 
     nc = socket.socket()
     nc.connect((sys.argv[1], int(sys.argv[2])))

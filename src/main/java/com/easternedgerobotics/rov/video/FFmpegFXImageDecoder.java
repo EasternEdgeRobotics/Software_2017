@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.video;
 
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -96,7 +97,8 @@ class FFmpegFXImageDecoder {
                     if (frame != null) {
                         final BufferedImage bufferedImage = converter.convert(frame);
                         if (bufferedImage != null) {
-                            images.onNext(SwingFXUtils.toFXImage(bufferedImage, null));
+                            Platform.runLater(() ->
+                                images.onNext(SwingFXUtils.toFXImage(bufferedImage, null)));
                         }
                     }
                 }

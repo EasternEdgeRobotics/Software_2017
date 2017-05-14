@@ -2,9 +2,7 @@
 Version={{ version }}
 Name=Control Software
 Path=/opt/eer-{{ version }}/
-Terminal=false
+Terminal=true
 Type=Application
 Categories=Application
-Exec=/usr/bin/java -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} \
-    --default=/opt/eer-{{ version }}/defaultConfig.yml \
-    --config=/home/{{ ansible_user }}/config.yml
+Exec=/usr/bin/java -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} --default=/opt/eer-{{ version }}/defaultConfig.yml --config=/home/{{ ansible_user }}/config.yml

@@ -19,8 +19,3 @@
     - name: Install Picamera module
       apt: name=python-picamera state=latest
       environment: "{{proxy}}"
-    - name: Add camera scripts to PATH
-      template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
-      with_items:
-        - eer-camera
-        - eer-camera-feed
