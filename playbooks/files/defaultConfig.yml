@@ -29,8 +29,8 @@ rov:
   vertAftChannel: 0
   vertForeChannel: 16
   cameraAMotorChannel: 7
-  cameraBMotorChannel: 6
-  toolingMotorChannel: 22
+  cameraBMotorChannel: 8
+  toolingMotorChannel: 5
   lightChannel: 23
   altImuSa0High: false
   i2cBus: 1
@@ -40,7 +40,7 @@ videoDecoder:
   portA: 12345
   portB: 12346
   format: h264
-  frameRate: 96
+  frameRate: 48
   socketBacklog: 100
   bitrate: 25000000
   preset: ultrafast
