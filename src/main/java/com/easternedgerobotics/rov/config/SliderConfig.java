@@ -14,4 +14,8 @@ public interface SliderConfig {
     byte yawPowerSliderAddress();
 
     byte lightPowerSliderAddress();
+
+    byte aftPowerSliderAddress();
+
+    byte forePowerSliderAddress();
 }

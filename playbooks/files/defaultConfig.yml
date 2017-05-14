@@ -63,4 +63,6 @@ slider:
   surgePowerSliderAddress: 0
   pitchPowerSliderAddress: 4
   yawPowerSliderAddress: 5
+  aftPowerSliderAddress: 6
+  forePowerSliderAddress: 8
   lightPowerSliderAddress: 7

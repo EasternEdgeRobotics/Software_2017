@@ -8,3 +8,4 @@ data class MotionPowerValue(
     val pitch: Float = 0f,
     val yaw: Float = 0f,
     val roll: Float = 0f)
+

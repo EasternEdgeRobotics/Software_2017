@@ -2,15 +2,23 @@ package com.easternedgerobotics.rov.control;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.test.CollectionAssert;
-import com.easternedgerobotics.rov.value.MotionPowerValue;
+import com.easternedgerobotics.rov.value.AftPowerValue;
+import com.easternedgerobotics.rov.value.ForePowerValue;
+import com.easternedgerobotics.rov.value.GlobalPowerValue;
+import com.easternedgerobotics.rov.value.HeavePowerValue;
 import com.easternedgerobotics.rov.value.MotionValue;
+import com.easternedgerobotics.rov.value.PitchPowerValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.RollPowerValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
+import com.easternedgerobotics.rov.value.SurgePowerValue;
+import com.easternedgerobotics.rov.value.SwayPowerValue;
 import com.easternedgerobotics.rov.value.VertAftSpeedValue;
 import com.easternedgerobotics.rov.value.VertForeSpeedValue;
+import com.easternedgerobotics.rov.value.YawPowerValue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,14 +154,39 @@ public class SixThrusterConfigTest {
         final EventPublisher eventPublisher = Mockito.mock(EventPublisher.class);
         final TestScheduler testScheduler = new TestScheduler();
         final TestSubject<MotionValue> motionValues = TestSubject.create(testScheduler);
-        final TestSubject<MotionPowerValue> motionPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<GlobalPowerValue> globalPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<HeavePowerValue> heavePowerValues = TestSubject.create(testScheduler);
+        final TestSubject<SwayPowerValue> swayPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<SurgePowerValue> surgePowerValues = TestSubject.create(testScheduler);
+        final TestSubject<PitchPowerValue> pitchPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<YawPowerValue> yawPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<RollPowerValue> rollPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<AftPowerValue> aftPowerValues = TestSubject.create(testScheduler);
+        final TestSubject<ForePowerValue> forePowerValues = TestSubject.create(testScheduler);
 
         Mockito.when(eventPublisher.valuesOfType(MotionValue.class)).thenReturn(motionValues);
-        Mockito.when(eventPublisher.valuesOfType(MotionPowerValue.class)).thenReturn(motionPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(GlobalPowerValue.class)).thenReturn(globalPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(HeavePowerValue.class)).thenReturn(heavePowerValues);
+        Mockito.when(eventPublisher.valuesOfType(SwayPowerValue.class)).thenReturn(swayPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(SurgePowerValue.class)).thenReturn(surgePowerValues);
+        Mockito.when(eventPublisher.valuesOfType(PitchPowerValue.class)).thenReturn(pitchPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(YawPowerValue.class)).thenReturn(yawPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(RollPowerValue.class)).thenReturn(rollPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(AftPowerValue.class)).thenReturn(aftPowerValues);
+        Mockito.when(eventPublisher.valuesOfType(ForePowerValue.class)).thenReturn(forePowerValues);
 
         final SixThrusterConfig sixThrusterConfig = new SixThrusterConfig(eventPublisher);
 
-        motionPowerValues.onNext(new MotionPowerValue(1, 1, 1, 1, 1, 1, 1));
+        globalPowerValues.onNext(new GlobalPowerValue(1));
+        heavePowerValues.onNext(new HeavePowerValue(1));
+        swayPowerValues.onNext(new SwayPowerValue(1));
+        surgePowerValues.onNext(new SurgePowerValue(1));
+        pitchPowerValues.onNext(new PitchPowerValue(1));
+        yawPowerValues.onNext(new YawPowerValue(1));
+        rollPowerValues.onNext(new RollPowerValue(1));
+        aftPowerValues.onNext(new AftPowerValue(1));
+        forePowerValues.onNext(new ForePowerValue(1));
+
         motionValues.onNext(motionValue);
         testScheduler.triggerActions();
 
