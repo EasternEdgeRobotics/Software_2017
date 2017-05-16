@@ -1,7 +1,6 @@
 package com.easternedgerobotics.rov.io.joystick;
 
 import com.easternedgerobotics.rov.config.JoystickConfig;
-import com.easternedgerobotics.rov.control.MotionReverser;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
@@ -12,123 +11,138 @@ import com.easternedgerobotics.rov.value.VideoFlipValueB;
 
 import org.pmw.tinylog.Logger;
 import rx.Observable;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import rx.functions.Func4;
+import rx.subscriptions.CompositeSubscription;
 
 public final class JoystickController {
+    private final CompositeSubscription sourceSubscription = new CompositeSubscription();
+
+    private final CompositeSubscription componentSubscriptions = new CompositeSubscription();
+
     private final EventPublisher eventPublisher;
 
-    private final Function<MotionValue, MotionValue> motionFunction;
+    private final Func1<MotionValue, MotionValue> scaleController;
+
+    private final Func2<MotionValue, Boolean, MotionValue> reverseController;
+
+    private final Func4<Boolean, Boolean, Boolean, Float, Float> speedRegulator;
 
     private final JoystickConfig config;
 
     public JoystickController(
         final EventPublisher eventPublisher,
-        final Function<MotionValue, MotionValue> motionFunction,
+        final Func1<MotionValue, MotionValue> scaleController,
+        final Func2<MotionValue, Boolean, MotionValue> reverseController,
+        final Func4<Boolean, Boolean, Boolean, Float, Float> speedRegulator,
         final JoystickConfig config
     ) {
         this.eventPublisher = eventPublisher;
-        this.motionFunction = motionFunction;
+        this.scaleController = scaleController;
+        this.reverseController = reverseController;
+        this.speedRegulator = speedRegulator;
         this.config = config;
+    }
+
+    public void start(final Observable<Joystick> joystickSource) {
+        sourceSubscription.add(joystickSource.subscribe(this::onNext, Logger::error));
+    }
+
+    public void stop() {
+        sourceSubscription.unsubscribe();
+        componentSubscriptions.unsubscribe();
     }
 
     /**
      * Initializes this controller to read from {@code joystick}.
      */
-    public void onNext(final Joystick joystick) {
-        final MotionReverser reverser = new MotionReverser();
+    private void onNext(final Joystick joystick) {
+        componentSubscriptions.clear();
 
-        joystick.axes().map(motionFunction::apply).map(reverser::apply).subscribe(eventPublisher::emit, Logger::error);
+        final Observable<MotionValue> motion = getMotion(joystick);
+        final Observable<MotionValue> scaledMotion = getScaledMotion(motion);
+        final Observable<MotionValue> pitchedMotion = getPitchedMotion(joystick, scaledMotion);
+        final Observable<MotionValue> reversedMotion = getReversedMotion(joystick, pitchedMotion);
 
-        joystick.button(config.motionReverseButton())
-            .filter(x -> x == Joystick.BUTTON_DOWN)
-            .subscribe(press -> reverser.toggle());
+        final Observable<VideoFlipValueA> cameraFlipA = getCameraFlipA(joystick);
+        final Observable<VideoFlipValueB> cameraFlipB = getCameraFlipB(joystick);
+        final Observable<CameraSpeedValueA> cameraSpeedA = getCameraSpeedA(joystick);
+        final Observable<CameraSpeedValueB> cameraSpeedB = getCameraSpeedB(joystick);
+        final Observable<ToolingSpeedValue> toolingSpeed = getToolingSpeed(joystick);
 
-        initCameraFlipA(joystick);
-        initCameraFlipB(joystick);
-
-        initCameraMotorA(joystick);
-        initCameraMotorB(joystick);
-        initToolingMotor(joystick);
+        componentSubscriptions.add(Observable
+            .merge(reversedMotion, cameraFlipA, cameraFlipB, cameraSpeedA, cameraSpeedB, toolingSpeed)
+            .subscribe(eventPublisher::emit, Logger::error));
     }
 
-    private void initCameraFlipA(final Joystick joystick) {
-        joystick.button(config.cameraAVideoFlipButton())
-            .filter(x -> x == Joystick.BUTTON_DOWN)
-            .map(x -> new VideoFlipValueA())
-            .subscribe(eventPublisher::emit);
+    private Observable<MotionValue> getMotion(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.axis(config.heaveAxis()).startWith(0f),
+            joystick.axis(config.swayAxis()).startWith(0f),
+            joystick.axis(config.surgeAxis()).startWith(0f),
+            joystick.axis(config.yawAxis()).startWith(0f),
+            (heave, sway, surge, yaw) -> new MotionValue(heave, sway, surge, 0, yaw, 0));
     }
 
-    private void initCameraFlipB(final Joystick joystick) {
-        joystick.button(config.cameraBVideoFlipButton())
-            .filter(x -> x == Joystick.BUTTON_DOWN)
-            .map(x -> new VideoFlipValueB())
-            .subscribe(eventPublisher::emit);
+    private Observable<MotionValue> getScaledMotion(final Observable<MotionValue> motion) {
+        return motion.map(scaleController);
     }
 
-    @SuppressWarnings("checkstyle:AvoidInlineConditionals")
-    private void initCameraMotorA(final Joystick joystick) {
-        // This needs to be a reference to a boolean, it being atomic is irrelevant
-        final AtomicBoolean flipped = new AtomicBoolean(true);
-        final Observable<Boolean> fwd = joystick.button(config.cameraAMotorForwardButton());
-        final Observable<Boolean> rev = joystick.button(config.cameraAMotorReverseButton());
-        final Observable<Boolean> flips = joystick.button(config.cameraAVideoFlipButton())
-            .filter(x -> x == Joystick.BUTTON_DOWN)
-            .startWith(Joystick.BUTTON_DOWN);
+    private Observable<MotionValue> getPitchedMotion(final Joystick joystick, final Observable<MotionValue> motion) {
+        final Observable<Float> pitch = Observable.combineLatest(
+            joystick.button(config.pitchForwardButton()).startWith(false),
+            joystick.button(config.pitchReverseButton()).startWith(false),
+            Observable.just(false),
+            Observable.just(config.pitchSpeed()),
+            speedRegulator);
 
-        Observable.switchOnNext(flips.map(flip -> {
-            flipped.set(!flipped.get());
-            return Observable.merge(
-                fwd.map(x -> new CameraSpeedValueA(
-                    x ? (flipped.get() ? -config.motorRotationSpeed() : config.motorRotationSpeed()) : (float) 0
-                )),
-                rev.map(x -> new CameraSpeedValueA(
-                    x ? (flipped.get() ? config.motorRotationSpeed() : -config.motorRotationSpeed()) : (float) 0
-                ))
-            );
-        })).subscribe(eventPublisher::emit, Logger::error);
+        return Observable.combineLatest(motion, pitch,
+            (m, p) -> new MotionValue(m.getHeave(), m.getSway(), m.getSurge(), p, m.getYaw(), m.getRoll()));
     }
 
-    @SuppressWarnings("checkstyle:AvoidInlineConditionals")
-    private void initCameraMotorB(final Joystick joystick) {
-        // This needs to be a reference to a boolean, it being atomic is irrelevant
-        final AtomicBoolean flipped = new AtomicBoolean(true);
-        final Observable<Boolean> fwd = joystick.button(config.cameraBMotorForwardButton());
-        final Observable<Boolean> rev = joystick.button(config.cameraBMotorReverseButton());
-        final Observable<Boolean> flips = joystick.button(config.cameraBVideoFlipButton())
-            .filter(x -> x == Joystick.BUTTON_DOWN)
-            .startWith(Joystick.BUTTON_DOWN);
-
-        Observable.switchOnNext(flips.map(flip -> {
-            flipped.set(!flipped.get());
-            return Observable.merge(
-                fwd.map(x -> new CameraSpeedValueB(
-                    x ? (flipped.get() ? -config.motorRotationSpeed() : config.motorRotationSpeed()) : (float) 0
-                )),
-                rev.map(x -> new CameraSpeedValueB(
-                    x ? (flipped.get() ? config.motorRotationSpeed() : -config.motorRotationSpeed()) : (float) 0
-                ))
-            );
-        })).subscribe(eventPublisher::emit, Logger::error);
+    private Observable<MotionValue> getReversedMotion(final Joystick joystick, final Observable<MotionValue> motion) {
+        return Observable.combineLatest(
+            motion, joystick.toggleButton(config.motionReverseButton()).startWith(false), reverseController);
     }
 
-    private void initToolingMotor(final Joystick joystick) {
-        final Observable<ToolingSpeedValue> fwd = joystick.button(config.toolingMotorForwardButton()).map(value -> {
-            if (value == Joystick.BUTTON_DOWN) {
-                return new ToolingSpeedValue(config.motorRotationSpeed());
-            }
+    private Observable<VideoFlipValueA> getCameraFlipA(final Joystick joystick) {
+        return joystick.toggleButton(config.cameraAVideoFlipButton())
+            .map(x -> new VideoFlipValueA());
+    }
 
-            return new ToolingSpeedValue(0);
-        });
-        final Observable<ToolingSpeedValue> rev = joystick.button(config.toolingMotorReverseButton()).map(value -> {
-            if (value == Joystick.BUTTON_DOWN) {
-                return new ToolingSpeedValue(-config.motorRotationSpeed());
-            }
+    private Observable<VideoFlipValueB> getCameraFlipB(final Joystick joystick) {
+        return joystick.toggleButton(config.cameraBVideoFlipButton())
+            .map(x -> new VideoFlipValueB());
+    }
 
-            return new ToolingSpeedValue(0);
-        });
+    private Observable<CameraSpeedValueA> getCameraSpeedA(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.button(config.cameraAMotorForwardButton()).startWith(false),
+            joystick.button(config.cameraAMotorReverseButton()).startWith(false),
+            joystick.toggleButton(config.cameraAVideoFlipButton()).startWith(false),
+            Observable.just(config.cameraAMotorSpeed()),
+            speedRegulator
+        ).map(CameraSpeedValueA::new);
+    }
 
-        Observable.merge(fwd, rev).subscribe(eventPublisher::emit, Logger::error);
+    private Observable<CameraSpeedValueB> getCameraSpeedB(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.button(config.cameraBMotorForwardButton()).startWith(false),
+            joystick.button(config.cameraBMotorReverseButton()).startWith(false),
+            joystick.toggleButton(config.cameraBVideoFlipButton()).startWith(false),
+            Observable.just(config.cameraBMotorSpeed()),
+            speedRegulator
+        ).map(CameraSpeedValueB::new);
+    }
+
+    private Observable<ToolingSpeedValue> getToolingSpeed(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.button(config.toolingMotorForwardButton()).startWith(false),
+            joystick.button(config.toolingMotorReverseButton()).startWith(false),
+            Observable.just(false),
+            Observable.just(config.toolingMotorSpeed()),
+            speedRegulator
+        ).map(ToolingSpeedValue::new);
     }
 }
