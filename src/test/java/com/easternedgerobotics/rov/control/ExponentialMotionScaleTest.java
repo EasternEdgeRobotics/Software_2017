@@ -72,9 +72,8 @@ public class ExponentialMotionScaleTest {
 
     @Test
     public final void exponentialScaling() {
-        final ExponentialMotionScale scale = new ExponentialMotionScale();
         final MotionValue inputMotion = new MotionValue(input, 0, 0, 0, 0, 0);
         final MotionValue expectedMotion = new MotionValue(expected, 0, 0, 0, 0, 0);
-        Assert.assertEquals(expectedMotion.getHeave(), scale.apply(inputMotion).getHeave(), 0.000001);
+        Assert.assertEquals(expectedMotion.getHeave(), ExponentialMotionScale.apply(inputMotion).getHeave(), 0.000001);
     }
 }

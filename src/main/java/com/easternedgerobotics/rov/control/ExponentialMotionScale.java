@@ -2,17 +2,18 @@ package com.easternedgerobotics.rov.control;
 
 import com.easternedgerobotics.rov.value.MotionValue;
 
-import java.util.function.Function;
+public final class ExponentialMotionScale {
+    private ExponentialMotionScale() {
 
-public class ExponentialMotionScale implements Function<MotionValue, MotionValue> {
+    }
+
     /**
      * Applies exponential scaling to the given motion value.
      *
      * @param motionValue the input motion value
      * @return the scaled motion value output
      */
-    @Override
-    public final MotionValue apply(final MotionValue motionValue) {
+    public static MotionValue apply(final MotionValue motionValue) {
         return new MotionValue(
             scale(motionValue.getHeave()),
             scale(motionValue.getSway()),
