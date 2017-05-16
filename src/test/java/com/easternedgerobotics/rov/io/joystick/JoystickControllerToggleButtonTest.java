@@ -2,16 +2,17 @@ package com.easternedgerobotics.rov.io.joystick;
 
 import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.MockJoystickConfig;
+import com.easternedgerobotics.rov.control.MotionReverser;
+import com.easternedgerobotics.rov.control.SpeedRegulator;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
-import com.easternedgerobotics.rov.value.CameraSpeedValueA;
-import com.easternedgerobotics.rov.value.CameraSpeedValueB;
-import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.VideoFlipValueA;
+import com.easternedgerobotics.rov.value.VideoFlipValueB;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -25,19 +26,13 @@ import java.util.Collection;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings({"checkstyle:magicnumber"})
-public final class JoystickControllerButtonTest {
-    @Parameterized.Parameters(name = "Joystick button #{0} should emit a value of {1}")
+public final class JoystickControllerToggleButtonTest {
+    @Parameters(name = "Joystick button #{0} should emit a value of {1}")
     public static Collection<Object[]> data() {
         final JoystickConfig config = new MockJoystickConfig();
         return Arrays.asList(new Object[][] {
-            {config.cameraAMotorForwardButton(), CameraSpeedValueA.class},
-            {config.cameraBMotorForwardButton(), CameraSpeedValueB.class},
-            {config.toolingMotorForwardButton(), ToolingSpeedValue.class},
-            {config.cameraAMotorReverseButton(), CameraSpeedValueA.class},
-            {config.cameraBMotorReverseButton(), CameraSpeedValueB.class},
-            {config.toolingMotorReverseButton(), ToolingSpeedValue.class},
-            {config.pitchForwardButton(), MotionValue.class},
-            {config.pitchReverseButton(), MotionValue.class}
+            {config.cameraAVideoFlipButton(), VideoFlipValueA.class},
+            {config.cameraBVideoFlipButton(), VideoFlipValueB.class},
         });
     }
 
@@ -45,7 +40,7 @@ public final class JoystickControllerButtonTest {
 
     private final Class clazz;
 
-    public JoystickControllerButtonTest(final String name, final Class clazz) {
+    public JoystickControllerToggleButtonTest(final String name, final Class clazz) {
         this.name = name;
         this.clazz = clazz;
     }
@@ -61,8 +56,8 @@ public final class JoystickControllerButtonTest {
         final JoystickController joystickController = new JoystickController(
             eventPublisher,
             m -> m,
-            (m, b) -> m,
-            (b1, b2, b3, f) -> 0f,
+            MotionReverser::apply,
+            SpeedRegulator::apply,
             config);
 
         final Joystick joystick = Mockito.mock(Joystick.class);
@@ -84,7 +79,7 @@ public final class JoystickControllerButtonTest {
         subj.onNext(Joystick.BUTTON_UP);
         scheduler.triggerActions();
 
-        subscriber.assertValueCount(3);
+        subscriber.assertValueCount(2);
         Assert.assertTrue("Emitted type is not correct", subscriber.getOnNextEvents().get(0).getClass().equals(clazz));
     }
 }
