@@ -76,10 +76,11 @@ public final class JoystickController {
             .subscribe(eventPublisher::emit, Logger::error));
     }
 
+    @SuppressWarnings({"checkstyle:avoidinlineconditionals"})
     private Observable<MotionValue> getMotion(final Joystick joystick) {
         return Observable.combineLatest(
             joystick.axis(config.heaveAxis()).startWith(0f),
-            joystick.axis(config.swayAxis()).startWith(0f),
+            joystick.axis(config.swayAxis()).startWith(0f).map(f -> f != 0 ? -f : 0),
             joystick.axis(config.surgeAxis()).startWith(0f),
             joystick.axis(config.yawAxis()).startWith(0f),
             (heave, sway, surge, yaw) -> new MotionValue(heave, sway, surge, 0, yaw, 0));
