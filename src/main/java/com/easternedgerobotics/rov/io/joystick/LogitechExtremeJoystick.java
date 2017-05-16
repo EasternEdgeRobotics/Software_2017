@@ -1,14 +1,13 @@
 package com.easternedgerobotics.rov.io.joystick;
 
-import com.easternedgerobotics.rov.value.MotionValue;
-
 import net.java.games.input.Component;
 import net.java.games.input.Event;
 import rx.Observable;
 import rx.Scheduler;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 class LogitechExtremeJoystick implements Joystick {
     /**
@@ -22,50 +21,22 @@ class LogitechExtremeJoystick implements Joystick {
     private final Observable<Event> events;
 
     /**
-     * A list of buttons found on the Logitech Extreme Joystick.
-     */
-    private final List<Component> buttons;
-
-    /**
      * Scheduler used to skip startup joystick events.
      */
     private final Scheduler scheduler;
-
-    /**
-     * Latest value polled for heave.
-     */
-    private float heave;
-
-    /**
-     * Latest value polled for sway.
-     */
-    private float sway;
-
-    /**
-     * Latest value polled for surge.
-     */
-    private float surge;
-
-    /**
-     * Latest value polled for yaw.
-     */
-    private float yaw;
 
     /**
      * Create a Logitech Extreme Joystick object.
      *
      * @param scheduler the scheduler to use during timed operations.
      * @param events events from the device.
-     * @param buttons all active buttons on the device.
      */
     public LogitechExtremeJoystick(
         final Scheduler scheduler,
-        final Observable<Event> events,
-        final List<Component> buttons
+        final Observable<Event> events
     ) {
         this.scheduler = scheduler;
         this.events = events.share();
-        this.buttons = buttons;
     }
 
     /**
@@ -74,11 +45,21 @@ class LogitechExtremeJoystick implements Joystick {
      * @return the stream of button presses.
      */
     @Override
-    public final Observable<Boolean> button(final int index) {
-        final Observable<Event> buttonEvents = events.filter(
-            event -> buttons.indexOf(event.getComponent()) == (index - 1));
+    public final Observable<Boolean> button(final String name) {
+        final Pattern pattern = Pattern.compile(name);
+        final Observable<Event> buttonEvents = events
+            .filter(event -> event.getComponent().getIdentifier() instanceof Component.Identifier.Button)
+            .filter(event -> pattern.matcher(event.getComponent().getIdentifier().getName()).matches());
 
         return buttonEvents.map(event -> event.getValue() == 1f);
+    }
+
+    @Override
+    public final Observable<Boolean> toggleButton(final String name) {
+        final AtomicBoolean isToggled = new AtomicBoolean();
+        return button(name)
+            .filter(x -> x == Joystick.BUTTON_DOWN)
+            .map(x -> isToggled.getAndSet(!isToggled.get()));
     }
 
     /**
@@ -87,34 +68,13 @@ class LogitechExtremeJoystick implements Joystick {
      * @return a stream of motion values.
      */
     @Override
-    public final Observable<MotionValue> axes() {
-        final Observable<Boolean> joystickTrigger = button(1).startWith(false);
-        final Observable<Component> components = events.map(Event::getComponent)
-            .filter(c -> c.getIdentifier() instanceof Component.Identifier.Axis)
+    public final Observable<Float> axis(final String name) {
+        final Pattern pattern = Pattern.compile(name);
+        final Observable<Event> axesEvents = events
+            .filter(event -> event.getComponent().getIdentifier() instanceof Component.Identifier.Axis)
+            .filter(event -> pattern.matcher(event.getComponent().getIdentifier().getName()).matches())
             .skip(INITIAL_INPUT_DELAY, TimeUnit.MILLISECONDS, scheduler);
-        return components.withLatestFrom(joystickTrigger, this::createMotionValue);
-    }
 
-    /**
-     * Map the current axes values into a motion value.
-     *
-     * @param component the latest axis component to be updated.
-     * @param pitching if the ROV is in a pitch operation.
-     * @return the latest motion value.
-     */
-    private MotionValue createMotionValue(final Component component, final boolean pitching) {
-        if (component.getIdentifier() == Component.Identifier.Axis.X) {
-            sway = -component.getPollData();
-        } else if (component.getIdentifier() == Component.Identifier.Axis.Y) {
-            surge = component.getPollData();
-        } else if (component.getIdentifier() == Component.Identifier.Axis.RZ) {
-            yaw = component.getPollData();
-        } else if (component.getIdentifier() == Component.Identifier.Axis.SLIDER) {
-            heave = component.getPollData();
-        }
-        if (pitching) {
-            return new MotionValue(heave, sway, 0, -surge, yaw, 0);
-        }
-        return new MotionValue(heave, sway, surge, 0, yaw, 0);
+        return axesEvents.map(event -> event.getComponent().getPollData());
     }
 }

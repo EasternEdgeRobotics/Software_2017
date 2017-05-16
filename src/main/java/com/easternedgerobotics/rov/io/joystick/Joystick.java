@@ -1,7 +1,5 @@
 package com.easternedgerobotics.rov.io.joystick;
 
-import com.easternedgerobotics.rov.value.MotionValue;
-
 import rx.Observable;
 
 public interface Joystick {
@@ -9,7 +7,9 @@ public interface Joystick {
 
     boolean BUTTON_UP = !BUTTON_DOWN;
 
-    Observable<Boolean> button(final int index);
+    Observable<Boolean> button(final String name);
 
-    Observable<MotionValue> axes();
+    Observable<Boolean> toggleButton(final String name);
+
+    Observable<Float> axis(final String name);
 }
