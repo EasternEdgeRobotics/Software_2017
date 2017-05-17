@@ -40,12 +40,22 @@ public class MainView implements View {
 
     final Button resetCameraButton = new Button("Reset Camera Feed");
 
+    static final int CALIBRATION_VIEW_WEIGHT = 1;
+
+    final Button calibrationButton = new Button("Camera Calibration Images");
+
+    static final int DISTANCE_VIEW_WEIGHT = 1;
+
+    final Button distanceButton = new Button("Distance Calculator");
+
     static final int TOTAL_WEIGHT =
         START_BUTTON_WEIGHT
         + THRUSTER_VIEW_WEIGHT
         + SENSOR_VIEW_WEIGHT
         + CAMERA_VIEW_WEIGHT
-        + RESET_CAMERA_WEIGHT;
+        + RESET_CAMERA_WEIGHT
+        + CALIBRATION_VIEW_WEIGHT
+        + DISTANCE_VIEW_WEIGHT;
 
     @Inject
     public MainView() {
@@ -54,6 +64,8 @@ public class MainView implements View {
         sensorButton.prefWidthProperty().bind(buttonPanel.widthProperty());
         cameraButton.prefWidthProperty().bind(buttonPanel.widthProperty());
         resetCameraButton.prefWidthProperty().bind(buttonPanel.widthProperty());
+        calibrationButton.prefWidthProperty().bind(buttonPanel.widthProperty());
+        distanceButton.prefWidthProperty().bind(buttonPanel.widthProperty());
 
         startButton.prefHeightProperty().bind(buttonPanel.heightProperty()
             .multiply(START_BUTTON_WEIGHT).divide(TOTAL_WEIGHT));
@@ -65,8 +77,20 @@ public class MainView implements View {
             .multiply(CAMERA_VIEW_WEIGHT).divide(TOTAL_WEIGHT));
         resetCameraButton.prefHeightProperty().bind(buttonPanel.heightProperty()
             .multiply(RESET_CAMERA_WEIGHT).divide(TOTAL_WEIGHT));
+        calibrationButton.prefHeightProperty().bind(buttonPanel.heightProperty()
+            .multiply(CALIBRATION_VIEW_WEIGHT).divide(TOTAL_WEIGHT));
+        distanceButton.prefHeightProperty().bind(buttonPanel.heightProperty()
+            .multiply(DISTANCE_VIEW_WEIGHT).divide(TOTAL_WEIGHT));
 
-        buttonPanel.getChildren().addAll(startButton, thrusterButton, sensorButton, cameraButton, resetCameraButton);
+        buttonPanel.getChildren().addAll(
+            startButton,
+            thrusterButton,
+            sensorButton,
+            cameraButton,
+            resetCameraButton,
+            calibrationButton,
+            distanceButton);
+
         buttonPanel.setPrefWidth(BOX_W);
         buttonPanel.setPrefHeight(BOX_H * TOTAL_WEIGHT);
         box.setPadding(new Insets(SPACING));
