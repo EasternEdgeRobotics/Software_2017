@@ -106,6 +106,7 @@ public final class Topside extends Application {
         viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
+                put(Config.class, configSource);
                 put(EmergencyStopController.class, emergencyStopController);
                 put(VideoDecoder.class, videoDecoder);
                 put(ViewLauncher.class, launcher);

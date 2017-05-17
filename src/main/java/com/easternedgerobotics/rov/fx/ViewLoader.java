@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.fx;
 
+import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.Configurable;
 import com.easternedgerobotics.rov.event.Event;
 import com.easternedgerobotics.rov.event.EventPublisher;
 
@@ -144,6 +146,10 @@ public class ViewLoader {
                 final ParameterizedType parameterizedType = (ParameterizedType) parameter.getParameterizedType();
                 final Class<?> inner = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                 return ((EventPublisher) dependencies.get(EventPublisher.class)).valuesOfType(inner);
+            }
+            if (parameter.isAnnotationPresent(Configurable.class)) {
+                final Configurable configurable = parameter.getAnnotation(Configurable.class);
+                return ((Config) dependencies.get(Config.class)).getConfig(configurable.value(), parameter.getType());
             }
             throw new RuntimeException(String.format("%s could not be resolved while constructing %s", type, clazz));
         });
