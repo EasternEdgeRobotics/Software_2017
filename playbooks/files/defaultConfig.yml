@@ -75,3 +75,10 @@ slider:
   aftPowerSliderAddress: 6
   forePowerSliderAddress: 8
   lightPowerSliderAddress: 7
+cameraCalibration:
+  cameraAImagesDirectory: samples0/
+  cameraBImagesDirectory: samples1/
+  chessboardWidth: 9
+  chessboardHeight: 6
+distanceCalculation:
+  imageDirectory: samples2/
