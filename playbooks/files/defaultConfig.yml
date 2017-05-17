@@ -29,7 +29,7 @@ rov:
   vertAftChannel: 0
   vertForeChannel: 16
   cameraAMotorChannel: 7
-  cameraBMotorChannel: 8
+  cameraBMotorChannel: 10
   toolingMotorChannel: 5
   lightChannel: 23
   altImuSa0High: false
@@ -46,16 +46,25 @@ videoDecoder:
   preset: ultrafast
   numBuffers: 0
 joystick:
-  cameraAMotorForwardButton: 4
-  cameraAMotorReverseButton: 6
-  cameraBMotorForwardButton: 5
-  cameraBMotorReverseButton: 3
-  toolingMotorForwardButton: 11
-  toolingMotorReverseButton: 12
-  motionReverseButton: 2
-  cameraAVideoFlipButton: 8
-  cameraBVideoFlipButton: 7
-  motorRotationSpeed: 0.3f
+  heaveAxis: slider
+  swayAxis: x
+  surgeAxis: y
+  yawAxis: rz
+  cameraAMotorForwardButton: Top|3
+  cameraAMotorReverseButton: Pinkie|5
+  cameraBMotorForwardButton: Top 2|4
+  cameraBMotorReverseButton: Thumb 2|2
+  toolingMotorForwardButton: Base 5|10
+  toolingMotorReverseButton: Base 6|11
+  motionReverseButton: Thumb|1
+  cameraAVideoFlipButton: Base 2|7
+  cameraBVideoFlipButton: Base|6
+  pitchForwardButton: Base 4|9
+  pitchReverseButton: Base 3|8
+  cameraAMotorSpeed: 0.30f
+  cameraBMotorSpeed: 0.30f
+  toolingMotorSpeed: 1f
+  pitchSpeed: 1f
 slider:
   globalPowerSliderAddress: 3
   heavePowerSliderAddress: 2

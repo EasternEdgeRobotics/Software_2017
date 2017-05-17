@@ -7,6 +7,8 @@ import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
 import com.easternedgerobotics.rov.config.VideoDecoderConfig;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
+import com.easternedgerobotics.rov.control.MotionReverser;
+import com.easternedgerobotics.rov.control.SpeedRegulator;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
@@ -54,6 +56,8 @@ public final class Topside extends Application {
     private ProfileController profileController;
 
     private VideoDecoder videoDecoder;
+
+    private JoystickController joystickController;
 
     @Override
     public void init() throws SocketException, UnknownHostException {
@@ -108,15 +112,12 @@ public final class Topside extends Application {
             }
         });
 
-        LogitechExtremeJoystickSource.create(
-            config.joystickRecoveryInterval(),
-            TimeUnit.MILLISECONDS,
-            Schedulers.io()
-        ).subscribe(new JoystickController(
+        joystickController = new JoystickController(
             eventPublisher,
-            new ExponentialMotionScale(),
-            configSource.getConfig("joystick", JoystickConfig.class)
-        )::onNext);
+            ExponentialMotionScale::apply,
+            MotionReverser::apply,
+            SpeedRegulator::apply,
+            configSource.getConfig("joystick", JoystickConfig.class));
     }
 
     @Override
@@ -125,6 +126,8 @@ public final class Topside extends Application {
 
         launcher.start(viewLoader, stage, MainView.class, "Control Software");
         arduino.start(config.pilotPanelHeartbeatInterval(), config.pilotPanelHeartbeatTimeout(), TimeUnit.MILLISECONDS);
+        joystickController.start(LogitechExtremeJoystickSource.create(
+            config.joystickRecoveryInterval(), TimeUnit.MILLISECONDS, Schedulers.io()));
         Logger.info("Started");
     }
 
@@ -136,6 +139,7 @@ public final class Topside extends Application {
         sliderController.stop();
         profileController.stop();
         videoDecoder.stop();
+        joystickController.stop();
         Logger.info("Stopped");
     }
 

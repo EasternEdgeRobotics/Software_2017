@@ -1,23 +1,41 @@
 package com.easternedgerobotics.rov.config;
 
 public interface JoystickConfig {
-    int cameraAMotorForwardButton();
+    String heaveAxis();
 
-    int cameraAMotorReverseButton();
+    String swayAxis();
 
-    int cameraBMotorForwardButton();
+    String surgeAxis();
 
-    int cameraBMotorReverseButton();
+    String yawAxis();
 
-    int toolingMotorForwardButton();
+    String cameraAMotorForwardButton();
 
-    int toolingMotorReverseButton();
+    String cameraAMotorReverseButton();
 
-    int motionReverseButton();
+    String cameraBMotorForwardButton();
 
-    int cameraAVideoFlipButton();
+    String cameraBMotorReverseButton();
 
-    int cameraBVideoFlipButton();
+    String toolingMotorForwardButton();
 
-    float motorRotationSpeed();
+    String toolingMotorReverseButton();
+
+    String motionReverseButton();
+
+    String cameraAVideoFlipButton();
+
+    String cameraBVideoFlipButton();
+
+    String pitchForwardButton();
+
+    String pitchReverseButton();
+
+    float cameraAMotorSpeed();
+
+    float cameraBMotorSpeed();
+
+    float toolingMotorSpeed();
+
+    float pitchSpeed();
 }

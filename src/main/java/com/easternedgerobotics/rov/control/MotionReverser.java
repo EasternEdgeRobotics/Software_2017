@@ -3,16 +3,8 @@ package com.easternedgerobotics.rov.control;
 import com.easternedgerobotics.rov.value.MotionValue;
 
 public final class MotionReverser {
-    /**
-     * State of the reverser.
-     */
-    private volatile boolean isReversed;
+    private MotionReverser() {
 
-    /**
-     * Toggle the state of the reverser.
-     */
-    public void toggle() {
-        isReversed = !isReversed;
     }
 
     /**
@@ -21,7 +13,7 @@ public final class MotionReverser {
      * @param motion the transformed motion.
      * @return MotionValue
      */
-    public MotionValue apply(final MotionValue motion) {
+    public static MotionValue apply(final MotionValue motion, final boolean isReversed) {
         if (!isReversed) {
             return motion;
         } else {

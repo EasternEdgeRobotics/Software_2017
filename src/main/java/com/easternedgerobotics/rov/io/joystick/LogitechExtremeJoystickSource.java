@@ -1,17 +1,13 @@
 package com.easternedgerobotics.rov.io.joystick;
 
-import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 import rx.Observable;
 import rx.Scheduler;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class LogitechExtremeJoystickSource {
     private static final String NAME = ".*Logitech.*Extreme.*3D.*";
@@ -49,8 +45,7 @@ public final class LogitechExtremeJoystickSource {
                 if (controller != null) {
                     return new LogitechExtremeJoystick(
                         scheduler,
-                        createEvents(controller),
-                        createButtons(controller));
+                        createEvents(controller));
                 }
             }
             return null;
@@ -87,11 +82,4 @@ public final class LogitechExtremeJoystickSource {
             .filter(event -> event != null)
             .share();
     }
-
-    private static List<Component> createButtons(final Controller controller) {
-        return Stream.of(controller.getComponents())
-            .filter(component -> component.getIdentifier() instanceof Component.Identifier.Button)
-            .collect(Collectors.toList());
-    }
-
 }
