@@ -18,7 +18,6 @@ import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.ForePowerValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
-import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
@@ -30,6 +29,7 @@ import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
 import com.easternedgerobotics.rov.value.SwayPowerValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.value.YawPowerValue;
 
 import org.hamcrest.CoreMatchers;
@@ -156,7 +156,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(false));
+        eventPublisher.emit(new TopsideHeartbeatValue(false));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
@@ -195,7 +195,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(false));
+        eventPublisher.emit(new TopsideHeartbeatValue(false));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
@@ -215,7 +215,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new GlobalPowerValue(1));
         eventPublisher.emit(new HeavePowerValue(1));
         eventPublisher.emit(new SwayPowerValue(1));
@@ -266,7 +266,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueA(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
@@ -282,7 +282,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueB(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
@@ -298,7 +298,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new ToolingSpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
@@ -314,7 +314,7 @@ public class RovTest {
         final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
-        eventPublisher.emit(new HeartbeatValue(true));
+        eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new LightSpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
