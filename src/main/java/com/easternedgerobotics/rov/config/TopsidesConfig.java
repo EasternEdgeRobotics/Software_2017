@@ -24,4 +24,6 @@ public interface TopsidesConfig {
     long profileSwitchDuration();
 
     String profilePref();
+
+    int heartbeatLostInterval();
 }

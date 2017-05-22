@@ -8,4 +8,6 @@ public interface LaunchConfig {
     String serialPort();
 
     int baudRate();
+
+    int heartbeatRate();
 }
