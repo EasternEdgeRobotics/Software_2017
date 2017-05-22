@@ -44,6 +44,9 @@ public final class Config {
     }
 
     public <T> T getConfig(final String name, final Class<T> bindingClass) {
+        if (!bindingClass.isInterface()) {
+            return configProvider.getProperty(name, bindingClass);
+        }
         return configProvider.bind(name, bindingClass);
     }
 }
