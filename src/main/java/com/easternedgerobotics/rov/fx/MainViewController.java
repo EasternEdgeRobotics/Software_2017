@@ -1,8 +1,13 @@
 package com.easternedgerobotics.rov.fx;
 
+import com.easternedgerobotics.rov.config.Configurable;
+import com.easternedgerobotics.rov.control.SourceController;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
-import com.easternedgerobotics.rov.value.HeartbeatValue;
+import com.easternedgerobotics.rov.value.PicameraAHeartbeatValue;
+import com.easternedgerobotics.rov.value.PicameraBHeartbeatValue;
+import com.easternedgerobotics.rov.value.RasprimeHeartbeatValue;
+import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import rx.Observable;
@@ -10,13 +15,12 @@ import rx.observables.JavaFxObservable;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 @SuppressWarnings("unused")
 public class MainViewController implements ViewController {
-    private static final int HEARTBEAT_GAP = 1;
-
     private final MainView view;
 
     private final ViewLauncher viewLauncher;
@@ -27,6 +31,10 @@ public class MainViewController implements ViewController {
 
     private final EmergencyStopController emergencyStopController;
 
+    private final int heartbeatRate;
+
+    private final int maxHeartbeatGap;
+
     private final CompositeSubscription subscriptions;
 
     @Inject
@@ -35,20 +43,24 @@ public class MainViewController implements ViewController {
         final ViewLauncher viewLauncher,
         final VideoDecoder videoDecoder,
         final EventPublisher eventPublisher,
-        final EmergencyStopController emergencyStopController
+        final EmergencyStopController emergencyStopController,
+        @Configurable("launch.heartbeatRate") final int heartbeatRate,
+        @Configurable("topsides.heartbeatLostInterval") final int maxHeartbeatGap
     ) {
         this.view = view;
         this.viewLauncher = viewLauncher;
         this.videoDecoder = videoDecoder;
         this.eventPublisher = eventPublisher;
         this.emergencyStopController = emergencyStopController;
+        this.heartbeatRate = heartbeatRate;
+        this.maxHeartbeatGap = maxHeartbeatGap;
         this.subscriptions = new CompositeSubscription();
     }
 
     @Override
     public final void onCreate() {
         subscriptions.add(
-            Observable.interval(HEARTBEAT_GAP, TimeUnit.SECONDS, Schedulers.io())
+            Observable.interval(heartbeatRate, TimeUnit.SECONDS, Schedulers.io())
                 .withLatestFrom(
                     JavaFxObservable.valuesOf(view.startButton.selectedProperty()).startWith(false),
                     (tick, beat) -> beat)
@@ -57,6 +69,23 @@ public class MainViewController implements ViewController {
             .subscribe(this::onSelected));
         subscriptions.add(emergencyStopController.emergencyStop().observeOn(JAVA_FX_SCHEDULER)
             .subscribe(this::onEmergencyStopClick));
+
+        final Observable<Long> heartbeatLostInterval = Observable.interval(
+            maxHeartbeatGap, TimeUnit.SECONDS, JAVA_FX_SCHEDULER);
+
+        Observable.zip(
+            Observable.from(Arrays.asList(
+                RasprimeHeartbeatValue.class,
+                PicameraAHeartbeatValue.class,
+                PicameraBHeartbeatValue.class)),
+            Observable.from(Arrays.asList(
+                view.rasprimeIndicator,
+                view.picameraAIndicator,
+                view.picameraBIndicator)),
+            (clazz, indicator) -> SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(clazz), h -> indicator.setBackground(MainView.FOUND_BG), JAVA_FX_SCHEDULER,
+                heartbeatLostInterval, t -> indicator.setBackground(MainView.LOST_BG), JAVA_FX_SCHEDULER)
+        ).subscribe(subscriptions::add);
 
         JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLauncher.launch(ThrusterPowerSlidersView.class, "Thruster Power"));
@@ -75,7 +104,7 @@ public class MainViewController implements ViewController {
     @Override
     public final void onDestroy() {
         subscriptions.unsubscribe();
-        eventPublisher.emit(new HeartbeatValue(false));
+        eventPublisher.emit(new TopsideHeartbeatValue(false));
     }
 
     private void onSelected(final boolean selected) {
@@ -87,7 +116,7 @@ public class MainViewController implements ViewController {
     }
 
     private void heartbeat(final boolean operational) {
-        eventPublisher.emit(new HeartbeatValue(operational));
+        eventPublisher.emit(new TopsideHeartbeatValue(operational));
     }
 
     private void onEmergencyStopClick(final boolean stop) {
