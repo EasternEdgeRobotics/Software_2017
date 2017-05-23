@@ -25,8 +25,9 @@ public class ViewLoaderCreationTest {
 
     @Test
     public final void loadViewCreatesStage() {
-        final ViewLoader viewLoader = new ViewLoader(Collections.emptyMap());
-        final Stage stage = viewLoader.load(SliderView.class);
+        final ViewLoader viewLoader = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage = new Stage();
+        viewLoader.loadMain(stage);
 
         Assert.assertNotNull("Stage is null", stage);
         Assert.assertNotNull("Scene is null", stage.getScene());
@@ -34,8 +35,9 @@ public class ViewLoaderCreationTest {
 
     @Test
     public final void loadViewDoesSetStageEventHandler() {
-        final ViewLoader viewLoader = new ViewLoader(Collections.emptyMap());
-        final Stage stage = viewLoader.load(SliderView.class);
+        final ViewLoader viewLoader = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage = new Stage();
+        viewLoader.loadMain(stage);
 
         Assert.assertNotNull("EventHandler for window hide is not set", stage.getOnHidden());
         Assert.assertNotNull("EventHandler for window show is not set", stage.getOnShown());
@@ -43,8 +45,9 @@ public class ViewLoaderCreationTest {
 
     @Test
     public final void loadViewDoesSetSceneRootNode() {
-        final ViewLoader viewLoader = new ViewLoader(Collections.emptyMap());
-        final Stage stage = viewLoader.load(SliderView.class);
+        final ViewLoader viewLoader = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage = new Stage();
+        viewLoader.loadMain(stage);
         final Parent view = stage.getScene().getRoot();
 
         Assert.assertNotNull("Scene root node is null", view);
