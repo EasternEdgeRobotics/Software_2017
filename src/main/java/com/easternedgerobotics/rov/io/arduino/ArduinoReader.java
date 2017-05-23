@@ -1,8 +1,8 @@
 package com.easternedgerobotics.rov.io.arduino;
 
 import com.easternedgerobotics.rov.value.AnalogPinValue;
+import com.easternedgerobotics.rov.value.ArduinoHeartbeatValue;
 import com.easternedgerobotics.rov.value.DigitalPinValue;
-import com.easternedgerobotics.rov.value.HeartbeatValue;
 
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
@@ -94,7 +94,7 @@ final class ArduinoReader implements SerialPortEventListener {
                                 subject.onNext(new AnalogPinValue(analogBytes[0], value / ANALOG_RESOLUTION));
                                 break;
                             case HEARTBEAT:
-                                subject.onNext(new HeartbeatValue(input.read() > 0));
+                                subject.onNext(new ArduinoHeartbeatValue(input.read() > 0));
                                 break;
                             default:
                                 break;

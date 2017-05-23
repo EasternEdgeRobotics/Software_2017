@@ -27,10 +27,12 @@ import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.LightSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.RasprimeHeartbeatValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
 import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.value.VertAftSpeedValue;
 import com.easternedgerobotics.rov.value.VertForeSpeedValue;
 
@@ -207,6 +209,7 @@ final class Rov {
         motors.forEach(Motor::writeZero);
         lights.forEach(Light::writeZero);
         thrusters.forEach(Thruster::writeZero);
+        eventPublisher.emit(new RasprimeHeartbeatValue(false));
     }
 
     /**
@@ -218,42 +221,44 @@ final class Rov {
      */
     void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
+        final CpuInformation cpuInformation = new CpuInformation(config.cpuPollInterval(), TimeUnit.SECONDS);
+        cpuInformation.observe().subscribe(eventPublisher::emit, Logger::error);
+
+        final Observable<TopsideHeartbeatValue> topsideHeartbeats = eventPublisher
+            .valuesOfType(TopsideHeartbeatValue.class);
+
+        final Observable<TopsideHeartbeatValue> timeout = Observable.just(new TopsideHeartbeatValue(false))
             .delay(config.maxHeartbeatGap(), TimeUnit.SECONDS, clock)
             .doOnNext(heartbeat -> Logger.warn("Timeout while waiting for heartbeat"))
             .concatWith(Observable.never());
 
-        final Observable<HeartbeatValue> heartbeats = eventPublisher.valuesOfType(HeartbeatValue.class);
-        final CpuInformation cpuInformation = new CpuInformation(config.cpuPollInterval(), TimeUnit.SECONDS);
+        final Observable<HeartbeatValue> controlHeartbeats = Observable
+            .interval(config.sleepDuration(), TimeUnit.MILLISECONDS, clock)
+            .withLatestFrom(
+                topsideHeartbeats.mergeWith(timeout.takeUntil(topsideHeartbeats).repeat()),
+                (tick, heartbeat) -> heartbeat)
+            .cast(HeartbeatValue.class)
+            .observeOn(io);
+
+        controlHeartbeats.takeUntil(killSwitch)
+            .doOnSubscribe(this::doOnSubscribe)
+            .subscribe(this::onNext, this::onError, this::onCompleted);
 
         thrusters.forEach(Thruster::writeZero);
 
-        cpuInformation.observe().subscribe(eventPublisher::emit, Logger::warn);
-        Observable.interval(config.sleepDuration(), TimeUnit.MILLISECONDS, clock)
-            .withLatestFrom(
-                heartbeats.mergeWith(timeout.takeUntil(heartbeats).repeat()), (tick, heartbeat) -> heartbeat)
-            .observeOn(io)
-            .takeUntil(killSwitch)
-            .doOnSubscribe(() -> dead.set(false))
-            .subscribe(
-                this::beat,
-                e -> {
-                    dead.set(true);
-                    throw new RuntimeException(e);
-                },
-                () -> dead.set(true));
-
-        final Observable<Long> sensorInterval = Observable.interval(
-                config.sensorPollInterval(),
-                TimeUnit.MILLISECONDS,
-                io);
-        sensorInterval.subscribe(tick -> {
-            eventPublisher.emit(barometer.pressure());
-            eventPublisher.emit(accelerometer.acceleration());
-            eventPublisher.emit(gyroscope.angularVelocity());
-            eventPublisher.emit(magnetometer.rotation());
-            eventPublisher.emit(thermometer.temperature());
-        });
+        // Temporarily commented section to prevent logs overflowing. FIX ME!!!
+        //
+        //        final Observable<Long> sensorInterval = Observable.interval(
+        //                config.sensorPollInterval(),
+        //                TimeUnit.MILLISECONDS,
+        //                io);
+        //        sensorInterval.subscribe(tick -> {
+        //            eventPublisher.emit(barometer.pressure());
+        //            eventPublisher.emit(accelerometer.acceleration());
+        //            eventPublisher.emit(gyroscope.angularVelocity());
+        //            eventPublisher.emit(magnetometer.rotation());
+        //            eventPublisher.emit(thermometer.temperature());
+        //        });
     }
 
     private void thrustersUpdate() {
@@ -266,16 +271,33 @@ final class Rov {
         thrusters.forEach(Thruster::writeZero);
     }
 
-    private void beat(final HeartbeatValue heartbeat) {
+    private void doOnSubscribe() {
+        dead.set(false);
+    }
+
+    private void onNext(final HeartbeatValue heartbeat) {
         if (heartbeat.getOperational()) {
             thrustersUpdate();
             lights.forEach(Light::write);
             motors.forEach(Motor::write);
+            eventPublisher.emit(new RasprimeHeartbeatValue(true));
         } else {
             softShutdown();
             lights.forEach(Light::flash);
             motors.forEach(Motor::writeZero);
+            eventPublisher.emit(new RasprimeHeartbeatValue(false));
         }
+    }
+
+    private void onError(final Throwable e) {
+        dead.set(true);
+        eventPublisher.emit(new RasprimeHeartbeatValue(false));
+        throw new RuntimeException(e);
+    }
+
+    private void onCompleted() {
+        eventPublisher.emit(new RasprimeHeartbeatValue(false));
+        dead.set(true);
     }
 
     public static void main(final String[] args) throws InterruptedException, IOException {

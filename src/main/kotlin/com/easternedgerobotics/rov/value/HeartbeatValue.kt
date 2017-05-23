@@ -1,3 +1,5 @@
 package com.easternedgerobotics.rov.value
 
-data class HeartbeatValue(val operational: Boolean = false)
+interface HeartbeatValue {
+    val operational: Boolean
+}

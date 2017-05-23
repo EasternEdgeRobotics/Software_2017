@@ -1,8 +1,8 @@
 package com.easternedgerobotics.rov.io.arduino;
 
 import com.easternedgerobotics.rov.value.AnalogPinValue;
+import com.easternedgerobotics.rov.value.ArduinoHeartbeatValue;
 import com.easternedgerobotics.rov.value.DigitalPinValue;
-import com.easternedgerobotics.rov.value.HeartbeatValue;
 
 import org.pmw.tinylog.Logger;
 import rx.Observable;
@@ -91,16 +91,16 @@ public final class Arduino {
             .subscribe(tick -> writer.requestHeartbeat()));
 
         // Inject message when timeout is reached.
-        final Observable<HeartbeatValue> timeout = Observable.just(new HeartbeatValue(false))
+        final Observable<ArduinoHeartbeatValue> timeout = Observable.just(new ArduinoHeartbeatValue(false))
             .delay(heartbeatTimeout, unit)
             .doOnNext(heartbeat -> Logger.warn("Arduino timeout while waiting for heartbeat"))
             .repeat();
 
-        final Observable<HeartbeatValue> heartbeats = reader.valuesOfType(HeartbeatValue.class);
+        final Observable<ArduinoHeartbeatValue> heartbeats = reader.valuesOfType(ArduinoHeartbeatValue.class);
 
         // When time out is reached, reconnect reader and writer to a new serial port instance.
         heartbeatSubscription.add(timeout.takeUntil(heartbeats).repeat().mergeWith(heartbeats)
-            .startWith(new HeartbeatValue(false))
+            .startWith(new ArduinoHeartbeatValue(false))
             .filter(beat -> !beat.getOperational())
             .observeOn(Schedulers.io())
             .subscribe(heartbeatValue -> init()));

@@ -4,6 +4,7 @@ import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.value.PicameraAHeartbeatValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoValueA;
 import com.easternedgerobotics.rov.video.PicameraVideo;
@@ -16,8 +17,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.pmw.tinylog.Logger;
+import rx.Observable;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
+import rx.schedulers.Schedulers;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -30,12 +33,15 @@ final class PicameraA {
 
     }
 
-    private static void initCameraA(final EventPublisher eventPublisher) {
+    private static void initCameraA(final EventPublisher eventPublisher, final int heartbeatRate) {
         eventPublisher.valuesOfType(VideoFlipValueA.class)
             .subscribe(f -> PicameraVideo.flip());
         eventPublisher.valuesOfType(VideoValueA.class)
             .throttleLast(1, TimeUnit.SECONDS)
             .subscribe(value -> PicameraVideo.start(value.getHost(), value.getPort()));
+        Observable.interval(heartbeatRate, TimeUnit.SECONDS, Schedulers.io())
+            .map(t -> new PicameraAHeartbeatValue(true))
+            .subscribe(eventPublisher::emit);
     }
 
     public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
@@ -75,7 +81,7 @@ final class PicameraA {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             PicameraVideo.addShutdownHook();
-            initCameraA(eventPublisher);
+            initCameraA(eventPublisher, launchConfig.heartbeatRate());
             Logger.info("Started");
             eventPublisher.await();
         } catch (final ParseException e) {

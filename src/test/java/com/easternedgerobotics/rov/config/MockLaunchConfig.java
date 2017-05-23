@@ -17,4 +17,9 @@ public final class MockLaunchConfig implements LaunchConfig {
     public int baudRate() {
         return 115200;
     }
+
+    @Override
+    public int heartbeatRate() {
+        return 1;
+    }
 }
