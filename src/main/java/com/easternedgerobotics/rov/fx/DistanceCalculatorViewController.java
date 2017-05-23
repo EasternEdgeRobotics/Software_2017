@@ -25,7 +25,7 @@ public final class DistanceCalculatorViewController implements ViewController {
 
     @Override
     public void onCreate() {
-        gallery.folderLabel.setText(config.imageDirectory());
+        gallery.directoryLabel.setText(config.imageDirectory());
         view.galleryBorderPane.setCenter(gallery.getParent());
     }
 }

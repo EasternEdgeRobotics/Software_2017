@@ -2,51 +2,82 @@ package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
 import com.easternedgerobotics.rov.config.Configurable;
-
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Scene;
-import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
+import rx.Observable;
+import rx.javafx.sources.Flag;
+import rx.javafx.sources.ListChange;
 import rx.observables.JavaFxObservable;
+import rx.subscriptions.CompositeSubscription;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 
 public final class CameraCalibrationViewController implements ViewController {
-    private static final int IMAGE_OFFSET = 10;
+    /**
+     * The subscriptions held by this controller.
+     */
+    private final CompositeSubscription subscriptions = new CompositeSubscription();
 
+    /**
+     * The label of the open image option.
+     */
+    static final String OPEN_ACTION = "Open";
+
+    /**
+     * The label of the delete image option.
+     */
+    static final String DELETE_ACTION = "Delete";
+
+    /**
+     * The parent view managed by this controller.
+     */
     private final CameraCalibrationView view;
 
+    /**
+     * A gallery for camera A calibration images.
+     */
     private final GalleryView cameraACalibration;
 
+    /**
+     * A gallery for camera B calibration images.
+     */
     private final GalleryView cameraBCalibration;
 
+    /**
+     * The video decoder to grab images latest camera images from.
+     */
     private final VideoDecoder videoDecoder;
 
+    /**
+     * The configuration of the camera calibrator.
+     */
     private final CameraCalibrationConfig config;
 
+    /**
+     * Create a controller for the camera calibration utility which lets users take calibration image snapshots
+     * and view if the images are of good quality by opening the images as fullscreen.
+     *
+     * @param view The parent view managed by this controller.
+     * @param cameraACalibration A gallery for camera A calibration images.
+     * @param cameraBCalibration A gallery for camera B calibration images.
+     * @param videoDecoder The video decoder to grab images latest camera images from.
+     * @param config The configuration of the camera calibrator.
+     */
     @Inject
     public CameraCalibrationViewController(
         final CameraCalibrationView view,
         final GalleryView cameraACalibration,
         final GalleryView cameraBCalibration,
         final VideoDecoder videoDecoder,
-        @Configurable("cameraCalibration")final CameraCalibrationConfig config
+        @Configurable("cameraCalibration") final CameraCalibrationConfig config
     ) {
         this.view = view;
         this.cameraACalibration = cameraACalibration;
@@ -57,86 +88,64 @@ public final class CameraCalibrationViewController implements ViewController {
 
     @Override
     public void onCreate() {
-        final Tab cameraACalibrationTab = new Tab();
-        cameraACalibration.updateFolder.onNext(config.cameraAImagesDirectory());
-        cameraACalibrationTab.setText("Camera A Calibration");
-        cameraACalibrationTab.setContent(cameraACalibration.getParent());
-        cameraACalibrationTab.setClosable(false);
+        final Observable<ListChange<GalleryImageView>> images = Observable.merge(
+            JavaFxObservable.changesOf(cameraACalibration.imageViews),
+            JavaFxObservable.changesOf(cameraBCalibration.imageViews));
 
-        final Tab cameraBCalibrationTab = new Tab();
-        cameraBCalibration.updateFolder.onNext(config.cameraBImagesDirectory());
-        cameraBCalibrationTab.setText("Camera B Calibration");
-        cameraBCalibrationTab.setContent(cameraBCalibration.getParent());
-        cameraBCalibrationTab.setClosable(false);
+        subscriptions.add(images
+            .filter(change -> change.getFlag().equals(Flag.ADDED))
+            .map(ListChange::getValue)
+            .flatMap(iv -> iv.doubleClickAction(OPEN_ACTION)
+                .takeUntil(iv.menuAction(DELETE_ACTION))
+                .doOnCompleted(() -> iv.getPath().toFile().delete())
+                .map(p -> iv))
+            .subscribe(GalleryImageView::fullscreen));
 
-        view.tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab);
+        cameraACalibration.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
+        cameraACalibration.directoryLabel.setText(config.cameraAImagesDirectory());
+        view.cameraACalibrationTab.setContent(cameraACalibration.getParent());
 
-        cameraACalibration.selected.subscribe(this::openImage);
-        cameraBCalibration.selected.subscribe(this::openImage);
+        cameraBCalibration.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
+        cameraBCalibration.directoryLabel.setText(config.cameraBImagesDirectory());
+        view.cameraBCalibrationTab.setContent(cameraBCalibration.getParent());
 
-        JavaFxObservable.valuesOf(view.captureCalibrateA.pressedProperty()).filter(x -> !x)
+        subscriptions.add(JavaFxObservable.valuesOf(view.captureCalibrateA.pressedProperty()).filter(x -> !x)
             .withLatestFrom(videoDecoder.cameraAImages(), (x, v) -> v)
-            .subscribe(this::saveImageA);
+            .subscribe(this::saveImageA));
 
-        JavaFxObservable.valuesOf(view.captureCalibrateB.pressedProperty()).filter(x -> !x)
+        subscriptions.add(JavaFxObservable.valuesOf(view.captureCalibrateB.pressedProperty()).filter(x -> !x)
             .withLatestFrom(videoDecoder.cameraBImages(), (x, v) -> v)
-            .subscribe(this::saveImageB);
+            .subscribe(this::saveImageB));
     }
 
-    private void openImage(final File file) {
-        final ImageView imageView;
-        try {
-            final Image image = new Image(new FileInputStream(file));
-            imageView = new ImageView(image);
-        } catch (final FileNotFoundException e) {
-            Logger.error(e);
-            return;
-        }
-
-        imageView.setImage(imageView.getImage());
-        imageView.setStyle("-fx-background-color: BLACK");
-        imageView.setFitHeight(Screen.getPrimary().getVisualBounds().getHeight() - IMAGE_OFFSET);
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-        imageView.setCache(true);
-
-        final BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(imageView);
-        borderPane.setStyle("-fx-background-color: BLACK");
-
-        final Stage stage = new Stage();
-
-        // Only one screen will ever be in a 1x1 block at the current location.
-        final Point location = MouseInfo.getPointerInfo().getLocation();
-        final Screen currentScreen = Screen.getScreensForRectangle(
-            location.getX(), location.getY(), 1, 1).toArray(new Screen[1])[0];
-
-        // Set image to full screen in the active screen
-        stage.setWidth(currentScreen.getVisualBounds().getWidth());
-        stage.setHeight(currentScreen.getVisualBounds().getHeight());
-        stage.setX(currentScreen.getVisualBounds().getMinX());
-        stage.setY(currentScreen.getVisualBounds().getMinY());
-
-        final Scene scene = new Scene(borderPane, Color.BLACK);
-        stage.setScene(scene);
-        stage.show();
+    @Override
+    public void onDestroy() {
+        subscriptions.unsubscribe();
     }
 
+    /**
+     * Save an image under the camera A calibration directory.
+     *
+     * @param image the image to save.
+     */
     private void saveImageA(final Image image) {
-        final String folder = cameraACalibration.folderLabel.getText();
+        final String folder = cameraACalibration.directoryLabel.getText();
         final File outputFile = fileOfNextAvailableName(folder, "checkerboardA", "png");
         if (outputFile != null) {
             saveImageFile(image, outputFile, "png");
-            cameraACalibration.updateFolder.onNext(folder);
         }
     }
 
+    /**
+     * Save an image under the camera B calibration directory.
+     *
+     * @param image the image to save.
+     */
     private void saveImageB(final Image image) {
-        final String folder = cameraBCalibration.folderLabel.getText();
+        final String folder = cameraBCalibration.directoryLabel.getText();
         final File outputFile = fileOfNextAvailableName(folder, "checkerboardB", "png");
         if (outputFile != null) {
             saveImageFile(image, outputFile, "png");
-            cameraBCalibration.updateFolder.onNext(folder);
         }
     }
 

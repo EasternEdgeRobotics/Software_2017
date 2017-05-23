@@ -1,37 +1,32 @@
 package com.easternedgerobotics.rov.fx;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import rx.subjects.PublishSubject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 
 public final class GalleryView implements View {
-    final PublishSubject<File> selected = PublishSubject.create();
-
-    final PublishSubject<String> updateFolder = PublishSubject.create();
-
-    static final double IMAGE_WIDTH = 150;
-
     static final double VBOX_PADDING = 5;
 
     static final double TILE_PADDING = 15;
 
-    final List<ImageView> imageViews = new ArrayList<>();
+    final List<String> actions = new ArrayList<>();
+
+    final ObservableList<GalleryImageView> imageViews = FXCollections.observableList(new ArrayList<>());
 
     final ScrollPane scrollPane = new ScrollPane();
 
     final VBox vBox = new VBox();
 
-    final Label folderLabel = new Label();
+    final Label directoryLabel = new Label();
 
     final TilePane tilePane = new TilePane();
 
@@ -43,7 +38,7 @@ public final class GalleryView implements View {
         tilePane.setVgap(TILE_PADDING);
 
         vBox.setPadding(new Insets(VBOX_PADDING, VBOX_PADDING, VBOX_PADDING, VBOX_PADDING));
-        vBox.getChildren().addAll(folderLabel, tilePane);
+        vBox.getChildren().addAll(directoryLabel, tilePane);
 
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
