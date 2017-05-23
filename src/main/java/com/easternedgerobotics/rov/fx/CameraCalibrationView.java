@@ -3,6 +3,7 @@ package com.easternedgerobotics.rov.fx;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
@@ -39,6 +40,10 @@ public final class CameraCalibrationView implements View {
 
     final Button captureCalibrateB = new Button("Capture B (Calibrate)");
 
+    final Tab cameraACalibrationTab = new Tab();
+
+    final Tab cameraBCalibrationTab = new Tab();
+
     @Inject
     public CameraCalibrationView() {
         final List<Button> buttons = Arrays.asList(captureCalibrateA, captureCalibrateB);
@@ -54,6 +59,14 @@ public final class CameraCalibrationView implements View {
         tabBorderPane.setPadding(new Insets(PADDING, 0, PADDING, 0));
         tabBorderPane.setCenter(tabPane);
         tabBorderPane.prefHeightProperty().bind(mainPanel.heightProperty().subtract(BUTTON_HEIGHT));
+
+        cameraACalibrationTab.setText("Camera A Calibration");
+        cameraACalibrationTab.setClosable(false);
+
+        cameraBCalibrationTab.setText("Camera B Calibration");
+        cameraBCalibrationTab.setClosable(false);
+
+        tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab);
 
         mainPanel.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
         mainPanel.getChildren().addAll(buttonPanel, tabBorderPane);
