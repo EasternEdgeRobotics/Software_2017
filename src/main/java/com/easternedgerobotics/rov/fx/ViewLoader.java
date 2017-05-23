@@ -21,25 +21,129 @@ import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 
-public class ViewLoader {
+public final class ViewLoader {
+    /**
+     * Title for the x position preference.
+     */
     private static final String WINDOW_POSITION_X = "WindowPositionX";
 
+    /**
+     * Title for the y position preference.
+     */
     private static final String WINDOW_POSITION_Y = "WindowPositionY";
 
+    /**
+     * Title for the width preference.
+     */
     private static final String WINDOW_WIDTH = "WindowWidth";
 
+    /**
+     * Title for the height preference.
+     */
     private static final String WINDOW_HEIGHT = "WindowHeight";
 
+    /**
+     * Title for the preference node.
+     */
     private static final String NODE_NAME = "ViewLoader";
 
+    /**
+     * The base dependencies to use when creating views.
+     */
     private final Map<Class<?>, Object> dependencies;
 
-    public ViewLoader(final Map<Class<?>, Object> dependencies) {
+    /**
+     * The stages which are managed by this loader.
+     */
+    private final Map<Class<? extends View>, Stage> stages = new HashMap<>();
+
+    /**
+     * The key for the main stage in this loader.
+     */
+    private final Class<? extends View> mainViewClass;
+
+    /**
+     * The title of the main stage.
+     */
+    private final String mainTitle;
+
+    /**
+     * Create a ViewLoader object responsible for creating all of the windows in the application.
+     * This loader manages dependencies of {@code View} objects and their corresponding {@code ViewController}.
+     * When a view is created, this loader will search for a constructor marked with {@code @javax.inject.Inject}.
+     * All of the parameters in this class will be loaded from the dependencies map, or created if they are of type
+     * View, or use the custom {@code @Configurable} or {@code @Event} annotations. When the {@code View} object
+     * is created, the loader will the create a {@code ViewController} for that instance.
+     *
+     * To use {@code @Configurable} annotation you must supply a {@code Config} instance to the dependency map
+     * To use {@code @Event} annotation you must supply an {@code EventPublisher} instance to the dependency map
+     *
+     * @param mainViewClass the view to be loaded on startup
+     * @param mainTitle the title of the view to be loaded on startup
+     * @param dependencies an initial map of view dependencies.
+     */
+    public ViewLoader(
+        final Class<? extends View> mainViewClass,
+        final String mainTitle,
+        final Map<Class<?>, Object> dependencies
+    ) {
+        this.mainViewClass = mainViewClass;
+        this.mainTitle = mainTitle;
         this.dependencies = new HashMap<>(dependencies);
+        this.dependencies.put(this.getClass(), this);
     }
 
+    /**
+     * All locations of the windows are saved in Java Preferences. This method allows the Preferences to be cleared
+     * in the event that a window ends up outside of the screen boundaries.
+     *
+     * @throws BackingStoreException if the preferences cannot be obtained.
+     */
     public static void dropPreferences() throws BackingStoreException {
         Preferences.userRoot().node(NODE_NAME).removeNode();
+    }
+
+    /**
+     * Load the main view into the first stage provided by the JavaFX application init method.
+     * This should only be called once, and must be called before calling {@code load}
+     *
+     * @param stage the main application stage
+     */
+    public void loadMain(final Stage stage) {
+        stages.put(mainViewClass, stage);
+        loadIntoStage(mainViewClass, stage);
+        stage.setTitle(mainTitle);
+        stage.show();
+    }
+
+    /**
+     * Loads the view into the a new stage owned by the main stage.
+     * <p>
+     * This method creates and modifies {@link Stage} and {@link Scene} objects. As such, it
+     * must be called on the JavaFX Application Thread.
+     *
+     * @param viewClass the view class
+     * @return the new stage
+     */
+    public Stage load(final Class<? extends View> viewClass, final String title) {
+        if (!stages.containsKey(mainViewClass)) {
+            throw new IllegalStateException("Main view must be loaded before sub views");
+        }
+        if (!stages.containsKey(viewClass) || !stages.get(viewClass).isShowing()) {
+            if (stages.containsKey(viewClass)) {
+                stages.get(viewClass).close();
+            }
+            final Stage subStage = new Stage();
+            loadIntoStage(viewClass, subStage);
+            subStage.setTitle(title);
+            subStage.initOwner(stages.get(mainViewClass));
+            subStage.show();
+
+            stages.put(viewClass, subStage);
+        } else {
+            stages.get(viewClass).show();
+        }
+        return stages.get(viewClass);
     }
 
     /**
@@ -52,7 +156,7 @@ public class ViewLoader {
      * @param stage the stage into which the view should be loaded
      * @param <T> the type of the view
      */
-    public final <T extends View> void loadIntoStage(final Class<T> viewClass, final Stage stage) {
+    private <T extends View> void loadIntoStage(final Class<T> viewClass, final Stage stage) {
         final Pair<View, ViewController> view = makeView(viewClass, dependencies);
         final ViewController viewController = view.getValue();
         final Scene scene = new Scene(view.getKey().getParent());
@@ -74,22 +178,6 @@ public class ViewLoader {
             preferences.putDouble(WINDOW_HEIGHT, stage.getHeight());
             viewController.onDestroy();
         });
-    }
-
-    /**
-     * Loads the view into the a new stage.
-     * <p>
-     * This method creates and modifies {@link Stage} and {@link Scene} objects. As such, it
-     * must be called on the JavaFX Application Thread.
-     *
-     * @param viewClass the view class
-     * @param <T> the type of the view
-     * @return the stage the view was loaded into
-     */
-    public final <T extends View> Stage load(final Class<T> viewClass) {
-        final Stage stage = new Stage();
-        loadIntoStage(viewClass, stage);
-        return stage;
     }
 
     /**

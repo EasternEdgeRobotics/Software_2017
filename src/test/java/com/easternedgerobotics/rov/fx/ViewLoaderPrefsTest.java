@@ -30,9 +30,10 @@ public class ViewLoaderPrefsTest {
     private static final double DELTA = 0.00001;
 
     @Test
-    public final void doesSaveSizeLocation() {
-        final ViewLoader viewLoader1 = new ViewLoader(Collections.emptyMap());
-        final Stage stage1 = viewLoader1.load(SliderView.class);
+    public final void doesSaveSizeLocation() throws BackingStoreException {
+        final ViewLoader viewLoader1 = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage1 = new Stage();
+        viewLoader1.loadMain(stage1);
         // Get current values and modify
         stage1.getOnShown().handle(null);
         final double x = stage1.getX();
@@ -45,36 +46,43 @@ public class ViewLoaderPrefsTest {
         stage1.setHeight(h * 2);
         stage1.getOnHidden().handle(null);
         // Get newest values from a separate loader
-        final ViewLoader viewLoader2 = new ViewLoader(Collections.emptyMap());
-        final Stage stage2 = viewLoader2.load(SliderView.class);
+        final ViewLoader viewLoader2 = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage2 = new Stage();
+        viewLoader2.loadMain(stage2);
         stage2.getOnShown().handle(null);
         Assert.assertEquals(x * 2, stage2.getX(), DELTA);
         Assert.assertEquals(y * 2, stage2.getY(), DELTA);
         Assert.assertEquals(w * 2, stage2.getWidth(), DELTA);
         Assert.assertEquals(h * 2, stage2.getHeight(), DELTA);
+        ViewLoader.dropPreferences();
     }
 
     @Test
     public final void doesResetSizeLocation() throws BackingStoreException {
-        final ViewLoader viewLoader = new ViewLoader(Collections.emptyMap());
-        final Stage stage = viewLoader.load(SliderView.class);
+        final ViewLoader viewLoader = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage1 = new Stage();
+        viewLoader.loadMain(stage1);
         // Get current values and modify
-        stage.getOnShown().handle(null);
-        final double x = stage.getX();
-        final double y = stage.getY();
-        final double w = stage.getWidth();
-        final double h = stage.getHeight();
-        stage.setX(x * 2);
-        stage.setY(y * 2);
-        stage.setWidth(w * 2);
-        stage.setHeight(h * 2);
-        stage.getOnHidden().handle(null);
+        stage1.getOnShown().handle(null);
+        final double x = stage1.getX();
+        final double y = stage1.getY();
+        final double w = stage1.getWidth();
+        final double h = stage1.getHeight();
+        stage1.setX(x * 2);
+        stage1.setY(y * 2);
+        stage1.setWidth(w * 2);
+        stage1.setHeight(h * 2);
+        stage1.getOnHidden().handle(null);
         ViewLoader.dropPreferences();
         // force reload of values
-        stage.getOnShown().handle(null);
-        Assert.assertEquals(x, stage.getX(), DELTA);
-        Assert.assertEquals(y, stage.getY(), DELTA);
-        Assert.assertEquals(w, stage.getWidth(), DELTA);
-        Assert.assertEquals(h, stage.getHeight(), DELTA);
+        final ViewLoader viewLoader2 = new ViewLoader(SliderView.class, "test", Collections.emptyMap());
+        final Stage stage2 = new Stage();
+        viewLoader2.loadMain(stage2);
+        stage2.getOnShown().handle(null);
+        Assert.assertEquals(x, stage2.getX(), DELTA);
+        Assert.assertEquals(y, stage2.getY(), DELTA);
+        Assert.assertEquals(w, stage2.getWidth(), DELTA);
+        Assert.assertEquals(h, stage2.getHeight(), DELTA);
+        ViewLoader.dropPreferences();
     }
 }

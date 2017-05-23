@@ -23,7 +23,7 @@ import javax.inject.Inject;
 public class MainViewController implements ViewController {
     private final MainView view;
 
-    private final ViewLauncher viewLauncher;
+    private final ViewLoader viewLoader;
 
     private final VideoDecoder videoDecoder;
 
@@ -40,7 +40,7 @@ public class MainViewController implements ViewController {
     @Inject
     public MainViewController(
         final MainView view,
-        final ViewLauncher viewLauncher,
+        final ViewLoader viewLoader,
         final VideoDecoder videoDecoder,
         final EventPublisher eventPublisher,
         final EmergencyStopController emergencyStopController,
@@ -48,7 +48,7 @@ public class MainViewController implements ViewController {
         @Configurable("topsides.heartbeatLostInterval") final int maxHeartbeatGap
     ) {
         this.view = view;
-        this.viewLauncher = viewLauncher;
+        this.viewLoader = viewLoader;
         this.videoDecoder = videoDecoder;
         this.eventPublisher = eventPublisher;
         this.emergencyStopController = emergencyStopController;
@@ -88,17 +88,17 @@ public class MainViewController implements ViewController {
         ).subscribe(subscriptions::add);
 
         JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLauncher.launch(ThrusterPowerSlidersView.class, "Thruster Power"));
+            .subscribe(v -> viewLoader.load(ThrusterPowerSlidersView.class, "Thruster Power"));
         JavaFxObservable.valuesOf(view.sensorButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLauncher.launch(SensorView.class, "Sensors 'n' stuff"));
+            .subscribe(v -> viewLoader.load(SensorView.class, "Sensors 'n' stuff"));
         JavaFxObservable.valuesOf(view.cameraButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLauncher.launch(VideoView.class, "Cameras"));
+            .subscribe(v -> viewLoader.load(VideoView.class, "Cameras"));
         JavaFxObservable.valuesOf(view.resetCameraButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> videoDecoder.restart());
         JavaFxObservable.valuesOf(view.calibrationButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLauncher.launch(DistanceCalculatorView.class, "Distance Calculator"));
+            .subscribe(v -> viewLoader.load(DistanceCalculatorView.class, "Distance Calculator"));
         JavaFxObservable.valuesOf(view.distanceButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLauncher.launch(CameraCalibrationView.class, "California Camera Calibration by Cal"));
+            .subscribe(v -> viewLoader.load(CameraCalibrationView.class, "California Camera Calibration by Cal"));
     }
 
     @Override
