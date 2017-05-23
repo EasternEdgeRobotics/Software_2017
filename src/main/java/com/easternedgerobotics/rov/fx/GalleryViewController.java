@@ -1,29 +1,36 @@
 package com.easternedgerobotics.rov.fx;
 
-import javafx.event.EventType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import com.easternedgerobotics.rov.io.DirectoryUtil;
+
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import org.pmw.tinylog.Logger;
-import rx.observables.JavaFxObservable;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.inject.Inject;
 
 public final class GalleryViewController implements ViewController {
-    private final CompositeSubscription imageViewSubscriptions = new CompositeSubscription();
+    /**
+     * The subscriptions held by this controller.
+     */
+    private final CompositeSubscription subscriptions = new CompositeSubscription();
 
+    /**
+     * The view this controller manages.
+     */
     private final GalleryView view;
 
+    /**
+     * Create a controller for a {@code GalleryView} which ensures that the {@code GalleryImageView#directoryLabel }
+     * directory matches the tiled {@code GalleryImageView} objects in the view.
+     *
+     * @param view the view to be controlled.
+     */
     @Inject
     public GalleryViewController(final GalleryView view) {
         this.view = view;
@@ -31,81 +38,56 @@ public final class GalleryViewController implements ViewController {
 
     @Override
     public void onCreate() {
-        view.updateFolder.subscribe(view.folderLabel::setText);
-        view.updateFolder.subscribe(this::changed);
+        view.directoryLabel.textProperty().addListener(this::updateDirectory);
     }
 
     @Override
     public void onDestroy() {
-        imageViewSubscriptions.unsubscribe();
+        subscriptions.unsubscribe();
     }
 
-    private void changed(final String current) {
-        final File folder = new File(current);
-        if ((folder.exists() || folder.mkdirs()) && folder.isDirectory()) {
-            loadFolder(folder);
-        }
-    }
-
-    private void loadFolder(final File folder) {
-        imageViewSubscriptions.clear();
-        view.tilePane.getChildren().removeAll(view.imageViews);
+    /**
+     * When the {@code GalleryImageView#directoryLabel } is changed this method resets the view and links
+     * the tile pane to the directory.
+     *
+     * @param value The {@code ObservableValue} which value changed
+     * @param prev The old value
+     * @param curr The new value
+     */
+    private void updateDirectory(final ObservableValue<? extends String> value, final String prev, final String curr) {
         view.imageViews.clear();
+        view.tilePane.getChildren().clear();
+        subscriptions.clear();
+        subscriptions.add(DirectoryUtil.observe(Paths.get(curr))
+            .subscribeOn(Schedulers.newThread())
+            .subscribe(this::onImagePathChanged));
+    }
 
-        final File[] folderContent = folder.listFiles();
-        if (folderContent == null) {
-            Logger.error(new FileNotFoundException("No files found in folder: " + folder.toString()));
+    /**
+     * When a change is detected in the directory, this method will add or remove that image from the view.
+     *
+     * @param path the path which has changed.
+     */
+    private void onImagePathChanged(final Path path) {
+        final File file = path.toAbsolutePath().toFile();
+        if (!file.exists()) {
+            view.imageViews.stream().filter(iv -> iv.getPath().equals(path)).findFirst().ifPresent(iv -> {
+                if (view.tilePane.getChildren().contains(iv)) {
+                    Platform.runLater(() -> view.tilePane.getChildren().remove(iv));
+                }
+                if (view.imageViews.contains(iv)) {
+                    view.imageViews.remove(iv);
+                }
+                iv.onDestroy();
+            });
             return;
         }
-
-        for (final File file : folderContent) {
-            try {
-                final File tempFile = File.createTempFile(file.getName(), ".tmp");
-                Files.copy(file.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                final Image image = new Image(new FileInputStream(tempFile), GalleryView.IMAGE_WIDTH, 0, true, true);
-                final ImageView imageView = new ImageView(image);
-                imageView.setFitWidth(GalleryView.IMAGE_WIDTH);
-                view.imageViews.add(imageView);
-
-                imageViewSubscriptions.add(JavaFxObservable
-                    .eventsOf(imageView, EventType.ROOT)
-                    .filter(event -> event.getEventType().equals(MouseEvent.MOUSE_CLICKED))
-                    .cast(MouseEvent.class)
-                    .filter(event -> event.getButton().equals(MouseButton.PRIMARY))
-                    .filter(event -> event.getClickCount() == 2)
-                    .subscribe(event -> view.selected.onNext(tempFile)));
-
-                final MenuItem open = new MenuItem("Open");
-                imageViewSubscriptions.add(JavaFxObservable
-                    .actionEventsOf(open)
-                    .subscribe(event -> view.selected.onNext(tempFile)));
-
-                final MenuItem delete = new MenuItem("Delete");
-                imageViewSubscriptions.add(JavaFxObservable
-                    .actionEventsOf(delete)
-                    .subscribe(event -> removeImage(file, imageView)));
-
-                final ContextMenu contextMenu = new ContextMenu();
-                contextMenu.getItems().addAll(open, delete);
-
-                imageViewSubscriptions.add(JavaFxObservable
-                    .eventsOf(imageView, EventType.ROOT)
-                    .filter(event -> event.getEventType().equals(MouseEvent.MOUSE_CLICKED))
-                    .cast(MouseEvent.class)
-                    .filter(event -> event.getButton().equals(MouseButton.SECONDARY))
-                    .subscribe(event -> contextMenu.show(imageView, event.getScreenX(), event.getScreenY())));
-
-            } catch (final IOException e) {
-                Logger.error(e);
-            }
+        try {
+            final GalleryImageView iv = new GalleryImageView(path, view.actions);
+            view.imageViews.add(iv);
+            Platform.runLater(() -> view.tilePane.getChildren().add(iv));
+        } catch (final IOException e) {
+            Logger.error(e);
         }
-        view.tilePane.getChildren().addAll(view.imageViews);
-    }
-
-    private void removeImage(final File file, final ImageView imageView) {
-        if (file.exists()) {
-            file.delete();
-        }
-        view.tilePane.getChildren().remove(imageView);
     }
 }
