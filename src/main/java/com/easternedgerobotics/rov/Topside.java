@@ -12,7 +12,6 @@ import com.easternedgerobotics.rov.control.SpeedRegulator;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
-import com.easternedgerobotics.rov.fx.ViewLauncher;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
@@ -42,8 +41,6 @@ public final class Topside extends Application {
     private TopsidesConfig config;
 
     private EventPublisher eventPublisher;
-
-    private ViewLauncher launcher;
 
     private ViewLoader viewLoader;
 
@@ -102,14 +99,12 @@ public final class Topside extends Application {
         videoDecoder = new VideoDecoder(
             eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
 
-        launcher = new ViewLauncher();
-        viewLoader = new ViewLoader(new HashMap<Class<?>, Object>() {
+        viewLoader = new ViewLoader(MainView.class, "Control Software", new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
                 put(Config.class, configSource);
                 put(EmergencyStopController.class, emergencyStopController);
                 put(VideoDecoder.class, videoDecoder);
-                put(ViewLauncher.class, launcher);
             }
         });
 
@@ -125,7 +120,7 @@ public final class Topside extends Application {
     public void start(final Stage stage) {
         Logger.info("Starting");
 
-        launcher.start(viewLoader, stage, MainView.class, "Control Software");
+        viewLoader.loadMain(stage);
         arduino.start(config.pilotPanelHeartbeatInterval(), config.pilotPanelHeartbeatTimeout(), TimeUnit.MILLISECONDS);
         joystickController.start(LogitechExtremeJoystickSource.create(
             config.joystickRecoveryInterval(), TimeUnit.MILLISECONDS, Schedulers.io()));
