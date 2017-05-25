@@ -5,6 +5,10 @@ public interface CameraCalibrationConfig {
 
     String cameraBImagesDirectory();
 
+    String cameraAValidImagesDirectory();
+
+    String cameraBValidImagesDirectory();
+
     int chessboardWidth();
 
     int chessboardHeight();
