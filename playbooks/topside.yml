@@ -3,8 +3,8 @@
   become_method: sudo
   vars:
     proxy:
-      http_proxy: http://192.168.88.3:3128
-      https_proxy: http://192.168.88.3:3128
+      http_proxy: "http://{{ groups['captain'][0] }}:3128"
+      https_proxy: "http://{{ groups['captain'][0] }}:3128"
   tasks:
     - set_fact:
           ssh_connection_ip: "{{ ansible_env['SSH_CONNECTION'].split()[2] }}"
@@ -12,34 +12,44 @@
           ssh_interface: "{{ item }}"
       when: "{{ hostvars[inventory_hostname]['ansible_' ~ item].get('ipv4', {}).get('address') == ssh_connection_ip }}"
       with_items: "{{ ansible_interfaces }}"
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+      environment: "{{ proxy }}"
+    - name: Configure journald settings
+      copy: src=files/etc/systemd/journald.conf dest=/etc/systemd/journald.conf mode=644 owner=root group=root
+    - name: Install Vim
+      apt: name=vim state=latest
     - name: "Add eedge to input group (fixes #129)"
       user: name=eedge groups=input append=yes
     - name: "Add eedge to tty and dialout groups (fixes #172)"
       user: name=eedge groups=tty,dialout append=yes
     - name: Add MPV repo for Ubuntu 15.10
       apt_repository: repo='ppa:mc3man/ffmpeg-test1'
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Add video scripts to PATH
       template: src=files/usr/bin/{{ item }} dest=/usr/bin/{{ item }} mode=755 owner=root group=root
       with_items:
         - eer-video
     - name: Install MPV
       apt: name=mpv state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install video drivers
       apt: name=mesa-vdpau-drivers state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install htop
       apt: name=htop state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install Java 8 Runtime
       apt: name=openjdk-8-jre state=latest
       tags: java
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install OpenJFX 8
       apt: name=openjfx state=latest
       tags: java
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Add poweroff script desktop launcher
       copy: src=files/Poweroff.desktop dest=~/Desktop mode=700
       become: no
@@ -55,7 +65,7 @@
         - eer-command-vehicle
     - name: Install DHCP Server
       apt: name=isc-dhcp-server state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
       tags: dhcp
     - name: Configure DHCP Service
       template: src=files/services/isc-dhcp-server dest=/etc/default/isc-dhcp-server mode=644 owner=root group=root

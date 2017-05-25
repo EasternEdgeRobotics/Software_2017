@@ -4,18 +4,30 @@
   gather_facts: no
   vars:
     proxy:
-      http_proxy: http://192.168.88.3:3128
-      https_proxy: http://192.168.88.3:3128
+      http_proxy: "http://{{ groups['captain'][0] }}:3128"
+      https_proxy: "http://{{ groups['captain'][0] }}:3128"
   tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+      environment: "{{ proxy }}"
+    - name: Configure journald settings
+      copy: src=files/etc/systemd/journald.conf dest=/etc/systemd/journald.conf mode=644 owner=root group=root
+    - name: Install Vim
+      apt: name=vim state=latest
+      environment: "{{ proxy }}"
     - name: Install Java 8 Runtime
       apt: name=openjdk-8-jre state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install htop
       apt: name=htop state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install nmap
       apt: name=nmap state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
     - name: Install Picamera module
       apt: name=python-picamera state=latest
-      environment: "{{proxy}}"
+      environment: "{{ proxy }}"
+
