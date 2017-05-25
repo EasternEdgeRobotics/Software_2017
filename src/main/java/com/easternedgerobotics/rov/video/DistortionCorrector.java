@@ -52,7 +52,7 @@ public final class DistortionCorrector {
         final Mat image = opencv_imgcodecs.imread(input.getAbsolutePath());
         final Mat undistorted = new Mat();
         opencv_imgproc.remap(image, undistorted, map1, map2, opencv_imgproc.INTER_LINEAR);
-        opencv_imgcodecs.imwrite(output.getAbsolutePath(), image);
+        opencv_imgcodecs.imwrite(output.getAbsolutePath(), undistorted);
         return output;
     }
 }
