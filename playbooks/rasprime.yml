@@ -13,6 +13,8 @@
         upgrade: yes
         update_cache: yes
       environment: "{{ proxy }}"
+    - name: Configure journald settings
+      copy: src=files/etc/systemd/journald.conf dest=/etc/systemd/journald.conf mode=644 owner=root group=root
     - name: Install Vim
       apt: name=vim state=latest
       environment: "{{ proxy }}"
