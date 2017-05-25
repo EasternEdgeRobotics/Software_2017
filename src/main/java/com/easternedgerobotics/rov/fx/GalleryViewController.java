@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 public final class GalleryViewController implements ViewController {
@@ -60,6 +61,7 @@ public final class GalleryViewController implements ViewController {
         subscriptions.clear();
         subscriptions.add(DirectoryUtil.observe(Paths.get(curr))
             .subscribeOn(Schedulers.newThread())
+            .delay(1, TimeUnit.SECONDS)
             .subscribe(this::onImagePathChanged));
     }
 
@@ -84,8 +86,10 @@ public final class GalleryViewController implements ViewController {
         }
         try {
             final GalleryImageView iv = new GalleryImageView(path, view.actions);
-            view.imageViews.add(iv);
-            Platform.runLater(() -> view.tilePane.getChildren().add(iv));
+            Platform.runLater(() -> {
+                view.tilePane.getChildren().add(iv);
+                view.imageViews.add(iv);
+            });
         } catch (final IOException e) {
             Logger.error(e);
         }
