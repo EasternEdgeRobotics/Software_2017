@@ -32,8 +32,11 @@ rov:
   vertForeChannel: 16
   cameraAMotorChannel: 7
   cameraBMotorChannel: 10
-  toolingMotorChannel: 5
-  lightChannel: 23
+  toolingAMotorChannel: 11
+  toolingBMotorChannel: 5
+  toolingCMotorChannel: -1
+  lightAChannel: 23
+  lightBChannel: -1
   altImuSa0High: false
   i2cBus: 1
   shutdownTimeout: 1000
@@ -56,8 +59,12 @@ joystick:
   cameraAMotorReverseButton: Pinkie|5
   cameraBMotorForwardButton: Top 2|4
   cameraBMotorReverseButton: Thumb 2|2
-  toolingMotorForwardButton: Base 5|10
-  toolingMotorReverseButton: Base 6|11
+  toolingAMotorForwardButton: Base 5|10
+  toolingAMotorReverseButton: Base 6|11
+  toolingBMotorForwardButton: Base 5|10
+  toolingBMotorReverseButton: Base 6|11
+  toolingCMotorForwardButton: ""
+  toolingCMotorReverseButton: ""
   motionReverseButton: Thumb|1
   cameraAVideoFlipButton: Base 2|7
   cameraBVideoFlipButton: Base|6
@@ -65,7 +72,9 @@ joystick:
   pitchReverseButton: Base 3|8
   cameraAMotorSpeed: 0.30f
   cameraBMotorSpeed: 0.30f
-  toolingMotorSpeed: 1f
+  toolingAMotorSpeed: 1f
+  toolingBMotorSpeed: 1f
+  toolingCMotorSpeed: 1f
   pitchSpeed: 1f
 slider:
   globalPowerSliderAddress: 3
@@ -76,7 +85,8 @@ slider:
   yawPowerSliderAddress: 5
   aftPowerSliderAddress: 6
   forePowerSliderAddress: 8
-  lightPowerSliderAddress: 7
+  lightAPowerSliderAddress: 7
+  lightBPowerSliderAddress: -1
 cameraCalibration:
   cameraAImagesDirectory: /home/eedge/calibration-a/
   cameraBImagesDirectory: /home/eedge/calibration-b/

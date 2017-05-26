@@ -17,9 +17,17 @@ public interface JoystickConfig {
 
     String cameraBMotorReverseButton();
 
-    String toolingMotorForwardButton();
+    String toolingAMotorForwardButton();
 
-    String toolingMotorReverseButton();
+    String toolingAMotorReverseButton();
+
+    String toolingBMotorForwardButton();
+
+    String toolingBMotorReverseButton();
+
+    String toolingCMotorForwardButton();
+
+    String toolingCMotorReverseButton();
 
     String motionReverseButton();
 
@@ -35,7 +43,11 @@ public interface JoystickConfig {
 
     float cameraBMotorSpeed();
 
-    float toolingMotorSpeed();
+    float toolingAMotorSpeed();
+
+    float toolingBMotorSpeed();
+
+    float toolingCMotorSpeed();
 
     float pitchSpeed();
 }
