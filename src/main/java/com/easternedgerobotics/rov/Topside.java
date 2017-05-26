@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov;
 
+import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
 import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.LaunchConfig;
@@ -21,6 +22,7 @@ import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
+import com.easternedgerobotics.rov.video.CameraCalibration;
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
 import javafx.application.Application;
@@ -53,6 +55,8 @@ public final class Topside extends Application {
     private ProfileController profileController;
 
     private VideoDecoder videoDecoder;
+
+    private CameraCalibration cameraCalibration;
 
     private JoystickController joystickController;
 
@@ -99,12 +103,18 @@ public final class Topside extends Application {
         videoDecoder = new VideoDecoder(
             eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
 
+        cameraCalibration = new CameraCalibration(
+            videoDecoder,
+            configSource.getConfig("cameraCalibration", CameraCalibrationConfig.class),
+            Schedulers.newThread());
+
         viewLoader = new ViewLoader(MainView.class, "Control Software", new HashMap<Class<?>, Object>() {
             {
                 put(EventPublisher.class, eventPublisher);
                 put(Config.class, configSource);
                 put(EmergencyStopController.class, emergencyStopController);
                 put(VideoDecoder.class, videoDecoder);
+                put(CameraCalibration.class, cameraCalibration);
             }
         });
 
