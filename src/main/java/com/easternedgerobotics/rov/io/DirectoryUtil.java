@@ -56,6 +56,21 @@ public final class DirectoryUtil {
         return Observable.empty();
     }
 
+    /**
+     * Recursively delete a directory.
+     *
+     * @param directoryPath the directory to delete.
+     */
+    public static void clearDirectory(final Path directoryPath) {
+        list(directoryPath).forEach(path -> {
+            final File file = path.toFile();
+            if (file.isDirectory()) {
+                clearDirectory(path);
+            }
+            file.delete();
+        });
+    }
+
     private static final class DirectoryWatcherSyncOnSubscribe extends SyncOnSubscribe<WatchService, Path> {
         /**
          * The Path to observe.

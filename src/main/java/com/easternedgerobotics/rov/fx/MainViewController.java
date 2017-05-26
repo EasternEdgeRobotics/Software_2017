@@ -95,9 +95,9 @@ public class MainViewController implements ViewController {
             .subscribe(v -> viewLoader.load(VideoView.class, "Cameras"));
         JavaFxObservable.valuesOf(view.resetCameraButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> videoDecoder.restart());
-        JavaFxObservable.valuesOf(view.calibrationButton.pressedProperty()).filter(x -> !x)
-            .subscribe(v -> viewLoader.load(DistanceCalculatorView.class, "Distance Calculator"));
         JavaFxObservable.valuesOf(view.distanceButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> viewLoader.load(DistanceCalculatorView.class, "Distance Calculator"));
+        JavaFxObservable.valuesOf(view.calibrationButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLoader.load(CameraCalibrationView.class, "California Camera Calibration by Cal"));
     }
 

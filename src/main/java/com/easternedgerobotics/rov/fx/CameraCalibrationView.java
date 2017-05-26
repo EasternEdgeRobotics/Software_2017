@@ -40,13 +40,19 @@ public final class CameraCalibrationView implements View {
 
     final Button captureCalibrateB = new Button("Capture B (Calibrate)");
 
+    final Button calibrate = new Button("Calibrate");
+
     final Tab cameraACalibrationTab = new Tab();
 
     final Tab cameraBCalibrationTab = new Tab();
 
+    final Tab cameraAValidTab = new Tab();
+
+    final Tab cameraBValidTab = new Tab();
+
     @Inject
     public CameraCalibrationView() {
-        final List<Button> buttons = Arrays.asList(captureCalibrateA, captureCalibrateB);
+        final List<Button> buttons = Arrays.asList(captureCalibrateA, captureCalibrateB, calibrate);
         for (final Button button : buttons) {
             button.setPrefHeight(BUTTON_HEIGHT);
             button.prefWidthProperty().bind(buttonPanel.widthProperty().divide(buttons.size()));
@@ -66,7 +72,13 @@ public final class CameraCalibrationView implements View {
         cameraBCalibrationTab.setText("Camera B Calibration");
         cameraBCalibrationTab.setClosable(false);
 
-        tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab);
+        cameraAValidTab.setText("Valid Camera A Images");
+        cameraAValidTab.setClosable(false);
+
+        cameraBValidTab.setText("Valid Camera B Images");
+        cameraBValidTab.setClosable(false);
+
+        tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab, cameraAValidTab, cameraBValidTab);
 
         mainPanel.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
         mainPanel.getChildren().addAll(buttonPanel, tabBorderPane);

@@ -78,9 +78,12 @@ slider:
   forePowerSliderAddress: 8
   lightPowerSliderAddress: 7
 cameraCalibration:
-  cameraAImagesDirectory: samples0/
-  cameraBImagesDirectory: samples1/
-  chessboardWidth: 9
-  chessboardHeight: 6
-distanceCalculation:
-  imageDirectory: samples2/
+  cameraAImagesDirectory: /home/eedge/calibration-a/
+  cameraBImagesDirectory: /home/eedge/calibration-b/
+  cameraAValidImagesDirectory: /home/eedge/valid-calibration-a/
+  cameraBValidImagesDirectory: /home/eedge/valid-calibration-b/
+  chessboardWidth: 12
+  chessboardHeight: 13
+distanceCalculator:
+  imageDirectory: /home/eedge/undistorted-images/
+  dataDirectory: /home/eedge/undistorted-images-data/

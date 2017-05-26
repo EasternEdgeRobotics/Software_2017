@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.config;
 
-public interface DistanceCalculationConfig {
+public interface DistanceCalculatorConfig {
     String imageDirectory();
+
+    String dataDirectory();
 }
