@@ -6,7 +6,9 @@ import com.easternedgerobotics.rov.test.TestEventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingASpeedValue;
+import com.easternedgerobotics.rov.value.ToolingBSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingCSpeedValue;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,10 +34,14 @@ public final class JoystickControllerButtonTest {
         return Arrays.asList(new Object[][] {
             {config.cameraAMotorForwardButton(), CameraSpeedValueA.class},
             {config.cameraBMotorForwardButton(), CameraSpeedValueB.class},
-            {config.toolingMotorForwardButton(), ToolingSpeedValue.class},
+            {config.toolingAMotorForwardButton(), ToolingASpeedValue.class},
+            {config.toolingBMotorForwardButton(), ToolingBSpeedValue.class},
+            {config.toolingCMotorForwardButton(), ToolingCSpeedValue.class},
             {config.cameraAMotorReverseButton(), CameraSpeedValueA.class},
             {config.cameraBMotorReverseButton(), CameraSpeedValueB.class},
-            {config.toolingMotorReverseButton(), ToolingSpeedValue.class},
+            {config.toolingAMotorReverseButton(), ToolingASpeedValue.class},
+            {config.toolingBMotorReverseButton(), ToolingBSpeedValue.class},
+            {config.toolingCMotorReverseButton(), ToolingCSpeedValue.class},
             {config.pitchForwardButton(), MotionValue.class},
             {config.pitchReverseButton(), MotionValue.class}
         });
