@@ -24,14 +24,17 @@ import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
-import com.easternedgerobotics.rov.value.LightSpeedValue;
+import com.easternedgerobotics.rov.value.LightASpeedValue;
+import com.easternedgerobotics.rov.value.LightBSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
 import com.easternedgerobotics.rov.value.RasprimeHeartbeatValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
 import com.easternedgerobotics.rov.value.StarboardForeSpeedValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingASpeedValue;
+import com.easternedgerobotics.rov.value.ToolingBSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingCSpeedValue;
 import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.value.VertAftSpeedValue;
 import com.easternedgerobotics.rov.value.VertForeSpeedValue;
@@ -126,10 +129,24 @@ final class Rov {
                     .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
             new Motor(
                 eventPublisher
-                    .valuesOfType(ToolingSpeedValue.class)
-                    .startWith(new ToolingSpeedValue())
+                    .valuesOfType(ToolingASpeedValue.class)
+                    .startWith(new ToolingASpeedValue())
                     .cast(SpeedValue.class),
-                channels.get(config.toolingMotorChannel())
+                channels.get(config.toolingAMotorChannel())
+                    .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+            new Motor(
+                eventPublisher
+                    .valuesOfType(ToolingBSpeedValue.class)
+                    .startWith(new ToolingBSpeedValue())
+                    .cast(SpeedValue.class),
+                channels.get(config.toolingBMotorChannel())
+                    .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD))),
+            new Motor(
+                eventPublisher
+                    .valuesOfType(ToolingCSpeedValue.class)
+                    .startWith(new ToolingCSpeedValue())
+                    .cast(SpeedValue.class),
+                channels.get(config.toolingCMotorChannel())
                     .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
         ));
 
@@ -178,15 +195,20 @@ final class Rov {
                     .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)))
         ));
 
-        this.lights = Collections.singletonList(
+        this.lights = Collections.unmodifiableList(Arrays.asList(
             new Light(
                 eventPublisher
-                    .valuesOfType(LightSpeedValue.class)
-                    .startWith(new LightSpeedValue())
+                    .valuesOfType(LightASpeedValue.class)
+                    .startWith(new LightASpeedValue())
                     .cast(SpeedValue.class),
-                channels.get(config.lightChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))
-            )
-        );
+                channels.get(config.lightAChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))),
+            new Light(
+                eventPublisher
+                    .valuesOfType(LightBSpeedValue.class)
+                    .startWith(new LightBSpeedValue())
+                    .cast(SpeedValue.class),
+                channels.get(config.lightBChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD)))
+        ));
 
         barometer = () -> imu.pressure();
         magnetometer = () -> imu.rotation();
