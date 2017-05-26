@@ -10,7 +10,8 @@ import com.easternedgerobotics.rov.value.AnalogPinValue;
 import com.easternedgerobotics.rov.value.ForePowerValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
-import com.easternedgerobotics.rov.value.LightSpeedValue;
+import com.easternedgerobotics.rov.value.LightASpeedValue;
+import com.easternedgerobotics.rov.value.LightBSpeedValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
 import com.easternedgerobotics.rov.value.SwayPowerValue;
@@ -54,8 +55,11 @@ public final class SliderController {
         final Observable<ForePowerValue> fore = arduino.analogPin(config.forePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(ForePowerValue::new);
 
-        final Observable<LightSpeedValue> light = arduino.analogPin(config.lightPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(LightSpeedValue::new);
+        final Observable<LightASpeedValue> lightA = arduino.analogPin(config.lightAPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(LightASpeedValue::new);
+
+        final Observable<LightBSpeedValue> lightB = arduino.analogPin(config.lightBPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convert).map(LightBSpeedValue::new);
 
         subscription.addAll(
             SourceController.manageMultiViewModel(
@@ -83,8 +87,11 @@ public final class SliderController {
                 eventPublisher.valuesOfType(ForePowerValue.class), v -> { }, scheduler,
                 fore, eventPublisher::emit, Schedulers.io()),
             SourceController.manageMultiViewModel(
-                eventPublisher.valuesOfType(LightSpeedValue.class), v -> { }, scheduler,
-                light, eventPublisher::emit, Schedulers.io()));
+                eventPublisher.valuesOfType(LightASpeedValue.class), v -> { }, scheduler,
+                lightA, eventPublisher::emit, Schedulers.io()),
+            SourceController.manageMultiViewModel(
+                eventPublisher.valuesOfType(LightBSpeedValue.class), v -> { }, scheduler,
+                lightB, eventPublisher::emit, Schedulers.io()));
     }
 
     public void stop() {
