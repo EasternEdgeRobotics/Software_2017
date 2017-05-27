@@ -3,27 +3,53 @@ import picamera
 import signal
 import socket
 import sys
+import threading
+
+host = sys.argv[1]
+video_port = int(sys.argv[2])
+image_port = int(sys.argv[3])
+
+signal_lock = threading.Lock()
 
 with picamera.PiCamera() as camera:
     def flip_video(signum, stack):
-        camera.vflip = not camera.vflip
-        camera.hflip = not camera.hflip
+        with signal_lock:
+            camera.vflip = not camera.vflip
+            camera.hflip = not camera.hflip
     signal.signal(signal.SIGUSR1, flip_video)
-    camera.resolution = (1296, 720)
+
+    def take_image(signum, stack):
+        with signal_lock:
+            with open('/run/eer/camera-image-path', 'r') as image_path_file:
+                image_path = image_path_file.readlines()[0]
+                image_socket = socket.socket()
+                image_socket.connect((host, image_port))
+                image_socket.send(image_path + '\n')
+                image_file = image_socket.makefile('wb')
+                try:
+                    camera.capture(image_file, 'png')
+                finally:
+                    image_file.close()
+                    image_socket.close()
+
+    signal.signal(signal.SIGUSR2, take_image)
+
+    camera.resolution = (1920, 1088)
     camera.framerate = 24
 
-    nc = socket.socket()
-    nc.connect((sys.argv[1], int(sys.argv[2])))
-    fd = nc.makefile('wb')
+    video_socket = socket.socket()
+    video_socket.connect((host, video_port))
+    video_file = video_socket.makefile('wb', 1024)
     try:
         camera.start_recording(
-            fd,
+            video_file,
             format='h264',
             intra_period=0,
             quality=0,
-            bitrate=25000000)
+            bitrate=25000000,
+            resize=(1296, 720))
         while True:
             signal.pause()
     finally:
-        fd.close()
-        nc.close()
+        video_file.close()
+        video_socket.close()
