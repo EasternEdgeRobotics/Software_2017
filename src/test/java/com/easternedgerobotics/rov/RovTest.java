@@ -21,14 +21,14 @@ import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
-import com.easternedgerobotics.rov.value.LightSpeedValue;
+import com.easternedgerobotics.rov.value.LightASpeedValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
 import com.easternedgerobotics.rov.value.RollPowerValue;
 import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
 import com.easternedgerobotics.rov.value.SwayPowerValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingASpeedValue;
 import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.value.YawPowerValue;
 
@@ -299,10 +299,10 @@ public class RovTest {
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
-        eventPublisher.emit(new ToolingSpeedValue(1));
+        eventPublisher.emit(new ToolingASpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(ROV_CONFIG.toolingMotorChannel())).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.toolingAMotorChannel())).write(1);
     }
 
     @Test
@@ -315,9 +315,9 @@ public class RovTest {
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
-        eventPublisher.emit(new LightSpeedValue(1));
+        eventPublisher.emit(new LightASpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(ROV_CONFIG.lightChannel())).write(1);
+        Mockito.verify(maestro.get(ROV_CONFIG.lightAChannel())).write(1);
     }
 }

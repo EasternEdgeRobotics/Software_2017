@@ -5,7 +5,9 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingASpeedValue;
+import com.easternedgerobotics.rov.value.ToolingBSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingCSpeedValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoFlipValueB;
 
@@ -65,15 +67,16 @@ public final class JoystickController {
         final Observable<MotionValue> pitchedMotion = getPitchedMotion(joystick, scaledMotion);
         final Observable<MotionValue> reversedMotion = getReversedMotion(joystick, pitchedMotion);
 
-        final Observable<VideoFlipValueA> cameraFlipA = getCameraFlipA(joystick);
-        final Observable<VideoFlipValueB> cameraFlipB = getCameraFlipB(joystick);
-        final Observable<CameraSpeedValueA> cameraSpeedA = getCameraSpeedA(joystick);
-        final Observable<CameraSpeedValueB> cameraSpeedB = getCameraSpeedB(joystick);
-        final Observable<ToolingSpeedValue> toolingSpeed = getToolingSpeed(joystick);
-
-        componentSubscriptions.add(Observable
-            .merge(reversedMotion, cameraFlipA, cameraFlipB, cameraSpeedA, cameraSpeedB, toolingSpeed)
-            .subscribe(eventPublisher::emit, Logger::error));
+        componentSubscriptions.add(Observable.merge(
+            reversedMotion,
+            getCameraFlipA(joystick),
+            getCameraFlipB(joystick),
+            getCameraSpeedA(joystick),
+            getCameraSpeedB(joystick),
+            getToolingASpeed(joystick),
+            getToolingBSpeed(joystick),
+            getToolingCSpeed(joystick)
+        ).subscribe(eventPublisher::emit, Logger::error));
     }
 
     @SuppressWarnings({"checkstyle:avoidinlineconditionals"})
@@ -137,13 +140,33 @@ public final class JoystickController {
         ).map(CameraSpeedValueB::new);
     }
 
-    private Observable<ToolingSpeedValue> getToolingSpeed(final Joystick joystick) {
+    private Observable<ToolingASpeedValue> getToolingASpeed(final Joystick joystick) {
         return Observable.combineLatest(
-            joystick.button(config.toolingMotorForwardButton()).startWith(false),
-            joystick.button(config.toolingMotorReverseButton()).startWith(false),
+            joystick.button(config.toolingAMotorForwardButton()).startWith(false),
+            joystick.button(config.toolingAMotorReverseButton()).startWith(false),
             Observable.just(false),
-            Observable.just(config.toolingMotorSpeed()),
+            Observable.just(config.toolingAMotorSpeed()),
             speedRegulator
-        ).map(ToolingSpeedValue::new);
+        ).map(ToolingASpeedValue::new);
+    }
+
+    private Observable<ToolingBSpeedValue> getToolingBSpeed(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.button(config.toolingBMotorForwardButton()).startWith(false),
+            joystick.button(config.toolingBMotorReverseButton()).startWith(false),
+            Observable.just(false),
+            Observable.just(config.toolingBMotorSpeed()),
+            speedRegulator
+        ).map(ToolingBSpeedValue::new);
+    }
+
+    private Observable<ToolingCSpeedValue> getToolingCSpeed(final Joystick joystick) {
+        return Observable.combineLatest(
+            joystick.button(config.toolingCMotorForwardButton()).startWith(false),
+            joystick.button(config.toolingCMotorReverseButton()).startWith(false),
+            Observable.just(false),
+            Observable.just(config.toolingCMotorSpeed()),
+            speedRegulator
+        ).map(ToolingCSpeedValue::new);
     }
 }

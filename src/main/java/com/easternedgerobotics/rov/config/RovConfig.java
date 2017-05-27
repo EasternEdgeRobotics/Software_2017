@@ -27,9 +27,15 @@ public interface RovConfig {
 
     byte cameraBMotorChannel();
 
-    byte toolingMotorChannel();
+    byte toolingAMotorChannel();
 
-    byte lightChannel();
+    byte toolingBMotorChannel();
+
+    byte toolingCMotorChannel();
+
+    byte lightAChannel();
+
+    byte lightBChannel();
 
     boolean altImuSa0High();
 

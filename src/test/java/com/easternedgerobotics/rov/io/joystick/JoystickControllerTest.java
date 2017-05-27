@@ -9,7 +9,7 @@ import com.easternedgerobotics.rov.test.TestEventPublisher;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.MotionValue;
-import com.easternedgerobotics.rov.value.ToolingSpeedValue;
+import com.easternedgerobotics.rov.value.ToolingASpeedValue;
 
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
@@ -126,9 +126,9 @@ public final class JoystickControllerTest {
 
     @Test
     public final void forwardToolingRotateButtonDoesEmitCorrectType() {
-        final String name = config.toolingMotorForwardButton();
+        final String name = config.toolingAMotorForwardButton();
         final TestScheduler scheduler = new TestScheduler();
-        final TestSubscriber<ToolingSpeedValue> subscriber = new TestSubscriber<>();
+        final TestSubscriber<ToolingASpeedValue> subscriber = new TestSubscriber<>();
         final TestSubject<Boolean> subj = TestSubject.create(scheduler);
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final JoystickController joystickController = getJoystickController(eventPublisher);
@@ -142,14 +142,14 @@ public final class JoystickControllerTest {
 
         joystickController.start(Observable.just(joystick));
 
-        eventPublisher.valuesOfType(ToolingSpeedValue.class).subscribe(subscriber);
+        eventPublisher.valuesOfType(ToolingASpeedValue.class).subscribe(subscriber);
         subj.onNext(Joystick.BUTTON_DOWN);
         subj.onNext(Joystick.BUTTON_UP);
         scheduler.triggerActions();
 
         subscriber.assertValueCount(3);
         subscriber.assertReceivedOnNext(Arrays.asList(
-            new ToolingSpeedValue(0), new ToolingSpeedValue(config.toolingMotorSpeed()), new ToolingSpeedValue(0)
+            new ToolingASpeedValue(0), new ToolingASpeedValue(config.toolingAMotorSpeed()), new ToolingASpeedValue(0)
         ));
     }
 
@@ -213,9 +213,9 @@ public final class JoystickControllerTest {
 
     @Test
     public final void reverseToolingRotateButtonDoesEmitCorrectType() {
-        final String name = config.toolingMotorReverseButton();
+        final String name = config.toolingAMotorReverseButton();
         final TestScheduler scheduler = new TestScheduler();
-        final TestSubscriber<ToolingSpeedValue> subscriber = new TestSubscriber<>();
+        final TestSubscriber<ToolingASpeedValue> subscriber = new TestSubscriber<>();
         final TestSubject<Boolean> subj = TestSubject.create(scheduler);
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final JoystickController joystickController = getJoystickController(eventPublisher);
@@ -229,14 +229,14 @@ public final class JoystickControllerTest {
 
         joystickController.start(Observable.just(joystick));
 
-        eventPublisher.valuesOfType(ToolingSpeedValue.class).subscribe(subscriber);
+        eventPublisher.valuesOfType(ToolingASpeedValue.class).subscribe(subscriber);
         subj.onNext(Joystick.BUTTON_DOWN);
         subj.onNext(Joystick.BUTTON_UP);
         scheduler.triggerActions();
 
         subscriber.assertValueCount(3);
         subscriber.assertReceivedOnNext(Arrays.asList(
-            new ToolingSpeedValue(0), new ToolingSpeedValue(-config.toolingMotorSpeed()), new ToolingSpeedValue(0)
+            new ToolingASpeedValue(0), new ToolingASpeedValue(-config.toolingAMotorSpeed()), new ToolingASpeedValue(0)
         ));
     }
 

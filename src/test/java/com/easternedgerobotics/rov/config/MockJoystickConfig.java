@@ -43,12 +43,12 @@ public final class MockJoystickConfig implements JoystickConfig {
     }
 
     @Override
-    public String toolingMotorForwardButton() {
+    public String toolingAMotorForwardButton() {
         return "5";
     }
 
     @Override
-    public String toolingMotorReverseButton() {
+    public String toolingAMotorReverseButton() {
         return "6";
     }
 
@@ -78,6 +78,26 @@ public final class MockJoystickConfig implements JoystickConfig {
     }
 
     @Override
+    public String toolingBMotorForwardButton() {
+        return "12";
+    }
+
+    @Override
+    public String toolingBMotorReverseButton() {
+        return "13";
+    }
+
+    @Override
+    public String toolingCMotorForwardButton() {
+        return "14";
+    }
+
+    @Override
+    public String toolingCMotorReverseButton() {
+        return "15";
+    }
+
+    @Override
     public float cameraAMotorSpeed() {
         return 1;
     }
@@ -88,7 +108,17 @@ public final class MockJoystickConfig implements JoystickConfig {
     }
 
     @Override
-    public float toolingMotorSpeed() {
+    public float toolingAMotorSpeed() {
+        return 1;
+    }
+
+    @Override
+    public float toolingBMotorSpeed() {
+        return 1;
+    }
+
+    @Override
+    public float toolingCMotorSpeed() {
         return 1;
     }
 

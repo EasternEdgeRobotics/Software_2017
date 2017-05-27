@@ -54,12 +54,24 @@ public final class MockRovConfig implements RovConfig {
         return 0x08;
     }
 
-    public byte toolingMotorChannel() {
+    public byte toolingAMotorChannel() {
         return 0x09;
     }
 
-    public byte lightChannel() {
+    public byte toolingBMotorChannel() {
         return 0x0a;
+    }
+
+    public byte toolingCMotorChannel() {
+        return 0x0b;
+    }
+
+    public byte lightAChannel() {
+        return 0x0c;
+    }
+
+    public byte lightBChannel() {
+        return 0x0d;
     }
 
     public boolean altImuSa0High() {
