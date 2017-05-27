@@ -18,6 +18,7 @@ import com.easternedgerobotics.rov.io.EmergencyStopController;
 import com.easternedgerobotics.rov.io.MotionPowerProfile;
 import com.easternedgerobotics.rov.io.ProfileController;
 import com.easternedgerobotics.rov.io.SliderController;
+import com.easternedgerobotics.rov.io.TcpFileReceiver;
 import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
@@ -59,6 +60,8 @@ public final class Topside extends Application {
     private CameraCalibration cameraCalibration;
 
     private JoystickController joystickController;
+
+    private TcpFileReceiver fileReceiver;
 
     @Override
     public void init() throws SocketException, UnknownHostException {
@@ -104,9 +107,11 @@ public final class Topside extends Application {
             eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
 
         cameraCalibration = new CameraCalibration(
-            videoDecoder,
+            eventPublisher,
             configSource.getConfig("cameraCalibration", CameraCalibrationConfig.class),
             Schedulers.newThread());
+
+        fileReceiver = new TcpFileReceiver(launchConfig.fileReceiverPort(), launchConfig.fileReceiverSocketBacklog());
 
         viewLoader = new ViewLoader(MainView.class, "Control Software", new HashMap<Class<?>, Object>() {
             {
@@ -134,6 +139,7 @@ public final class Topside extends Application {
         arduino.start(config.pilotPanelHeartbeatInterval(), config.pilotPanelHeartbeatTimeout(), TimeUnit.MILLISECONDS);
         joystickController.start(LogitechExtremeJoystickSource.create(
             config.joystickRecoveryInterval(), TimeUnit.MILLISECONDS, Schedulers.io()));
+        fileReceiver.start();
         Logger.info("Started");
     }
 
@@ -146,6 +152,7 @@ public final class Topside extends Application {
         profileController.stop();
         videoDecoder.stop();
         joystickController.stop();
+        fileReceiver.stop();
         Logger.info("Stopped");
     }
 
