@@ -4,6 +4,8 @@ launch:
   serialPort: /dev/ttyACM0
   baudRate: 115200
   heartbeatRate: 1
+  fileReceiverPort: 12347
+  fileReceiverSocketBacklog: 100
 topsides:
   pilotPanelName: Pilot Panel
   pilotPanelPort: /dev/ttyACM0
@@ -92,8 +94,10 @@ cameraCalibration:
   cameraBImagesDirectory: /home/eedge/calibration-b/
   cameraAValidImagesDirectory: /home/eedge/valid-calibration-a/
   cameraBValidImagesDirectory: /home/eedge/valid-calibration-b/
-  chessboardWidth: 12
-  chessboardHeight: 13
+  cameraAPreUndistortedDirectory: /home/eedge/pre-undistorted-a/
+  cameraBPreUndistortedDirectory: /home/eedge/pre-undistorted-b/
+  chessboardWidth: 6
+  chessboardHeight: 9
 distanceCalculator:
   imageDirectory: /home/eedge/undistorted-images/
   dataDirectory: /home/eedge/undistorted-images-data/

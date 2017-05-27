@@ -22,4 +22,14 @@ public final class MockLaunchConfig implements LaunchConfig {
     public int heartbeatRate() {
         return 1;
     }
+
+    @Override
+    public int fileReceiverPort() {
+        return 12347;
+    }
+
+    @Override
+    public int fileReceiverSocketBacklog() {
+        return 100;
+    }
 }

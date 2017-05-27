@@ -10,4 +10,8 @@ public interface LaunchConfig {
     int baudRate();
 
     int heartbeatRate();
+
+    int fileReceiverPort();
+
+    int fileReceiverSocketBacklog();
 }
