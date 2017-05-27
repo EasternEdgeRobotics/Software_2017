@@ -30,10 +30,10 @@ public final class PicameraVideo {
         }
     }
 
-    public static void start(final String host, final int port) {
+    public static void start(final String host, final int videoPort, final int imagePort) {
         Logger.info("Starting video");
         try (final PrintWriter out = new PrintWriter("/run/eer/camera-environment")) {
-            out.println(String.format("host=%s\nport=%s", host, port));
+            out.println(String.format("host=%s\nvideo_port=%s\nimage_port=%s", host, videoPort, imagePort));
             out.flush();
             out.close();
             RUNTIME.exec(new String[] {"systemctl", "restart", SERVICE});
@@ -46,6 +46,18 @@ public final class PicameraVideo {
         Logger.info("Flipping video");
         try {
             RUNTIME.exec(new String[] {"systemctl", "kill", SERVICE, "--signal=SIGUSR1"});
+        } catch (final IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    public static void takeImage(final String path) {
+        Logger.info("Taking image and writing to path: " + path);
+        try (final PrintWriter out = new PrintWriter("/run/eer/camera-image-path")) {
+            out.println(path);
+            out.flush();
+            out.close();
+            RUNTIME.exec(new String[] {"systemctl", "kill", SERVICE, "--signal=SIGUSR2"});
         } catch (final IOException e) {
             Logger.error(e);
         }

@@ -9,6 +9,10 @@ public interface CameraCalibrationConfig {
 
     String cameraBValidImagesDirectory();
 
+    String cameraAPreUndistortedDirectory();
+
+    String cameraBPreUndistortedDirectory();
+
     int chessboardWidth();
 
     int chessboardHeight();

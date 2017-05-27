@@ -1,21 +1,22 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.config.Configurable;
-import com.easternedgerobotics.rov.control.SourceController;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
+import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.PicameraAHeartbeatValue;
 import com.easternedgerobotics.rov.value.PicameraBHeartbeatValue;
 import com.easternedgerobotics.rov.value.RasprimeHeartbeatValue;
 import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
+import javafx.scene.control.ToggleButton;
 import rx.Observable;
+import rx.Subscription;
 import rx.observables.JavaFxObservable;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
@@ -73,19 +74,17 @@ public class MainViewController implements ViewController {
         final Observable<Long> heartbeatLostInterval = Observable.interval(
             maxHeartbeatGap, TimeUnit.SECONDS, JAVA_FX_SCHEDULER);
 
-        Observable.zip(
-            Observable.from(Arrays.asList(
-                RasprimeHeartbeatValue.class,
-                PicameraAHeartbeatValue.class,
-                PicameraBHeartbeatValue.class)),
-            Observable.from(Arrays.asList(
-                view.rasprimeIndicator,
-                view.picameraAIndicator,
-                view.picameraBIndicator)),
-            (clazz, indicator) -> SourceController.manageMultiViewModel(
-                eventPublisher.valuesOfType(clazz), h -> indicator.setBackground(MainView.FOUND_BG), JAVA_FX_SCHEDULER,
-                heartbeatLostInterval, t -> indicator.setBackground(MainView.LOST_BG), JAVA_FX_SCHEDULER)
-        ).subscribe(subscriptions::add);
+        final Observable<HeartbeatValue> rasprimeHeartbeats = eventPublisher
+            .valuesOfType(RasprimeHeartbeatValue.class).cast(HeartbeatValue.class);
+        final Observable<HeartbeatValue> picameraAHeartbeats = eventPublisher
+            .valuesOfType(PicameraAHeartbeatValue.class).cast(HeartbeatValue.class);
+        final Observable<HeartbeatValue> picameraBHeartbeats = eventPublisher
+            .valuesOfType(PicameraBHeartbeatValue.class).cast(HeartbeatValue.class);
+
+        subscriptions.addAll(
+            setIndicator(rasprimeHeartbeats, view.rasprimeIndicator),
+            setIndicator(picameraAHeartbeats, view.picameraAIndicator),
+            setIndicator(picameraBHeartbeats, view.picameraBIndicator));
 
         JavaFxObservable.valuesOf(view.thrusterButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLoader.load(ThrusterPowerSlidersView.class, "Thruster Power"));
@@ -105,6 +104,15 @@ public class MainViewController implements ViewController {
     public final void onDestroy() {
         subscriptions.unsubscribe();
         eventPublisher.emit(new TopsideHeartbeatValue(false));
+    }
+
+    private Subscription setIndicator(final Observable<HeartbeatValue> heartbeats, final ToggleButton indicator) {
+        final Observable<Boolean> timeout = Observable.just(false)
+            .delay(maxHeartbeatGap, TimeUnit.SECONDS, JAVA_FX_SCHEDULER)
+            .concatWith(Observable.never());
+        return new CompositeSubscription(
+            timeout.takeUntil(heartbeats).repeat().subscribe(h -> indicator.setBackground(MainView.LOST_BG)),
+            heartbeats.subscribe(h -> indicator.setBackground(MainView.FOUND_BG)));
     }
 
     private void onSelected(final boolean selected) {
