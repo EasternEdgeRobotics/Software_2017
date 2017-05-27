@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.video;
 
+import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Size;
 
@@ -30,11 +31,29 @@ public final class CameraCalibrationResult {
      */
     private final Mat cameraMatrix;
 
+    private final double fx;
+
+    private final double fy;
+
+    private final double cx;
+
+    private final double cy;
+
     /**
      * This distortion coefficients associated with the camera.
      * Turns real world coordinates into image space coordinates.
      */
     private final Mat distortionCoeffs;
+
+    private final double k1;
+
+    private final double k2;
+
+    private final double p1;
+
+    private final double p2;
+
+    private final double k3;
 
     /**
      * The results from running a camera calibration.
@@ -45,6 +64,7 @@ public final class CameraCalibrationResult {
      * @param cameraMatrix This intrinsic camera matrix.
      * @param distortionCoeffs The distortion coefficients associated with the camera.
      */
+    @SuppressWarnings({"checkstyle:magicnumber"})
     public CameraCalibrationResult(
         final List<String> validFileNames,
         final Size imageSize,
@@ -57,6 +77,29 @@ public final class CameraCalibrationResult {
         this.calibrateCameraRmsError = calibrateCameraRmsError;
         this.cameraMatrix = cameraMatrix;
         this.distortionCoeffs = distortionCoeffs;
+        final DoubleIndexer cameraMatrixIndexer = cameraMatrix.createIndexer();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(cameraMatrixIndexer.get(i, j) + " ");
+            }
+            System.out.println();
+        }
+        fx = cameraMatrixIndexer.get(0, 0);
+        fy = cameraMatrixIndexer.get(1, 1);
+        cx = cameraMatrixIndexer.get(0, 2);
+        cy = cameraMatrixIndexer.get(1, 2);
+        final DoubleIndexer distortionCoeffsIndexer = distortionCoeffs.createIndexer();
+        for (int i = 0; i < 1; i++) {
+            for (int j = 0; j < 5; j++) {
+                System.out.print(distortionCoeffsIndexer.get(i, j) + " ");
+            }
+            System.out.println();
+        }
+        k1 = distortionCoeffsIndexer.get(0, 0);
+        k2 = distortionCoeffsIndexer.get(0, 1);
+        p1 = distortionCoeffsIndexer.get(0, 2);
+        p2 = distortionCoeffsIndexer.get(0, 3);
+        k3 = distortionCoeffsIndexer.get(0, 4);
     }
 
     /**
