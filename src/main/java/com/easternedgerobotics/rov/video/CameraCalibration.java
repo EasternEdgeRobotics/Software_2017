@@ -1,13 +1,16 @@
 package com.easternedgerobotics.rov.video;
 
 import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
+import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.DirectoryUtil;
 import com.easternedgerobotics.rov.io.FileUtil;
+import com.easternedgerobotics.rov.value.CameraCaptureValueA;
+import com.easternedgerobotics.rov.value.CameraCaptureValueB;
 
-import org.pmw.tinylog.Logger;
 import rx.Scheduler;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,9 +36,9 @@ public class CameraCalibration {
     private final AtomicReference<DistortionCorrector> correctorB = new AtomicReference<>();
 
     /**
-     * The source of the video frames to be calibrated.
+     * The network event publisher to communicate with the cameras.
      */
-    private final VideoDecoder videoDecoder;
+    private final EventPublisher eventPublisher;
 
     /**
      * The calibration settings.
@@ -50,16 +53,16 @@ public class CameraCalibration {
     /**
      * Create a calibration object which can perform a chessboard calibration.
      *
-     * @param videoDecoder The source of the video frames to be calibrated.
-     * @param config       The calibration settings.
-     * @param scheduler    The scheduler used when performing calibration work.
+     * @param eventPublisher The network event publisher to communicate with the cameras.
+     * @param config         The calibration settings.
+     * @param scheduler      The scheduler used when performing calibration work.
      */
     public CameraCalibration(
-        final VideoDecoder videoDecoder,
+        final EventPublisher eventPublisher,
         final CameraCalibrationConfig config,
         final Scheduler scheduler
     ) {
-        this.videoDecoder = videoDecoder;
+        this.eventPublisher = eventPublisher;
         this.config = config;
         this.scheduler = scheduler;
         scheduler.createWorker().schedule(() ->
@@ -98,33 +101,29 @@ public class CameraCalibration {
 
     /**
      * Capture an image to be used with the camera A calibration.
-     * Timeout for 1 second in case the stream is not initialized.
+     * Timeout for 10 second in case the stream is not initialized.
      */
     public void captureCalibrationImageA() {
-        videoDecoder.cameraAImages().observeOn(scheduler).timeout(1, TimeUnit.SECONDS).take(1).subscribe(image -> {
-            final File outputFile = FileUtil.nextName(config.cameraAImagesDirectory(), "checkerboardA", "png");
-            if (outputFile != null) {
-                FileUtil.saveImageFile(image, outputFile, "png");
-            }
-        });
+        final File destination = FileUtil.nextName(config.cameraAImagesDirectory(), "checkerboardA", "png");
+        if (destination != null) {
+            eventPublisher.emit(new CameraCaptureValueA(destination.getAbsolutePath()));
+        }
     }
 
     /**
      * Capture an image to be used with the camera B calibration.
-     * Timeout for 1 second in case the stream is not initialized.
+     * Timeout for 10 second in case the stream is not initialized.
      */
     public void captureCalibrationImageB() {
-        videoDecoder.cameraBImages().observeOn(scheduler).timeout(1, TimeUnit.SECONDS).take(1).subscribe(image -> {
-            final File outputFile = FileUtil.nextName(config.cameraBImagesDirectory(), "checkerboardB", "png");
-            if (outputFile != null) {
-                FileUtil.saveImageFile(image, outputFile, "png");
-            }
-        });
+        final File destination = FileUtil.nextName(config.cameraBImagesDirectory(), "checkerboardB", "png");
+        if (destination != null) {
+            eventPublisher.emit(new CameraCaptureValueB(destination.getAbsolutePath()));
+        }
     }
 
     /**
      * Capture an image to be used with the camera A calibration.
-     * Timeout for 1 second in case the stream is not initialized.
+     * Timeout for 1 minute in case the stream is not initialized.
      *
      * @param saveFile the output destination
      */
@@ -136,21 +135,21 @@ public class CameraCalibration {
             }
             correctorA.set(new DistortionCorrector(result));
         }
-        final DistortionCorrector corrector = correctorA.get();
-        videoDecoder.cameraAImages().observeOn(scheduler).timeout(1, TimeUnit.SECONDS).take(1).subscribe(image -> {
-            try {
-                final File tempFile = File.createTempFile(saveFile.getName(), ".tmp");
-                FileUtil.saveImageFile(image, tempFile, "png");
-                corrector.apply(tempFile, saveFile);
-            } catch (final IOException e) {
-                Logger.error(e);
-            }
-        });
+        final File destination = FileUtil.nextName(config.cameraAPreUndistortedDirectory(), "captureA", "png");
+        if (destination != null) {
+            final DistortionCorrector corrector = correctorA.get();
+            DirectoryUtil.observe(Paths.get(config.cameraAPreUndistortedDirectory()))
+                .filter(destination.toPath()::equals).take(1)
+                .timeout(1, TimeUnit.MINUTES)
+                .observeOn(scheduler)
+                .subscribe(path -> corrector.apply(destination, saveFile));
+            eventPublisher.emit(new CameraCaptureValueA(destination.getAbsolutePath()));
+        }
     }
 
     /**
      * Capture an image to be used with the camera B calibration.
-     * Timeout for 1 second in case the stream is not initialized.
+     * Timeout for 1 minute in case the stream is not initialized.
      *
      * @param saveFile the output destination
      */
@@ -162,15 +161,15 @@ public class CameraCalibration {
             }
             correctorB.set(new DistortionCorrector(result));
         }
-        final DistortionCorrector corrector = correctorB.get();
-        videoDecoder.cameraBImages().observeOn(scheduler).timeout(1, TimeUnit.SECONDS).take(1).subscribe(image -> {
-            try {
-                final File tempFile = File.createTempFile(saveFile.getName(), ".tmp");
-                FileUtil.saveImageFile(image, tempFile, "png");
-                corrector.apply(tempFile, saveFile);
-            } catch (final IOException e) {
-                Logger.error(e);
-            }
-        });
+        final File destination = FileUtil.nextName(config.cameraBPreUndistortedDirectory(), "captureB", "png");
+        if (destination != null) {
+            final DistortionCorrector corrector = correctorB.get();
+            DirectoryUtil.observe(Paths.get(config.cameraBPreUndistortedDirectory()))
+                .filter(destination.toPath()::equals).take(1)
+                .timeout(1, TimeUnit.MINUTES)
+                .observeOn(scheduler)
+                .subscribe(path -> corrector.apply(destination, saveFile));
+            eventPublisher.emit(new CameraCaptureValueB(destination.getAbsolutePath()));
+        }
     }
 }
