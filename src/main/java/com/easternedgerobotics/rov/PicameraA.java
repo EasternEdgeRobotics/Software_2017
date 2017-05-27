@@ -4,6 +4,7 @@ import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.value.CameraCaptureValueA;
 import com.easternedgerobotics.rov.value.PicameraAHeartbeatValue;
 import com.easternedgerobotics.rov.value.VideoFlipValueA;
 import com.easternedgerobotics.rov.value.VideoValueA;
@@ -33,14 +34,27 @@ final class PicameraA {
 
     }
 
-    private static void initCameraA(final EventPublisher eventPublisher, final int heartbeatRate) {
+    private static void initCameraA(
+        final EventPublisher eventPublisher,
+        final int heartbeatRate,
+        final int fileReceiverPort
+    ) {
         eventPublisher.valuesOfType(VideoFlipValueA.class)
+            .observeOn(Schedulers.io())
             .subscribe(f -> PicameraVideo.flip());
+
+        eventPublisher.valuesOfType(CameraCaptureValueA.class)
+            .observeOn(Schedulers.io())
+            .subscribe(capture -> PicameraVideo.takeImage(capture.getPath()));
+
         eventPublisher.valuesOfType(VideoValueA.class)
-            .throttleLast(1, TimeUnit.SECONDS)
-            .subscribe(value -> PicameraVideo.start(value.getHost(), value.getPort()));
+            .throttleLast(1, TimeUnit.SECONDS, Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe(value -> PicameraVideo.start(value.getHost(), value.getPort(), fileReceiverPort));
+
         Observable.interval(heartbeatRate, TimeUnit.SECONDS, Schedulers.io())
             .map(t -> new PicameraAHeartbeatValue(true))
+            .observeOn(Schedulers.io())
             .subscribe(eventPublisher::emit);
     }
 
@@ -81,7 +95,7 @@ final class PicameraA {
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
             PicameraVideo.addShutdownHook();
-            initCameraA(eventPublisher, launchConfig.heartbeatRate());
+            initCameraA(eventPublisher, launchConfig.heartbeatRate(), launchConfig.fileReceiverPort());
             Logger.info("Started");
             eventPublisher.await();
         } catch (final ParseException e) {
