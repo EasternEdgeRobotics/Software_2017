@@ -61,7 +61,6 @@ public final class GalleryViewController implements ViewController {
         subscriptions.clear();
         subscriptions.add(DirectoryUtil.observe(Paths.get(curr))
             .subscribeOn(Schedulers.newThread())
-            .delay(1, TimeUnit.SECONDS)
             .subscribe(this::onImagePathChanged));
     }
 
@@ -83,6 +82,10 @@ public final class GalleryViewController implements ViewController {
                 iv.onDestroy();
             });
             return;
+        }
+        // in the event that the file was not completed.
+        if (file.length() == 0) {
+            Schedulers.io().createWorker().schedule(() -> onImagePathChanged(path), 1, TimeUnit.SECONDS);
         }
         try {
             final GalleryImageView iv = new GalleryImageView(path, view.actions);
