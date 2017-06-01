@@ -108,11 +108,13 @@ public class MainViewController implements ViewController {
 
     private Subscription setIndicator(final Observable<HeartbeatValue> heartbeats, final ToggleButton indicator) {
         final Observable<Boolean> timeout = Observable.just(false)
-            .delay(maxHeartbeatGap, TimeUnit.SECONDS, JAVA_FX_SCHEDULER)
-            .concatWith(Observable.never());
+            .delay(maxHeartbeatGap, TimeUnit.SECONDS, Schedulers.io())
+            .concatWith(Observable.never())
+            .takeUntil(heartbeats)
+            .repeat();
         return new CompositeSubscription(
-            timeout.takeUntil(heartbeats).repeat().subscribe(h -> indicator.setBackground(MainView.LOST_BG)),
-            heartbeats.subscribe(h -> indicator.setBackground(MainView.FOUND_BG)));
+            timeout.observeOn(JAVA_FX_SCHEDULER).subscribe(h -> indicator.setBackground(MainView.LOST_BG)),
+            heartbeats.observeOn(JAVA_FX_SCHEDULER).subscribe(h -> indicator.setBackground(MainView.FOUND_BG)));
     }
 
     private void onSelected(final boolean selected) {
