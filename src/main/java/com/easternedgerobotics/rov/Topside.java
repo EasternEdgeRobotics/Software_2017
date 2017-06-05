@@ -100,7 +100,8 @@ public final class Topside extends Application {
             configSource.getConfig("slider", SliderConfig.class));
 
         profileController = new ProfileController(
-            arduino, config.pilotPanelInputPullups(), config.pilotPanelOutputs(), config.profileSwitchDuration(),
+            arduino, config.pilotPanelInputPullups(), config.pilotPanelOutputs(),
+            config.profileSwitchDuration(), config.profileSaveFlashCount(), config.profileSaveFlashDuration(),
             eventPublisher, profiles, Schedulers.io());
 
         videoDecoder = new VideoDecoder(
