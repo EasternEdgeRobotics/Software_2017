@@ -17,10 +17,10 @@ topsides:
   pilotPanelInputPullups: [25,27,29,31,33,35,37,22,24,26,28,30,32,34,36,38]
   joystickRecoveryInterval: 1000
   emergencyStopButtonAddress: 38
-  profileSwitchDuration: 2000
-  profilePref: profiles
-  profileSaveFlashCount: 6
-  profileSaveFlashDuration: 200
+  preferencesHome: profiles
+  motionPowerSwitchDuration: 2000
+  motionPowerSaveFlashCount: 6
+  motionPowerSaveFlashDuration: 200
   heartbeatLostInterval: 5
 rov:
   maxHeartbeatGap: 5
@@ -92,6 +92,8 @@ slider:
   lightAPowerSliderAddress: 8
   lightBPowerSliderAddress: 9
 cameraCalibration:
+  cameraAName: camera-a-1
+  cameraBName: camera-b-1
   cameraAImagesDirectory: /home/eedge/calibration-a/
   cameraBImagesDirectory: /home/eedge/calibration-b/
   cameraAValidImagesDirectory: /home/eedge/valid-calibration-a/
