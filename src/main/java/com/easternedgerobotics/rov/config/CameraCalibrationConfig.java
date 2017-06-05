@@ -9,10 +9,6 @@ public interface CameraCalibrationConfig {
 
     String cameraBImagesDirectory();
 
-    String cameraAValidImagesDirectory();
-
-    String cameraBValidImagesDirectory();
-
     String cameraAPreUndistortedDirectory();
 
     String cameraBPreUndistortedDirectory();
