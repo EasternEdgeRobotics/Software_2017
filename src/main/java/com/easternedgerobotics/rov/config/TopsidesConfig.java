@@ -21,9 +21,13 @@ public interface TopsidesConfig {
 
     byte emergencyStopButtonAddress();
 
-    long profileSwitchDuration();
+    int profileSwitchDuration();
 
     String profilePref();
+
+    int profileSaveFlashCount();
+
+    int profileSaveFlashDuration();
 
     int heartbeatLostInterval();
 }
