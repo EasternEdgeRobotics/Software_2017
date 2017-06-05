@@ -3,7 +3,7 @@ package com.easternedgerobotics.rov.value
 import org.bytedeco.javacpp.indexer.DoubleIndexer
 import org.bytedeco.javacpp.opencv_core
 
-class CameraCalibrationValue(
+data class CameraCalibrationValue(
     val validFileNames: List<String>,
     val rmsError: Double,
     val width: Int,
