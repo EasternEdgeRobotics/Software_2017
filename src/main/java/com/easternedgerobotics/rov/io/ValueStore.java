@@ -14,23 +14,23 @@ public final class ValueStore<V>  {
 
     private final Class<V> clazz;
 
-    private final Preferences preferencesHome;
+    private final Preferences preferences;
 
-    private final Map<Object, V> profiles = new HashMap<>();
+    private final Map<Object, V> values = new HashMap<>();
 
     public static <V> ValueStore<V> of(final Class<V> clazz, final String preferencesHome) {
-        return new ValueStore<>(clazz, preferencesHome);
+        return new ValueStore<>(clazz, Preferences.userRoot().node(preferencesHome));
     }
 
-    private ValueStore(final Class<V> clazz, final String profile) {
+    private ValueStore(final Class<V> clazz, final Preferences preferences) {
         this.clazz = clazz;
-        this.preferencesHome = Preferences.userRoot().node(profile);
+        this.preferences = preferences;
     }
 
-    public <K> Optional<V> get(final K key) {
-        return Optional.ofNullable(profiles.computeIfAbsent(key, k -> {
+    public Optional<V> get(final Object key) {
+        return Optional.ofNullable(values.computeIfAbsent(key, k -> {
             final String valueName = String.format(NAME_FORMAT, clazz.getName(), key);
-            final String valueStr = preferencesHome.get(valueName, "DEFAULT");
+            final String valueStr = preferences.get(valueName, "DEFAULT");
             if (valueStr.equals("DEFAULT")) {
                 Logger.warn("The value {} does not exist.", valueName);
                 return null;
@@ -44,11 +44,11 @@ public final class ValueStore<V>  {
         }));
     }
 
-    public <K> void set(final K key, final V value) {
-        profiles.put(key, value);
+    public void set(final Object key, final V value) {
+        values.put(key, value);
         final String valueName = String.format(NAME_FORMAT, clazz.getName(), key);
         try {
-            preferencesHome.put(valueName, new ObjectMapper().writeValueAsString(value));
+            preferences.put(valueName, new ObjectMapper().writeValueAsString(value));
         } catch (final IOException e) {
             Logger.warn("The value {} could not be saved to {}: {}", value, valueName, e);
         }
