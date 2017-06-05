@@ -54,13 +54,6 @@ public class CameraCalibration {
         this.config = config;
         this.store = store;
         this.scheduler = scheduler;
-        final Scheduler.Worker worker = scheduler.createWorker();
-        worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
-            config.cameraAValidImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-        ).ifPresent(value -> store.set(config.cameraAName(), value)));
-        worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
-            config.cameraBValidImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-        ).ifPresent(value -> store.set(config.cameraBName(), value)));
     }
 
     /**
@@ -71,16 +64,10 @@ public class CameraCalibration {
         final Scheduler.Worker worker = scheduler.createWorker();
         worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
             config.cameraAImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-        ).ifPresent(value -> {
-            store.set(config.cameraAName(), value);
-            FileUtil.copyFilesToDirectory(value.getValidFileNames(), config.cameraAValidImagesDirectory());
-        }));
+        ).ifPresent(value -> store.set(config.cameraAName(), value)));
         worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
             config.cameraBImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-        ).ifPresent(value -> {
-            store.set(config.cameraBName(), value);
-            FileUtil.copyFilesToDirectory(value.getValidFileNames(), config.cameraBValidImagesDirectory());
-        }));
+        ).ifPresent(value -> store.set(config.cameraBName(), value)));
     }
 
     /**

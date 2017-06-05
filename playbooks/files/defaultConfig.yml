@@ -96,8 +96,6 @@ cameraCalibration:
   cameraBName: camera-b-1
   cameraAImagesDirectory: /home/eedge/calibration-a/
   cameraBImagesDirectory: /home/eedge/calibration-b/
-  cameraAValidImagesDirectory: /home/eedge/valid-calibration-a/
-  cameraBValidImagesDirectory: /home/eedge/valid-calibration-b/
   cameraAPreUndistortedDirectory: /home/eedge/pre-undistorted-a/
   cameraBPreUndistortedDirectory: /home/eedge/pre-undistorted-b/
   chessboardWidth: 6
