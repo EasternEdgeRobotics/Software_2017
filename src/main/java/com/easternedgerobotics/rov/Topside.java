@@ -15,14 +15,16 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.fx.MainView;
 import com.easternedgerobotics.rov.fx.ViewLoader;
 import com.easternedgerobotics.rov.io.EmergencyStopController;
-import com.easternedgerobotics.rov.io.MotionPowerProfile;
-import com.easternedgerobotics.rov.io.ProfileController;
+import com.easternedgerobotics.rov.io.MotionPowerStoreController;
 import com.easternedgerobotics.rov.io.SliderController;
 import com.easternedgerobotics.rov.io.TcpFileReceiver;
+import com.easternedgerobotics.rov.io.ValueStore;
 import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
+import com.easternedgerobotics.rov.value.CameraCalibrationValue;
+import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.video.CameraCalibration;
 import com.easternedgerobotics.rov.video.VideoDecoder;
 
@@ -53,7 +55,7 @@ public final class Topside extends Application {
 
     private SliderController sliderController;
 
-    private ProfileController profileController;
+    private MotionPowerStoreController motionPowerStoreController;
 
     private VideoDecoder videoDecoder;
 
@@ -88,8 +90,6 @@ public final class Topside extends Application {
             config.pilotPanelOutputs(),
             config.pilotPanelInputPullups());
 
-        final MotionPowerProfile profiles = new MotionPowerProfile(config.profilePref());
-
         emergencyStopController = new EmergencyStopController(
             arduino, config.emergencyStopButtonAddress());
 
@@ -99,20 +99,31 @@ public final class Topside extends Application {
             eventPublisher,
             configSource.getConfig("slider", SliderConfig.class));
 
-        profileController = new ProfileController(
-            arduino, config.pilotPanelInputPullups(), config.pilotPanelOutputs(),
-            config.profileSwitchDuration(), config.profileSaveFlashCount(), config.profileSaveFlashDuration(),
-            eventPublisher, profiles, Schedulers.io());
+        motionPowerStoreController = new MotionPowerStoreController(
+            arduino,
+            config.pilotPanelInputPullups(),
+            config.pilotPanelOutputs(),
+            config.motionPowerSwitchDuration(),
+            config.motionPowerSaveFlashCount(),
+            config.motionPowerSaveFlashDuration(),
+            eventPublisher,
+            ValueStore.of(MotionPowerValue.class, config.preferencesHome()),
+            Schedulers.io());
 
         videoDecoder = new VideoDecoder(
-            eventPublisher, configSource.getConfig("videoDecoder", VideoDecoderConfig.class));
+            eventPublisher,
+            configSource.getConfig("videoDecoder",
+                VideoDecoderConfig.class));
 
         cameraCalibration = new CameraCalibration(
             eventPublisher,
             configSource.getConfig("cameraCalibration", CameraCalibrationConfig.class),
+            ValueStore.of(CameraCalibrationValue.class, config.preferencesHome()),
             Schedulers.newThread());
 
-        fileReceiver = new TcpFileReceiver(launchConfig.fileReceiverPort(), launchConfig.fileReceiverSocketBacklog());
+        fileReceiver = new TcpFileReceiver(
+            launchConfig.fileReceiverPort(),
+            launchConfig.fileReceiverSocketBacklog());
 
         viewLoader = new ViewLoader(MainView.class, "Control Software", new HashMap<Class<?>, Object>() {
             {
@@ -150,7 +161,7 @@ public final class Topside extends Application {
         eventPublisher.stop();
         arduino.stop();
         sliderController.stop();
-        profileController.stop();
+        motionPowerStoreController.stop();
         videoDecoder.stop();
         joystickController.stop();
         fileReceiver.stop();
