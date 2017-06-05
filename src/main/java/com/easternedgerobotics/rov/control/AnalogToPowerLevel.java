@@ -36,6 +36,17 @@ public final class AnalogToPowerLevel {
     }
 
     /**
+     * Transform an analog pin value into an appropriate power slider value
+     * with dead-bands at the top and bottom of the slider, and 0v is max power.
+     *
+     * @param analogValue the input.
+     * @return power slider value.
+     */
+    public static float convertNeg(final float analogValue) {
+        return 1f - convert(analogValue);
+    }
+
+    /**
      * Clamp the value between the maximum and minimum supported power values.
      *
      * @param value the power slider value.
