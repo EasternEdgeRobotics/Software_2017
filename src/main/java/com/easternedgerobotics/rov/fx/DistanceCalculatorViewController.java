@@ -5,12 +5,21 @@ import com.easternedgerobotics.rov.config.DistanceCalculatorConfig;
 import com.easternedgerobotics.rov.io.FileUtil;
 import com.easternedgerobotics.rov.video.CameraCalibration;
 
+import javafx.scene.image.Image;
+import org.pmw.tinylog.Logger;
 import rx.Observable;
+import rx.javafx.sources.Change;
 import rx.javafx.sources.Flag;
 import rx.javafx.sources.ListChange;
 import rx.observables.JavaFxObservable;
 import rx.subscriptions.CompositeSubscription;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import javax.inject.Inject;
 
@@ -21,14 +30,19 @@ public final class DistanceCalculatorViewController implements ViewController {
     private final CompositeSubscription subscriptions = new CompositeSubscription();
 
     /**
+     * Holds onto subscriptions of the window size.
+     */
+    private final CompositeSubscription resizeSubscription = new CompositeSubscription();
+
+    /**
      * The label of the open image option.
      */
-    static final String OPEN_ACTION = "Open";
+    private static final String OPEN_ACTION = "Open";
 
     /**
      * The label of the delete image option.
      */
-    static final String DELETE_ACTION = "Delete";
+    private static final String DELETE_ACTION = "Delete";
 
     /**
      * The view controlled by this instance.
@@ -81,9 +95,8 @@ public final class DistanceCalculatorViewController implements ViewController {
             .map(ListChange::getValue)
             .flatMap(iv -> iv.doubleClickAction(OPEN_ACTION)
                 .takeUntil(iv.menuAction(DELETE_ACTION))
-                .doOnCompleted(() -> iv.getPath().toFile().delete())
-                .map(p -> iv))
-            .subscribe(GalleryImageView::fullscreen));
+                .doOnCompleted(() -> iv.getPath().toFile().delete()))
+            .subscribe(this::setImageFromPath));
 
         gallery.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
         gallery.directoryLabel.setText(config.imageDirectory());
@@ -98,8 +111,32 @@ public final class DistanceCalculatorViewController implements ViewController {
                 FileUtil.nextName(config.imageDirectory(), "undistortedB", "png"))));
     }
 
+    /**
+     * Set the calculator to display an image from the following path, and resize this image if the windows changes.
+     *
+     * @param path
+     */
+    public void setImageFromPath(final Path path) {
+        resizeSubscription.clear();
+        try {
+            final File tempFile = File.createTempFile(path.toFile().getName(), ".tmp");
+            Files.copy(path, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            final Image image = new Image(new FileInputStream(tempFile));
+            resizeSubscription.add(Observable
+                .merge(
+                    JavaFxObservable.changesOf(view.borderPane.widthProperty()),
+                    JavaFxObservable.changesOf(view.borderPane.heightProperty()))
+                .map(Change::getNewVal)
+                .startWith(0)
+                .subscribe(v -> view.setImage(image)));
+        } catch (final IOException e) {
+            Logger.error(e);
+        }
+    }
+
     @Override
     public void onDestroy() {
         subscriptions.unsubscribe();
+        resizeSubscription.unsubscribe();
     }
 }
