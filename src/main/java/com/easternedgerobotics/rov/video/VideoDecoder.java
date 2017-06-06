@@ -30,7 +30,8 @@ public final class VideoDecoder {
             config.socketBacklog(),
             config.bitrate(),
             config.preset(),
-            config.numBuffers());
+            config.numBuffers(),
+            config.introVideoLocation());
         this.decoderB  = new FFmpegFXImageDecoder(
             config.portB(),
             config.format(),
@@ -38,7 +39,8 @@ public final class VideoDecoder {
             config.socketBacklog(),
             config.bitrate(),
             config.preset(),
-            config.numBuffers());
+            config.numBuffers(),
+            config.introVideoLocation());
     }
 
     public void start() {

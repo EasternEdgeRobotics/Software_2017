@@ -15,7 +15,9 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 
 import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.SequenceInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -35,6 +37,8 @@ class FFmpegFXImageDecoder {
 
     private final int numBuffers;
 
+    private final String introVideoLocation;
+
     private final PublishSubject<Image> images = PublishSubject.create();
 
     private final PublishSubject<Socket> server = PublishSubject.create();
@@ -50,7 +54,8 @@ class FFmpegFXImageDecoder {
         final int socketBacklog,
         final int bitrate,
         final String preset,
-        final int numBuffers
+        final int numBuffers,
+        final String introVideoLocation
     ) {
         this.port = port;
         this.socketBacklog = socketBacklog;
@@ -59,6 +64,7 @@ class FFmpegFXImageDecoder {
         this.bitrate = bitrate;
         this.preset = preset;
         this.numBuffers = numBuffers;
+        this.introVideoLocation = introVideoLocation;
         Observable.create(new SocketSyncOnSubscribe())
             .subscribeOn(Schedulers.newThread())
             .observeOn(Schedulers.newThread())
@@ -129,7 +135,10 @@ class FFmpegFXImageDecoder {
             try {
                 Logger.info(String.format("Processing stream from %s, %d",
                     clientSocket.getInetAddress(), clientSocket.getPort()));
-                final FrameGrabber grabber = new FFmpegFrameGrabber(clientSocket.getInputStream());
+                final FrameGrabber grabber = new FFmpegFrameGrabber(
+                    new SequenceInputStream(
+                        new FileInputStream(introVideoLocation),
+                        clientSocket.getInputStream()));
                 grabber.setFrameRate(frameRate);
                 grabber.setFormat(format);
                 grabber.setVideoBitrate(bitrate);
