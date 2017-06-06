@@ -77,6 +77,8 @@
       copy: src=files/conf/dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=644 owner=root group=root
       tags: dhcp
       notify: Restart DHCP Server
+    - name: Copy camera intro video
+      copy: src=files/intro.h264 dest=/home/{{ ansible_user }}/intro.h264 mode=644 owner={{ ansible_user }} group={{ ansible_user }}
   handlers:
     - name: Restart DHCP Server
       service: name=isc-dhcp-server state=restarted
