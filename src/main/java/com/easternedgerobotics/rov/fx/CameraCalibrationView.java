@@ -46,10 +46,6 @@ public final class CameraCalibrationView implements View {
 
     final Tab cameraBCalibrationTab = new Tab();
 
-    final Tab cameraAValidTab = new Tab();
-
-    final Tab cameraBValidTab = new Tab();
-
     @Inject
     public CameraCalibrationView() {
         final List<Button> buttons = Arrays.asList(captureCalibrateA, captureCalibrateB, calibrate);
@@ -72,13 +68,7 @@ public final class CameraCalibrationView implements View {
         cameraBCalibrationTab.setText("Camera B Calibration");
         cameraBCalibrationTab.setClosable(false);
 
-        cameraAValidTab.setText("Valid Camera A Images");
-        cameraAValidTab.setClosable(false);
-
-        cameraBValidTab.setText("Valid Camera B Images");
-        cameraBValidTab.setClosable(false);
-
-        tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab, cameraAValidTab, cameraBValidTab);
+        tabPane.getTabs().addAll(cameraACalibrationTab, cameraBCalibrationTab);
 
         mainPanel.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
         mainPanel.getChildren().addAll(buttonPanel, tabBorderPane);

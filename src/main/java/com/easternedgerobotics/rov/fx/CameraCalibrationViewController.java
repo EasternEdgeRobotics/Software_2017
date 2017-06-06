@@ -45,16 +45,6 @@ public final class CameraCalibrationViewController implements ViewController {
     private final GalleryView cameraBCalibration;
 
     /**
-     * A gallery for valid camera A calibration images.
-     */
-    private final GalleryView cameraAValid;
-
-    /**
-     * A gallery for valid camera B calibration images.
-     */
-    private final GalleryView cameraBValid;
-
-    /**
      * The calibration object associated with this view.
      */
     private final CameraCalibration cameraCalibration;
@@ -71,8 +61,6 @@ public final class CameraCalibrationViewController implements ViewController {
      * @param view The parent view managed by this controller.
      * @param cameraACalibration A gallery for camera A calibration images.
      * @param cameraBCalibration A gallery for camera B calibration images.
-     * @param cameraAValid A gallery for valid camera A calibration images.
-     * @param cameraBValid A gallery for vaild camera B calibration images.
      * @param cameraCalibration The calibration object associated with this view.
      * @param config The configuration of the camera calibrator.
      */
@@ -81,16 +69,12 @@ public final class CameraCalibrationViewController implements ViewController {
         final CameraCalibrationView view,
         final GalleryView cameraACalibration,
         final GalleryView cameraBCalibration,
-        final GalleryView cameraAValid,
-        final GalleryView cameraBValid,
         final CameraCalibration cameraCalibration,
         @Configurable("cameraCalibration") final CameraCalibrationConfig config
     ) {
         this.view = view;
         this.cameraACalibration = cameraACalibration;
         this.cameraBCalibration = cameraBCalibration;
-        this.cameraAValid = cameraAValid;
-        this.cameraBValid = cameraBValid;
         this.cameraCalibration = cameraCalibration;
         this.config = config;
     }
@@ -99,9 +83,7 @@ public final class CameraCalibrationViewController implements ViewController {
     public void onCreate() {
         final Observable<ListChange<GalleryImageView>> images = Observable.merge(
             JavaFxObservable.changesOf(cameraACalibration.imageViews),
-            JavaFxObservable.changesOf(cameraBCalibration.imageViews),
-            JavaFxObservable.changesOf(cameraAValid.imageViews),
-            JavaFxObservable.changesOf(cameraBValid.imageViews));
+            JavaFxObservable.changesOf(cameraBCalibration.imageViews));
 
         subscriptions.add(images
             .filter(change -> change.getFlag().equals(Flag.ADDED))
@@ -119,14 +101,6 @@ public final class CameraCalibrationViewController implements ViewController {
         cameraBCalibration.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
         cameraBCalibration.directoryLabel.setText(config.cameraBImagesDirectory());
         view.cameraBCalibrationTab.setContent(cameraBCalibration.getParent());
-
-        cameraAValid.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
-        cameraAValid.directoryLabel.setText(config.cameraAValidImagesDirectory());
-        view.cameraAValidTab.setContent(cameraAValid.getParent());
-
-        cameraBValid.actions.addAll(Arrays.asList(OPEN_ACTION, DELETE_ACTION));
-        cameraBValid.directoryLabel.setText(config.cameraBValidImagesDirectory());
-        view.cameraBValidTab.setContent(cameraBValid.getParent());
 
         subscriptions.add(JavaFxObservable.valuesOf(view.captureCalibrateA.pressedProperty()).filter(x -> !x).skip(1)
             .subscribe(x -> cameraCalibration.captureCalibrationImageA()));

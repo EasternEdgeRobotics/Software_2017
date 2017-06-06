@@ -4,6 +4,8 @@ import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.DirectoryUtil;
 import com.easternedgerobotics.rov.io.FileUtil;
+import com.easternedgerobotics.rov.io.ValueStore;
+import com.easternedgerobotics.rov.value.CameraCalibrationValue;
 import com.easternedgerobotics.rov.value.CameraCaptureValueA;
 import com.easternedgerobotics.rov.value.CameraCaptureValueB;
 
@@ -12,28 +14,12 @@ import rx.Scheduler;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class CameraCalibration {
     /**
-     * Threadsafe holder for the calibration A result.
+     * The value store for calibration results.
      */
-    private final AtomicReference<CameraCalibrationResult> resultsA = new AtomicReference<>();
-
-    /**
-     * Threadsafe holder for the calibration B result.
-     */
-    private final AtomicReference<CameraCalibrationResult> resultsB = new AtomicReference<>();
-
-    /**
-     * Threadsafe holder for the calibration A distortion correction.
-     */
-    private final AtomicReference<DistortionCorrector> correctorA = new AtomicReference<>();
-
-    /**
-     * Threadsafe holder for the calibration B distortion correction.
-     */
-    private final AtomicReference<DistortionCorrector> correctorB = new AtomicReference<>();
+    private final ValueStore<CameraCalibrationValue> store;
 
     /**
      * The network event publisher to communicate with the cameras.
@@ -55,24 +41,19 @@ public class CameraCalibration {
      *
      * @param eventPublisher The network event publisher to communicate with the cameras.
      * @param config         The calibration settings.
+     * @param store          The value store for calibration results.
      * @param scheduler      The scheduler used when performing calibration work.
      */
     public CameraCalibration(
         final EventPublisher eventPublisher,
         final CameraCalibrationConfig config,
+        final ValueStore<CameraCalibrationValue> store,
         final Scheduler scheduler
     ) {
         this.eventPublisher = eventPublisher;
         this.config = config;
+        this.store = store;
         this.scheduler = scheduler;
-        scheduler.createWorker().schedule(() ->
-            ChessboardCalibration.findCameraCalibrationResult(
-                config.cameraAValidImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-            ).ifPresent(resultsA::set));
-        scheduler.createWorker().schedule(() ->
-            ChessboardCalibration.findCameraCalibrationResult(
-                config.cameraBValidImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-            ).ifPresent(resultsB::set));
     }
 
     /**
@@ -81,22 +62,12 @@ public class CameraCalibration {
      */
     public void calibrate() {
         final Scheduler.Worker worker = scheduler.createWorker();
-        worker.schedule(() -> {
-            ChessboardCalibration.findCameraCalibrationResult(
-                config.cameraAImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-            ).ifPresent(result -> {
-                resultsA.set(result);
-                FileUtil.copyFilesToDirectory(result.getValidFileNames(), config.cameraAValidImagesDirectory());
-            });
-        });
-        worker.schedule(() -> {
-            ChessboardCalibration.findCameraCalibrationResult(
-                config.cameraBImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
-            ).ifPresent(result -> {
-                resultsB.set(result);
-                FileUtil.copyFilesToDirectory(result.getValidFileNames(), config.cameraBValidImagesDirectory());
-            });
-        });
+        worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
+            config.cameraAImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
+        ).ifPresent(value -> store.set(config.cameraAName(), value)));
+        worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
+            config.cameraBImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
+        ).ifPresent(value -> store.set(config.cameraBName(), value)));
     }
 
     /**
@@ -128,23 +99,18 @@ public class CameraCalibration {
      * @param saveFile the output destination
      */
     public void captureUndistortedImageA(final File saveFile) {
-        if (correctorA.get() == null) {
-            final CameraCalibrationResult result = resultsA.get();
-            if (result == null) {
-                return;
+        store.get(config.cameraAName()).map(DistortionCorrector::new).ifPresent(corrector -> {
+            final File destination = FileUtil.nextName(config.cameraAPreUndistortedDirectory(), "captureA", "png");
+            if (destination != null) {
+                DirectoryUtil.observe(Paths.get(config.cameraAPreUndistortedDirectory()))
+                    .filter(destination.toPath()::equals).take(1)
+                    .timeout(1, TimeUnit.MINUTES)
+                    .delay(1, TimeUnit.SECONDS)
+                    .observeOn(scheduler)
+                    .subscribe(path -> corrector.apply(destination, saveFile));
+                eventPublisher.emit(new CameraCaptureValueA(destination.getAbsolutePath()));
             }
-            correctorA.set(new DistortionCorrector(result));
-        }
-        final File destination = FileUtil.nextName(config.cameraAPreUndistortedDirectory(), "captureA", "png");
-        if (destination != null) {
-            final DistortionCorrector corrector = correctorA.get();
-            DirectoryUtil.observe(Paths.get(config.cameraAPreUndistortedDirectory()))
-                .filter(destination.toPath()::equals).take(1)
-                .timeout(1, TimeUnit.MINUTES)
-                .observeOn(scheduler)
-                .subscribe(path -> corrector.apply(destination, saveFile));
-            eventPublisher.emit(new CameraCaptureValueA(destination.getAbsolutePath()));
-        }
+        });
     }
 
     /**
@@ -154,22 +120,17 @@ public class CameraCalibration {
      * @param saveFile the output destination
      */
     public void captureUndistortedImageB(final File saveFile) {
-        if (correctorB.get() == null) {
-            final CameraCalibrationResult result = resultsB.get();
-            if (result == null) {
-                return;
+        store.get(config.cameraAName()).map(DistortionCorrector::new).ifPresent(corrector -> {
+            final File destination = FileUtil.nextName(config.cameraBPreUndistortedDirectory(), "captureB", "png");
+            if (destination != null) {
+                DirectoryUtil.observe(Paths.get(config.cameraBPreUndistortedDirectory()))
+                    .filter(destination.toPath()::equals).take(1)
+                    .timeout(1, TimeUnit.MINUTES)
+                    .delay(1, TimeUnit.SECONDS)
+                    .observeOn(scheduler)
+                    .subscribe(path -> corrector.apply(destination, saveFile));
+                eventPublisher.emit(new CameraCaptureValueB(destination.getAbsolutePath()));
             }
-            correctorB.set(new DistortionCorrector(result));
-        }
-        final File destination = FileUtil.nextName(config.cameraBPreUndistortedDirectory(), "captureB", "png");
-        if (destination != null) {
-            final DistortionCorrector corrector = correctorB.get();
-            DirectoryUtil.observe(Paths.get(config.cameraBPreUndistortedDirectory()))
-                .filter(destination.toPath()::equals).take(1)
-                .timeout(1, TimeUnit.MINUTES)
-                .observeOn(scheduler)
-                .subscribe(path -> corrector.apply(destination, saveFile));
-            eventPublisher.emit(new CameraCaptureValueB(destination.getAbsolutePath()));
-        }
+        });
     }
 }

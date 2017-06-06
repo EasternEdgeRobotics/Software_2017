@@ -1,5 +1,8 @@
 package com.easternedgerobotics.rov.video;
 
+import com.easternedgerobotics.rov.value.CameraCalibrationValue;
+
+import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.opencv_calib3d;
 import org.bytedeco.javacpp.opencv_core;
@@ -33,7 +36,8 @@ public final class ChessboardCalibration {
      * @param boardHeight the number of inner corners per any two adjacent rows on the chessboard
      * @return the camera calibration results if successful.
      */
-    public static Optional<CameraCalibrationResult> findCameraCalibrationResult(
+    @SuppressWarnings({"checkstyle:magicnumber"})
+    public static Optional<CameraCalibrationValue> findCameraCalibrationResult(
         final String folder,
         final int boardWidth,
         final int boardHeight
@@ -62,6 +66,9 @@ public final class ChessboardCalibration {
          * intrinsic properties of the camera and develop a precise distortion matrix which can be used to
          * transform real-world coordinates into image coordinates. Rotational and translational vecotrs
          * are not required at the moment, so they are left to be garbage collected.
+         *
+         * The root mean square (RMS) re-projection error of the calibration should be between 0.1 and 1.0
+         * pixels in a good calibration. See http://stackoverflow.com/a/29897948/3280538
          */
         final double calibrateCameraRmsError = opencv_calib3d.calibrateCamera(
             objectCornerMatsVect,
@@ -75,13 +82,47 @@ public final class ChessboardCalibration {
             new TermCriteria(TermCriteria.MAX_ITER + TermCriteria.EPS, 30, 0.00001)
         );
 
-        return Optional.of(
-            new CameraCalibrationResult(
-                validNames,
-                imageSize,
-                calibrateCameraRmsError,
-                cameraMatrix,
-                distortionCoeffs));
+        final DoubleIndexer cameraMatrixIndexer = cameraMatrix.createIndexer();
+        final StringBuilder cameraStringBuilder = new StringBuilder();
+        cameraStringBuilder.append("cameraMatrix = {\n");
+        for (int i = 0; i < 3; i++) {
+            cameraStringBuilder.append("    { ");
+            for (int j = 0; j < 3; j++) {
+                cameraStringBuilder.append(cameraMatrixIndexer.get(i, j));
+                cameraStringBuilder.append(", ");
+            }
+            cameraStringBuilder.append("},\n");
+        }
+        cameraStringBuilder.append("};");
+        Logger.info(cameraStringBuilder.toString());
+        final DoubleIndexer distortionCoeffsIndexer = distortionCoeffs.createIndexer();
+        final StringBuilder distortionStringBuilder = new StringBuilder();
+        distortionStringBuilder.append("distortionCoeffs = {\n");
+        for (int i = 0; i < 1; i++) {
+            distortionStringBuilder.append("    { ");
+            for (int j = 0; j < 5; j++) {
+                distortionStringBuilder.append(distortionCoeffsIndexer.get(i, j));
+                distortionStringBuilder.append(", ");
+            }
+            distortionStringBuilder.append("},\n");
+        }
+        distortionStringBuilder.append("};");
+        Logger.info(distortionStringBuilder.toString());
+
+        return Optional.of(new CameraCalibrationValue(
+            validNames,
+            calibrateCameraRmsError,
+            imageSize.width(),
+            imageSize.height(),
+            cameraMatrixIndexer.get(0, 0),
+            cameraMatrixIndexer.get(1, 1),
+            cameraMatrixIndexer.get(0, 2),
+            cameraMatrixIndexer.get(1, 2),
+            distortionCoeffsIndexer.get(0, 0),
+            distortionCoeffsIndexer.get(0, 1),
+            distortionCoeffsIndexer.get(0, 2),
+            distortionCoeffsIndexer.get(0, 3),
+            distortionCoeffsIndexer.get(0, 4)));
     }
 
     /**

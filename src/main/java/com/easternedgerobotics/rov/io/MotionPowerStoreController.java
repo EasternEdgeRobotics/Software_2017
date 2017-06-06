@@ -21,14 +21,15 @@ import rx.subscriptions.CompositeSubscription;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class ProfileController {
+public final class MotionPowerStoreController {
     private final CompositeSubscription subscription = new CompositeSubscription();
 
-    public ProfileController(
+    public MotionPowerStoreController(
         final Arduino arduino,
         final byte[] inputs,
         final byte[] outputs,
@@ -36,7 +37,7 @@ public final class ProfileController {
         final int profileSaveFlashCount,
         final int profileSaveFlashDuration,
         final EventPublisher eventPublisher,
-        final MotionPowerProfile profiles,
+        final ValueStore<MotionPowerValue> store,
         final Scheduler scheduler
     ) {
         final List<TwoActionButton> buttons = Collections
@@ -61,7 +62,7 @@ public final class ProfileController {
                     MotionPowerValue::new
                 ), (click, value) -> value)
             .subscribe(value -> {
-                profiles.set(i, value);
+                store.set(i, value);
                 arduino.setPinValue(outputs[i], true);
                 Observable.interval(profileSaveFlashDuration, TimeUnit.MILLISECONDS, Schedulers.io())
                     .take(profileSaveFlashCount)
@@ -69,7 +70,9 @@ public final class ProfileController {
             })));
 
         subscription.add(Observable.range(0, outputs.length)
-            .flatMap(i -> buttons.get(i).shortClick().filter(x -> x).map(click -> profiles.get(i)))
+            .flatMap(i -> buttons.get(i).shortClick().filter(x -> x).map(click -> store.get(i)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .subscribe(value -> {
                 eventPublisher.emit(new GlobalPowerValue(value.getGlobal()));
                 eventPublisher.emit(new HeavePowerValue(value.getHeave()));
