@@ -14,13 +14,11 @@ import javax.inject.Inject;
 public class CpuInformationView implements View {
     private static final int LABEL_SPACING = 20;
 
-    final Label frequencyLabel = new Label("???");
-
     final Label temperatureLabel = new Label("???");
 
     final Label voltageLabel = new Label("???");
 
-    final Label name = new Label("Rasprime");
+    final Label name = new Label("???");
 
     final VBox row;
 
@@ -30,8 +28,7 @@ public class CpuInformationView implements View {
             new HBox(
                 LABEL_SPACING,
                 column(bold(voltageLabel), new Label("Voltage")),
-                column(bold(temperatureLabel), new Label("CPU temperature")),
-                column(bold(frequencyLabel), new Label("CPU frequency"))
+                column(bold(temperatureLabel), new Label("CPU temperature"))
             ),
             name
         );
