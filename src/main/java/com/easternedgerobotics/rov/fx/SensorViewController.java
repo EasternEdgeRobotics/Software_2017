@@ -4,9 +4,13 @@ import com.easternedgerobotics.rov.event.Event;
 import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.math.AverageTransformer;
 import com.easternedgerobotics.rov.math.MedianTransformer;
+import com.easternedgerobotics.rov.value.CpuValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.PicameraACpuValue;
+import com.easternedgerobotics.rov.value.PicameraBCpuValue;
+import com.easternedgerobotics.rov.value.RasprimeCpuValue;
 
 import rx.Observable;
 import rx.subscriptions.CompositeSubscription;
@@ -37,7 +41,17 @@ public class SensorViewController implements ViewController {
     /**
      * The CPU information sub-view.
      */
-    private final CpuInformationView cpuInformationView;
+    private final CpuInformationView rasprimeCpuInformationView;
+
+    private final CpuInformationView picameraACpuInformationView;
+
+    private final CpuInformationView picameraBCpuInformationView;
+
+    private final Observable<RasprimeCpuValue> rasprimeCpuValues;
+
+    private final Observable<PicameraACpuValue> picameraACpuValues;
+
+    private final Observable<PicameraBCpuValue> picameraBCpuValues;
 
     private final Observable<InternalPressureValue> internalPressure;
 
@@ -50,13 +64,23 @@ public class SensorViewController implements ViewController {
     @Inject
     public SensorViewController(
         final SensorView view,
-        final CpuInformationView cpuInformationView,
+        final CpuInformationView rasprimeCpuInformationView,
+        final CpuInformationView picameraACpuInformationView,
+        final CpuInformationView picameraBCpuInformationView,
+        @Event final Observable<RasprimeCpuValue> rasprimeCpuValues,
+        @Event final Observable<PicameraACpuValue> picameraACpuValues,
+        @Event final Observable<PicameraBCpuValue> picameraBCpuValues,
         @Event final Observable<InternalPressureValue> internalPressure,
         @Event final Observable<ExternalPressureValue> externalPressureA,
         @Event final Observable<InternalTemperatureValue> internalTemperature
     ) {
         this.view = view;
-        this.cpuInformationView = cpuInformationView;
+        this.rasprimeCpuInformationView = rasprimeCpuInformationView;
+        this.picameraACpuInformationView = picameraACpuInformationView;
+        this.picameraBCpuInformationView = picameraBCpuInformationView;
+        this.rasprimeCpuValues = rasprimeCpuValues;
+        this.picameraACpuValues = picameraACpuValues;
+        this.picameraBCpuValues = picameraBCpuValues;
         this.subscriptions = new CompositeSubscription();
 
         this.internalPressure = internalPressure;
@@ -66,7 +90,22 @@ public class SensorViewController implements ViewController {
 
     @Override
     public final void onCreate() {
-        view.row.getChildren().add(cpuInformationView.getParent());
+        view.row.getChildren().addAll(
+            rasprimeCpuInformationView.getParent(),
+            picameraACpuInformationView.getParent(),
+            picameraBCpuInformationView.getParent());
+
+        subscriptions.add(rasprimeCpuValues.observeOn(JAVA_FX_SCHEDULER)
+            .subscribe(v -> updateCpuValueLabels(rasprimeCpuInformationView, v)));
+        subscriptions.add(picameraACpuValues.observeOn(JAVA_FX_SCHEDULER)
+            .subscribe(v -> updateCpuValueLabels(picameraACpuInformationView, v)));
+        subscriptions.add(picameraBCpuValues.observeOn(JAVA_FX_SCHEDULER)
+            .subscribe(v -> updateCpuValueLabels(picameraBCpuInformationView, v)));
+
+        rasprimeCpuInformationView.name.setText("RasPrime");
+        picameraACpuInformationView.name.setText("PiCameraA");
+        picameraBCpuInformationView.name.setText("PiCameraB");
+
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(
             externalPressureA.map(ExternalPressureValue::getValue)
@@ -96,5 +135,10 @@ public class SensorViewController implements ViewController {
     private void updateTemperatureLabel(final InternalTemperatureValue internalTemperatureValue) {
         view.internalTemperatureLabel.setText(
             String.format(SensorView.TEMPERATURE_LABEL_FORMAT, internalTemperatureValue.getTemperature()));
+    }
+
+    private void updateCpuValueLabels(final CpuInformationView cpuView, final CpuValue value) {
+        cpuView.temperatureLabel.setText(String.format("%.1f °C", value.getTemperature()));
+        cpuView.voltageLabel.setText(String.format("%.2f V", value.getVoltage()));
     }
 }
