@@ -1,6 +1,8 @@
 package com.easternedgerobotics.rov.io;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
@@ -18,13 +20,18 @@ public final class ValueStore<V>  {
 
     private final Map<Object, V> values = new HashMap<>();
 
+    private final ObjectMapper mapper;
+
     public static <V> ValueStore<V> of(final Class<V> clazz, final String preferencesHome) {
-        return new ValueStore<>(clazz, Preferences.userRoot().node(preferencesHome));
+        final ObjectMapper mapper = new ObjectMapper().registerModule(new KotlinModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return new ValueStore<>(clazz, Preferences.userRoot().node(preferencesHome), mapper);
     }
 
-    private ValueStore(final Class<V> clazz, final Preferences preferences) {
+    private ValueStore(final Class<V> clazz, final Preferences preferences, final ObjectMapper mapper) {
         this.clazz = clazz;
         this.preferences = preferences;
+        this.mapper = mapper;
     }
 
     public Optional<V> get(final Object key) {
@@ -36,7 +43,7 @@ public final class ValueStore<V>  {
                 return null;
             }
             try {
-                return new ObjectMapper().readValue(valueStr, clazz);
+                return mapper.readValue(valueStr, clazz);
             } catch (final IOException e) {
                 Logger.warn("The value {} could not be parsed from '{}': {}", valueName, valueStr, e);
                 return null;
@@ -48,7 +55,7 @@ public final class ValueStore<V>  {
         values.put(key, value);
         final String valueName = String.format(NAME_FORMAT, clazz.getName(), key);
         try {
-            preferences.put(valueName, new ObjectMapper().writeValueAsString(value));
+            preferences.put(valueName, mapper.writeValueAsString(value));
         } catch (final IOException e) {
             Logger.warn("The value {} could not be saved to {}: {}", value, valueName, e);
         }
