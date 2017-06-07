@@ -5,6 +5,7 @@ import com.easternedgerobotics.rov.value.CpuValue;
 import com.pi4j.system.SystemInfo;
 import rx.Observable;
 import rx.exceptions.Exceptions;
+import rx.functions.Func3;
 import rx.schedulers.Schedulers;
 
 import java.io.BufferedReader;
@@ -38,12 +39,22 @@ public final class CpuInformation {
     }
 
     /**
+     * Used to create instances of CpuValue.
+     */
+    private final Func3<Long, Float, Float, ? extends CpuValue> ctor;
+
+    /**
      * Constructs a CpuInformation instance that polls CPU properties at the specified interval.
      *
      * @param interval the interval at which to poll the CPU properties.
      * @param timeUnit the {@code TimeUnit} the interval is specified in.
      */
-    public CpuInformation(final long interval, final TimeUnit timeUnit) {
+    public CpuInformation(
+        final Func3<Long, Float, Float, ? extends CpuValue> ctor,
+        final long interval,
+        final TimeUnit timeUnit
+    ) {
+        this.ctor = ctor;
         this.interval = Observable.interval(interval, timeUnit);
     }
 
@@ -59,7 +70,7 @@ public final class CpuInformation {
     private CpuValue pollCpu(final long tick) {
         if (RASPBIAN) {
             try {
-                return new CpuValue(
+                return ctor.call(
                     SystemInfo.getClockFrequencyArm(),
                     SystemInfo.getCpuTemperature(),
                     SystemInfo.getCpuVoltage());
@@ -67,6 +78,6 @@ public final class CpuInformation {
                 throw Exceptions.propagate(e);
             }
         }
-        return new CpuValue();
+        return ctor.call(0L, 0f, 0f);
     }
 }
