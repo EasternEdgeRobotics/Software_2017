@@ -6,13 +6,8 @@ import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_imgcodecs;
 import org.bytedeco.javacpp.opencv_imgproc;
-import org.pmw.tinylog.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public final class DistortionCorrector {
     /**
@@ -56,16 +51,10 @@ public final class DistortionCorrector {
         final File input,
         final File output
     ) {
-        try {
-            final Mat image = opencv_imgcodecs.imread(input.getAbsolutePath());
-            final Mat undistorted = new Mat();
-            opencv_imgproc.remap(image, undistorted, map1, map2, opencv_imgproc.INTER_LINEAR);
-            final Path temp = File.createTempFile("TcpFileReceiver", ".tmp").toPath();
-            opencv_imgcodecs.imwrite(temp.toAbsolutePath().toString(), undistorted);
-            Files.copy(temp, output.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (final IOException e) {
-            Logger.error(e);
-        }
+        final Mat image = opencv_imgcodecs.imread(input.getAbsolutePath());
+        final Mat undistorted = new Mat();
+        opencv_imgproc.remap(image, undistorted, map1, map2, opencv_imgproc.INTER_LINEAR);
+        opencv_imgcodecs.imwrite(output.getAbsolutePath(), undistorted);
         return output;
     }
 }

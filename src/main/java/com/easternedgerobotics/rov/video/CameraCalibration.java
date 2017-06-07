@@ -103,10 +103,11 @@ public class CameraCalibration {
             final File destination = FileUtil.nextName(config.cameraAPreUndistortedDirectory(), "captureA", "png");
             if (destination != null) {
                 DirectoryUtil.observe(Paths.get(config.cameraAPreUndistortedDirectory()))
-                    .filter(destination.toPath()::equals).take(1)
+                    .subscribeOn(scheduler)
+                    .observeOn(scheduler)
+                    .filter(destination.getAbsoluteFile().toPath()::equals).take(1)
                     .timeout(1, TimeUnit.MINUTES)
                     .delay(1, TimeUnit.SECONDS)
-                    .observeOn(scheduler)
                     .subscribe(path -> corrector.apply(destination, saveFile));
                 eventPublisher.emit(new CameraCaptureValueA(destination.getAbsolutePath()));
             }
@@ -120,14 +121,15 @@ public class CameraCalibration {
      * @param saveFile the output destination
      */
     public void captureUndistortedImageB(final File saveFile) {
-        store.get(config.cameraAName()).map(DistortionCorrector::new).ifPresent(corrector -> {
+        store.get(config.cameraBName()).map(DistortionCorrector::new).ifPresent(corrector -> {
             final File destination = FileUtil.nextName(config.cameraBPreUndistortedDirectory(), "captureB", "png");
             if (destination != null) {
                 DirectoryUtil.observe(Paths.get(config.cameraBPreUndistortedDirectory()))
-                    .filter(destination.toPath()::equals).take(1)
+                    .subscribeOn(scheduler)
+                    .observeOn(scheduler)
+                    .filter(destination.getAbsoluteFile().toPath()::equals).take(1)
                     .timeout(1, TimeUnit.MINUTES)
                     .delay(1, TimeUnit.SECONDS)
-                    .observeOn(scheduler)
                     .subscribe(path -> corrector.apply(destination, saveFile));
                 eventPublisher.emit(new CameraCaptureValueB(destination.getAbsolutePath()));
             }
