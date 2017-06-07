@@ -28,6 +28,7 @@ import com.easternedgerobotics.rov.value.LightASpeedValue;
 import com.easternedgerobotics.rov.value.LightBSpeedValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
+import com.easternedgerobotics.rov.value.RasprimeCpuValue;
 import com.easternedgerobotics.rov.value.RasprimeHeartbeatValue;
 import com.easternedgerobotics.rov.value.SpeedValue;
 import com.easternedgerobotics.rov.value.StarboardAftSpeedValue;
@@ -243,7 +244,8 @@ final class Rov {
      */
     void init(final Scheduler io, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final CpuInformation cpuInformation = new CpuInformation(config.cpuPollInterval(), TimeUnit.SECONDS);
+        final CpuInformation cpuInformation = new CpuInformation(
+            RasprimeCpuValue::new, config.cpuPollInterval(), TimeUnit.SECONDS);
         cpuInformation.observe().subscribe(eventPublisher::emit, Logger::error);
 
         final Observable<TopsideHeartbeatValue> topsideHeartbeats = eventPublisher
