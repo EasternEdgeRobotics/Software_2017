@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    compile files("${System.properties['java.home']}/../lib/tools.jar")
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7"
     compile 'com.neuronrobotics:nrjavaserial:3.11.0'
     compile 'com.pi4j:pi4j-core:1.0'
