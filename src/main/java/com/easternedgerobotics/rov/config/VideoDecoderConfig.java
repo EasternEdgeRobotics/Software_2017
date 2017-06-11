@@ -18,4 +18,6 @@ public interface VideoDecoderConfig {
     String preset();
 
     int numBuffers();
+
+    String introVideoLocation();
 }

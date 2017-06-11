@@ -12,11 +12,24 @@ image_port = int(sys.argv[3])
 signal_lock = threading.Lock()
 
 with picamera.PiCamera() as camera:
+    video_socket = socket.socket()
+    video_socket.connect((host, video_port))
+    video_file = video_socket.makefile('wb', 1024)
+
+    def start_video():
+        camera.resolution = (1296, 720)
+        camera.framerate = 20
+        camera.start_recording(
+            video_file,
+            format='h264',
+            intra_period=0,
+            quality=30,
+            bitrate=25000000)
+
     def flip_video(signum, stack):
         with signal_lock:
             camera.vflip = not camera.vflip
             camera.hflip = not camera.hflip
-    signal.signal(signal.SIGUSR1, flip_video)
 
     def take_image(signum, stack):
         with signal_lock:
@@ -27,28 +40,18 @@ with picamera.PiCamera() as camera:
                 image_socket.send(image_path + '\n')
                 image_file = image_socket.makefile('wb')
                 try:
+                    camera.stop_recording()
+                    camera.resolution = (2592, 1944)
                     camera.capture(image_file, 'png')
                 finally:
                     image_file.close()
                     image_socket.close()
+                    start_video()
 
-    signal.signal(signal.SIGUSR2, take_image)
-
-    #camera.resolution = (1920, 1088)
-    camera.resolution = (1296, 720)
-    camera.framerate = 20
-
-    video_socket = socket.socket()
-    video_socket.connect((host, video_port))
-    video_file = video_socket.makefile('wb', 1024)
     try:
-        camera.start_recording(
-            video_file,
-            format='h264',
-            intra_period=0,
-            quality=30,
-            bitrate=25000000)#,
-            #resize=(1296, 720))
+        signal.signal(signal.SIGUSR1, flip_video)
+        signal.signal(signal.SIGUSR2, take_image)
+        start_video()
         while True:
             signal.pause()
     finally:
