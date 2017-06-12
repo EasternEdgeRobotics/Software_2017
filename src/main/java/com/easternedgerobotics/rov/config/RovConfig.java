@@ -42,4 +42,12 @@ public interface RovConfig {
     int i2cBus();
 
     long shutdownTimeout();
+
+    String bluetoothComPortName();
+
+    String bluetoothComPort();
+
+    int bluetoothConnectionTimeout();
+
+    int bluetoothBaudRate();
 }

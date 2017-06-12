@@ -2,9 +2,11 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.config.RovConfig;
+import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.Accelerometer;
 import com.easternedgerobotics.rov.io.Barometer;
+import com.easternedgerobotics.rov.io.Bluetooth;
 import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.PWM;
@@ -122,6 +124,12 @@ class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Ma
     }
 }
 
+class MockBluetooth implements Bluetooth {
+    public void start(final EventPublisher eventPublisher) { }
+
+    public void stop() { }
+}
+
 @SuppressWarnings({"checkstyle:magicnumber"})
 public class RovTest {
     private static final RovConfig ROV_CONFIG = new MockRovConfig();
@@ -135,7 +143,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
 
@@ -153,7 +162,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -173,7 +183,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
@@ -192,7 +203,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -212,7 +224,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -263,7 +276,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -279,7 +293,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -295,7 +310,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -311,7 +327,8 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, ROV_CONFIG);
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));

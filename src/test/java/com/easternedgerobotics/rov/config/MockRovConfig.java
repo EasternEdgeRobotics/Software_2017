@@ -85,4 +85,20 @@ public final class MockRovConfig implements RovConfig {
     public long shutdownTimeout() {
         return 1;
     }
+
+    public String bluetoothComPortName() {
+        return "bluetooth";
+    }
+
+    public String bluetoothComPort() {
+        return "/dev/ttyS0";
+    }
+
+    public int bluetoothConnectionTimeout() {
+        return 2000;
+    }
+
+    public int bluetoothBaudRate() {
+        return 9600;
+    }
 }

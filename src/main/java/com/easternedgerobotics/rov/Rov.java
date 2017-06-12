@@ -9,6 +9,8 @@ import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.ADC;
 import com.easternedgerobotics.rov.io.Accelerometer;
 import com.easternedgerobotics.rov.io.Barometer;
+import com.easternedgerobotics.rov.io.Bluetooth;
+import com.easternedgerobotics.rov.io.BluetoothReader;
 import com.easternedgerobotics.rov.io.CpuInformation;
 import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Light;
@@ -88,6 +90,8 @@ final class Rov {
 
     private final Magnetometer magnetometer;
 
+    private final Bluetooth bluetooth;
+
     private final EventPublisher eventPublisher;
 
     private final AtomicBoolean dead = new AtomicBoolean(true);
@@ -99,6 +103,7 @@ final class Rov {
         final EventPublisher eventPublisher,
         final List<MaestroChannel> channels,
         final AltIMU imu,
+        final Bluetooth bluetooth,
         final RovConfig rovConfig
     ) {
         this.eventPublisher = eventPublisher;
@@ -216,6 +221,8 @@ final class Rov {
         accelerometer = () -> imu.acceleration();
         gyroscope = () -> imu.angularVelocity();
         thermometer = () -> imu.temperature();
+
+        this.bluetooth = bluetooth;
     }
 
     void shutdown() {
@@ -232,6 +239,7 @@ final class Rov {
         motors.forEach(Motor::writeZero);
         lights.forEach(Light::writeZero);
         thrusters.forEach(Thruster::writeZero);
+        bluetooth.stop();
         eventPublisher.emit(new RasprimeHeartbeatValue(false));
     }
 
@@ -271,18 +279,20 @@ final class Rov {
         thrusters.forEach(Thruster::writeZero);
 
         // Temporarily commented section to prevent logs overflowing. FIX ME!!!
-        //
-        //        final Observable<Long> sensorInterval = Observable.interval(
-        //                config.sensorPollInterval(),
-        //                TimeUnit.MILLISECONDS,
-        //                io);
-        //        sensorInterval.subscribe(tick -> {
-        //            eventPublisher.emit(barometer.pressure());
-        //            eventPublisher.emit(accelerometer.acceleration());
-        //            eventPublisher.emit(gyroscope.angularVelocity());
-        //            eventPublisher.emit(magnetometer.rotation());
-        //            eventPublisher.emit(thermometer.temperature());
-        //        });
+
+        final Observable<Long> sensorInterval = Observable.interval(
+                config.sensorPollInterval(),
+                TimeUnit.MILLISECONDS,
+                io);
+        sensorInterval.subscribe(tick -> {
+            eventPublisher.emit(barometer.pressure());
+            eventPublisher.emit(accelerometer.acceleration());
+            eventPublisher.emit(gyroscope.angularVelocity());
+            eventPublisher.emit(magnetometer.rotation());
+            eventPublisher.emit(thermometer.temperature());
+        });
+
+        bluetooth.start(eventPublisher);
     }
 
     private void thrustersUpdate() {
@@ -369,6 +379,12 @@ final class Rov {
                 eventPublisher,
                 new Maestro<>(serial, rovConfig.maestroDeviceNumber()),
                 new AltIMU10v3(new PololuBus(rovConfig.i2cBus()), rovConfig.altImuSa0High()),
+                new BluetoothReader(
+                    rovConfig.bluetoothComPortName(),
+                    rovConfig.bluetoothComPort(),
+                    rovConfig.bluetoothConnectionTimeout(),
+                    rovConfig.bluetoothBaudRate()
+                ),
                 rovConfig);
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));

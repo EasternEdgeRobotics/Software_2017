@@ -44,6 +44,10 @@ rov:
   altImuSa0High: false
   i2cBus: 1
   shutdownTimeout: 1000
+  bluetoothComPortName: bluetooth
+  bluetoothComPort: /dev/ttyS0
+  bluetoothConnectionTimeout: 2000
+  bluetoothBaudRate: 9600
 videoDecoder:
   host: 192.168.88.2
   portA: 12345
