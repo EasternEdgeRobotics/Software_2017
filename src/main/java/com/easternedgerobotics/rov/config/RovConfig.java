@@ -50,4 +50,6 @@ public interface RovConfig {
     int bluetoothConnectionTimeout();
 
     int bluetoothBaudRate();
+
+    int pressureSensorConvertTime();
 }
