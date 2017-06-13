@@ -113,9 +113,9 @@ public final class Topside extends Application {
             Schedulers.io());
 
         videoDecoder = new VideoDecoder(
-            eventPublisher,
-            configSource.getConfig("videoDecoder",
-                VideoDecoderConfig.class));
+                eventPublisher,
+                configSource.getConfig("videoDecoder", VideoDecoderConfig.class),
+                launchConfig.broadcast());
 
         final ValueStore<CameraCalibrationValue> cameraCalibrationStore = ValueStore.of(
             CameraCalibrationValue.class, config.preferencesHome());
