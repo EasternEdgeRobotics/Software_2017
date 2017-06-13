@@ -1,6 +1,7 @@
 package com.easternedgerobotics.rov.io;
 
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.devices.Bluetooth;
 import com.easternedgerobotics.rov.value.BluetoothValue;
 
 import gnu.io.CommPortIdentifier;

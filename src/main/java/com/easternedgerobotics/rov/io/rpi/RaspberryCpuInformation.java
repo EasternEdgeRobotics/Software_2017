@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.rpi;
 
 import com.easternedgerobotics.rov.value.CpuValue;
 
@@ -16,7 +16,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("InnerAssignment")
-public final class CpuInformation {
+public final class RaspberryCpuInformation {
     private final Observable<Long> interval;
 
     private static final boolean RASPBIAN;
@@ -44,12 +44,12 @@ public final class CpuInformation {
     private final Func3<Long, Float, Float, ? extends CpuValue> ctor;
 
     /**
-     * Constructs a CpuInformation instance that polls CPU properties at the specified interval.
+     * Constructs a RaspberryCpuInformation instance that polls CPU properties at the specified interval.
      *
      * @param interval the interval at which to poll the CPU properties.
      * @param timeUnit the {@code TimeUnit} the interval is specified in.
      */
-    public CpuInformation(
+    public RaspberryCpuInformation(
         final Func3<Long, Float, Float, ? extends CpuValue> ctor,
         final long interval,
         final TimeUnit timeUnit

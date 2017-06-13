@@ -1,7 +1,7 @@
 package com.easternedgerobotics.rov.io.pololu;
 
-import com.easternedgerobotics.rov.io.ADC;
-import com.easternedgerobotics.rov.io.PWM;
+import com.easternedgerobotics.rov.io.devices.ADC;
+import com.easternedgerobotics.rov.io.devices.PWM;
 import com.easternedgerobotics.rov.math.Range;
 
 import com.pi4j.io.serial.Serial;

@@ -1,11 +1,11 @@
 package com.easternedgerobotics.rov.io.pololu;
 
-import com.easternedgerobotics.rov.io.Accelerometer;
-import com.easternedgerobotics.rov.io.Barometer;
-import com.easternedgerobotics.rov.io.Gyroscope;
-import com.easternedgerobotics.rov.io.I2C;
-import com.easternedgerobotics.rov.io.Magnetometer;
-import com.easternedgerobotics.rov.io.Thermometer;
+import com.easternedgerobotics.rov.io.devices.Accelerometer;
+import com.easternedgerobotics.rov.io.devices.Barometer;
+import com.easternedgerobotics.rov.io.devices.Gyroscope;
+import com.easternedgerobotics.rov.io.devices.I2C;
+import com.easternedgerobotics.rov.io.devices.Magnetometer;
+import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AngularVelocityValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;

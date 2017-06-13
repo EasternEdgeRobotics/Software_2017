@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.io.rpi;
 
-import com.easternedgerobotics.rov.io.I2C;
+import com.easternedgerobotics.rov.io.devices.I2C;
 
 import com.pi4j.io.i2c.I2CDevice;
 import org.pmw.tinylog.Logger;

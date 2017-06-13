@@ -6,21 +6,21 @@ import com.easternedgerobotics.rov.config.RovConfig;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.ADC;
-import com.easternedgerobotics.rov.io.Accelerometer;
-import com.easternedgerobotics.rov.io.Barometer;
-import com.easternedgerobotics.rov.io.Bluetooth;
 import com.easternedgerobotics.rov.io.BluetoothReader;
-import com.easternedgerobotics.rov.io.CpuInformation;
-import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Light;
-import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.Motor;
-import com.easternedgerobotics.rov.io.PWM;
-import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.io.Thruster;
+import com.easternedgerobotics.rov.io.devices.ADC;
+import com.easternedgerobotics.rov.io.devices.Accelerometer;
+import com.easternedgerobotics.rov.io.devices.Barometer;
+import com.easternedgerobotics.rov.io.devices.Bluetooth;
+import com.easternedgerobotics.rov.io.devices.Gyroscope;
+import com.easternedgerobotics.rov.io.devices.Magnetometer;
+import com.easternedgerobotics.rov.io.devices.PWM;
+import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
+import com.easternedgerobotics.rov.io.rpi.RaspberryCpuInformation;
 import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
@@ -253,7 +253,7 @@ final class Rov {
      */
     void init(final Scheduler io, final Scheduler sensorRead, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final CpuInformation cpuInformation = new CpuInformation(
+        final RaspberryCpuInformation cpuInformation = new RaspberryCpuInformation(
             RasprimeCpuValue::new, config.cpuPollInterval(), TimeUnit.SECONDS);
         cpuInformation.observe().subscribe(eventPublisher::emit, Logger::error);
 

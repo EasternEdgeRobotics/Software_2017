@@ -4,7 +4,7 @@ import com.easternedgerobotics.rov.config.Config;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.CpuInformation;
+import com.easternedgerobotics.rov.io.rpi.RaspberryCpuInformation;
 import com.easternedgerobotics.rov.value.CameraCaptureValueB;
 import com.easternedgerobotics.rov.value.PicameraBCpuValue;
 import com.easternedgerobotics.rov.value.PicameraBHeartbeatValue;
@@ -59,7 +59,7 @@ final class PicameraB {
             .observeOn(Schedulers.io())
             .subscribe(eventPublisher::emit);
 
-        final CpuInformation cpuInformation = new CpuInformation(
+        final RaspberryCpuInformation cpuInformation = new RaspberryCpuInformation(
             PicameraBCpuValue::new, heartbeatRate, TimeUnit.SECONDS);
         cpuInformation.observe().subscribe(eventPublisher::emit, Logger::error);
     }
