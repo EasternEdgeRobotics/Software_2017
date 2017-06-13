@@ -8,8 +8,8 @@ import com.easternedgerobotics.rov.io.devices.Magnetometer;
 import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AngularVelocityValue;
-import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.PressureValue;
 import com.easternedgerobotics.rov.value.RotationValue;
 
 import java.util.List;
@@ -83,7 +83,7 @@ public final class AltIMU10v3 implements Accelerometer, Barometer, Thermometer, 
     }
 
     @Override
-    public InternalPressureValue pressure() {
+    public PressureValue pressure() {
         return lps.pollPressure();
     }
 

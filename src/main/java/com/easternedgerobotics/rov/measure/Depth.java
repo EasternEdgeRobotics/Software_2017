@@ -11,7 +11,7 @@ public final class Depth {
     private static final double DENSITY_FRESH_WATER = 1000;
 
     public static DepthValue fromPressure(final ExternalPressureValue pressure) {
-        return new DepthValue(fromPressure(pressure.getValue()));
+        return new DepthValue(fromPressure(pressure.getPressure()));
     }
 
     private static float fromPressure(final float value) {

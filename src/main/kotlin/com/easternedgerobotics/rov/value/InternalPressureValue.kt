@@ -1,3 +1,5 @@
 package com.easternedgerobotics.rov.value
 
-data class InternalPressureValue(val pressure: Float = 0f)
+data class InternalPressureValue(override val pressure: Float = 0f) : PressureValue {
+    constructor() : this(0f)
+}

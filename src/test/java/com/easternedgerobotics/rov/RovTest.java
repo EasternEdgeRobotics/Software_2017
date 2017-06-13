@@ -26,6 +26,7 @@ import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.LightASpeedValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
+import com.easternedgerobotics.rov.value.PressureValue;
 import com.easternedgerobotics.rov.value.RollPowerValue;
 import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
@@ -104,7 +105,7 @@ class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Ma
     }
 
     @Override
-    public InternalPressureValue pressure() {
+    public PressureValue pressure() {
         return pressure;
     }
 

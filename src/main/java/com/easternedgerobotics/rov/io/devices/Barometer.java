@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.io.devices;
 
-import com.easternedgerobotics.rov.value.InternalPressureValue;
+import com.easternedgerobotics.rov.value.PressureValue;
 
 public interface Barometer {
 
@@ -9,5 +9,5 @@ public interface Barometer {
      *
      * @return an observable at rate interval
      */
-    public InternalPressureValue pressure();
+    PressureValue pressure();
 }

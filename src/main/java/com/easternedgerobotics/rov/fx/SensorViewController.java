@@ -107,7 +107,7 @@ public class SensorViewController implements ViewController {
 
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
         subscriptions.add(
-            externalPressureA.map(ExternalPressureValue::getValue)
+            externalPressureA.map(ExternalPressureValue::getPressure)
                 .compose(new MedianTransformer<>(SENSOR_MEDIAN_SAMPLE_SIZE))
                 .compose(new AverageTransformer<>(SENSOR_AVERAGE_SAMPLE_SIZE))
                 .map(Number::floatValue)
@@ -127,7 +127,7 @@ public class SensorViewController implements ViewController {
     }
 
     private void updatePressureLabel(final ExternalPressureValue value) {
-        view.externalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getValue()));
+        view.externalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getPressure()));
     }
 
     private void updateTemperatureLabel(final InternalTemperatureValue internalTemperatureValue) {
