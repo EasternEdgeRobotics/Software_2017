@@ -1,3 +1,5 @@
 package com.easternedgerobotics.rov.value
 
-data class ExternalTemperatureValue(val value: Float = 0f)
+data class ExternalTemperatureValue(override val temperature: Float = 0f) : TemperatureValue {
+    constructor() : this(0f)
+}

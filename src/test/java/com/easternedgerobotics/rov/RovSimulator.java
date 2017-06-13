@@ -19,6 +19,7 @@ import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.PressureValue;
 import com.easternedgerobotics.rov.value.RotationValue;
+import com.easternedgerobotics.rov.value.TemperatureValue;
 
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
@@ -100,7 +101,7 @@ class NullAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Ma
     }
 
     @Override
-    public InternalTemperatureValue temperature() {
+    public TemperatureValue temperature() {
         return new InternalTemperatureValue();
     }
 }

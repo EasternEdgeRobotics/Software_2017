@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.io.devices;
 
-import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.TemperatureValue;
 
 public interface Thermometer {
     /**
@@ -8,5 +8,5 @@ public interface Thermometer {
      *
      * @return the current temperature
      */
-    InternalTemperatureValue temperature();
+    TemperatureValue temperature();
 }
