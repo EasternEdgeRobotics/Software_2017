@@ -248,9 +248,10 @@ final class Rov {
      * if communication with the topside is lost or the received heartbeat value indicates a non-operational
      * status and will shutdown.
      * @param io the scheduler to use for device I/O
+     * @param sensorRead the scheduler to use for sensor I/O
      * @param clock the scheduler to use for timing
      */
-    void init(final Scheduler io, final Scheduler clock) {
+    void init(final Scheduler io, final Scheduler sensorRead, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
         final CpuInformation cpuInformation = new CpuInformation(
             RasprimeCpuValue::new, config.cpuPollInterval(), TimeUnit.SECONDS);
@@ -283,7 +284,7 @@ final class Rov {
         final Observable<Long> sensorInterval = Observable.interval(
                 config.sensorPollInterval(),
                 TimeUnit.MILLISECONDS,
-                io);
+                sensorRead);
         sensorInterval.subscribe(tick -> {
             eventPublisher.emit(barometer.pressure());
             eventPublisher.emit(accelerometer.acceleration());
@@ -390,7 +391,7 @@ final class Rov {
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
             serial.open(launchConfig.serialPort(), launchConfig.baudRate());
-            rov.init(Schedulers.io(), Schedulers.computation());
+            rov.init(Schedulers.io(), Schedulers.newThread(), Schedulers.computation());
 
             Logger.info("Started");
             eventPublisher.await();
