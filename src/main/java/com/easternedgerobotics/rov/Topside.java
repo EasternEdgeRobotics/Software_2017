@@ -2,6 +2,7 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
 import com.easternedgerobotics.rov.config.Config;
+import com.easternedgerobotics.rov.config.DistanceCalculatorConfig;
 import com.easternedgerobotics.rov.config.JoystickConfig;
 import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.SliderConfig;
@@ -23,6 +24,7 @@ import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.io.arduino.ArduinoPort;
 import com.easternedgerobotics.rov.io.joystick.JoystickController;
 import com.easternedgerobotics.rov.io.joystick.LogitechExtremeJoystickSource;
+import com.easternedgerobotics.rov.math.DistanceCalculator;
 import com.easternedgerobotics.rov.value.CameraCalibrationValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.video.CameraCalibration;
@@ -115,15 +117,22 @@ public final class Topside extends Application {
             configSource.getConfig("videoDecoder",
                 VideoDecoderConfig.class));
 
+        final ValueStore<CameraCalibrationValue> cameraCalibrationStore = ValueStore.of(
+            CameraCalibrationValue.class, config.preferencesHome());
+
         cameraCalibration = new CameraCalibration(
             eventPublisher,
             configSource.getConfig("cameraCalibration", CameraCalibrationConfig.class),
-            ValueStore.of(CameraCalibrationValue.class, config.preferencesHome()),
+            cameraCalibrationStore,
             Schedulers.newThread());
 
         fileReceiver = new TcpFileReceiver(
             launchConfig.fileReceiverPort(),
             launchConfig.fileReceiverSocketBacklog());
+
+        final DistanceCalculator distanceCalculator = new DistanceCalculator(
+            configSource.getConfig("distanceCalculator", DistanceCalculatorConfig.class),
+            cameraCalibrationStore);
 
         viewLoader = new ViewLoader(MainView.class, "Control Software", new HashMap<Class<?>, Object>() {
             {
@@ -132,6 +141,7 @@ public final class Topside extends Application {
                 put(EmergencyStopController.class, emergencyStopController);
                 put(VideoDecoder.class, videoDecoder);
                 put(CameraCalibration.class, cameraCalibration);
+                put(DistanceCalculator.class, distanceCalculator);
             }
         });
 

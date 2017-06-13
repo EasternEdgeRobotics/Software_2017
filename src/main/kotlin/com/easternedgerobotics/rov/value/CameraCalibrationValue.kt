@@ -32,9 +32,13 @@ data class CameraCalibrationValue(
         val matrix = opencv_core.Mat(3, 3, opencv_core.CV_64F)
         val indexer = matrix.createIndexer<DoubleIndexer>()
         indexer.put(0, 0, fx)
-        indexer.put(1, 1, fy)
+        indexer.put(0, 1, 0.0)
         indexer.put(0, 2, cx)
+        indexer.put(1, 0, 0.0)
+        indexer.put(1, 1, fy)
         indexer.put(1, 2, cy)
+        indexer.put(2, 0, 0.0)
+        indexer.put(2, 1, 0.0)
         indexer.put(2, 2, 1.0)
         return matrix
     }

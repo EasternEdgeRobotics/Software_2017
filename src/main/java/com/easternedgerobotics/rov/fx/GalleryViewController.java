@@ -61,6 +61,7 @@ public final class GalleryViewController implements ViewController {
         subscriptions.clear();
         subscriptions.add(DirectoryUtil.observe(Paths.get(curr))
             .subscribeOn(Schedulers.newThread())
+            .delay(1, TimeUnit.SECONDS)
             .subscribe(this::onImagePathChanged));
     }
 
