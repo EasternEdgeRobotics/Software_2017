@@ -283,7 +283,7 @@ final class Rov {
         final Observable<Long> sensorInterval = Observable.interval(
                 config.sensorPollInterval(),
                 TimeUnit.MILLISECONDS,
-                io);
+                Schedulers.newThread());
         sensorInterval.subscribe(tick -> {
             eventPublisher.emit(barometer.pressure());
             eventPublisher.emit(accelerometer.acceleration());
