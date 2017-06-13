@@ -2,36 +2,24 @@ package com.easternedgerobotics.rov;
 
 import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.config.RovConfig;
-import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.devices.ADC;
-import com.easternedgerobotics.rov.io.devices.Accelerometer;
-import com.easternedgerobotics.rov.io.devices.Barometer;
-import com.easternedgerobotics.rov.io.devices.Bluetooth;
-import com.easternedgerobotics.rov.io.devices.Gyroscope;
-import com.easternedgerobotics.rov.io.devices.Magnetometer;
-import com.easternedgerobotics.rov.io.devices.PWM;
-import com.easternedgerobotics.rov.io.devices.Thermometer;
+import com.easternedgerobotics.rov.io.MockPressureSensor;
+import com.easternedgerobotics.rov.io.devices.MockBluetooth;
+import com.easternedgerobotics.rov.io.pololu.MockAltIMU;
+import com.easternedgerobotics.rov.io.pololu.MockMaestro;
 import com.easternedgerobotics.rov.test.OrgPwmTinylogSuppressionRule;
 import com.easternedgerobotics.rov.test.TestEventPublisher;
-import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AftPowerValue;
-import com.easternedgerobotics.rov.value.AngularVelocityValue;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.ForePowerValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
-import com.easternedgerobotics.rov.value.InternalPressureValue;
-import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.LightASpeedValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
-import com.easternedgerobotics.rov.value.PressureValue;
 import com.easternedgerobotics.rov.value.RollPowerValue;
-import com.easternedgerobotics.rov.value.RotationValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
 import com.easternedgerobotics.rov.value.SwayPowerValue;
-import com.easternedgerobotics.rov.value.TemperatureValue;
 import com.easternedgerobotics.rov.value.ToolingASpeedValue;
 import com.easternedgerobotics.rov.value.TopsideHeartbeatValue;
 import com.easternedgerobotics.rov.value.YawPowerValue;
@@ -44,93 +32,7 @@ import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 import rx.schedulers.TestScheduler;
 
-import java.util.AbstractList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-interface Channel extends ADC, PWM {
-    // ???
-}
-
-class MockMaestro extends AbstractList<Channel> {
-    private static final byte NUMBER_OF_CHANNELS = 24;
-
-    private final Map<Byte, Channel> channels = new HashMap<>();
-
-    @Override
-    public final Channel get(final int index) {
-        return channels.computeIfAbsent((byte) index, k -> Mockito.mock(Channel.class, Mockito.RETURNS_SELF));
-    }
-
-    @Override
-    public final int size() {
-        return NUMBER_OF_CHANNELS;
-    }
-}
-
-class MockAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
-    private AccelerationValue acceleration = new AccelerationValue();
-
-    private InternalPressureValue pressure = new InternalPressureValue();
-
-    private AngularVelocityValue angularVelocity = new AngularVelocityValue();
-
-    private RotationValue rotation = new RotationValue();
-
-    private InternalTemperatureValue temperature = new InternalTemperatureValue();
-
-    public void setAcceleration(final AccelerationValue acceleration) {
-        this.acceleration = acceleration;
-    }
-
-    public void setPressure(final InternalPressureValue pressure) {
-        this.pressure = pressure;
-    }
-
-    public void setAngularVelocity(final AngularVelocityValue angularVelocity) {
-        this.angularVelocity = angularVelocity;
-    }
-
-    public void setRotation(final RotationValue rotation) {
-        this.rotation = rotation;
-    }
-
-    public void setTemperature(final InternalTemperatureValue temperature) {
-        this.temperature = temperature;
-    }
-
-    @Override
-    public AccelerationValue acceleration() {
-        return acceleration;
-    }
-
-    @Override
-    public PressureValue pressure() {
-        return pressure;
-    }
-
-    @Override
-    public AngularVelocityValue angularVelocity() {
-        return angularVelocity;
-    }
-
-    @Override
-    public RotationValue rotation() {
-        return rotation;
-    }
-
-    @Override
-    public TemperatureValue temperature() {
-        return temperature;
-    }
-}
-
-class MockBluetooth implements Bluetooth {
-    public void start(final EventPublisher eventPublisher) { }
-
-    public void stop() { }
-}
 
 @SuppressWarnings({"checkstyle:magicnumber"})
 public class RovTest {
@@ -145,8 +47,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
 
@@ -164,8 +67,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -185,8 +89,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
@@ -205,8 +110,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -226,8 +132,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -278,8 +185,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -295,8 +203,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -312,8 +221,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -329,8 +239,9 @@ public class RovTest {
         final TestEventPublisher eventPublisher = new TestEventPublisher(scheduler);
         final MockMaestro maestro = new MockMaestro();
         final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));

@@ -5,21 +5,10 @@ import com.easternedgerobotics.rov.config.MockLaunchConfig;
 import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.devices.ADC;
-import com.easternedgerobotics.rov.io.devices.Accelerometer;
-import com.easternedgerobotics.rov.io.devices.Barometer;
-import com.easternedgerobotics.rov.io.devices.Gyroscope;
-import com.easternedgerobotics.rov.io.devices.Magnetometer;
-import com.easternedgerobotics.rov.io.devices.PWM;
-import com.easternedgerobotics.rov.io.devices.Thermometer;
-import com.easternedgerobotics.rov.math.Range;
-import com.easternedgerobotics.rov.value.AccelerationValue;
-import com.easternedgerobotics.rov.value.AngularVelocityValue;
-import com.easternedgerobotics.rov.value.InternalPressureValue;
-import com.easternedgerobotics.rov.value.InternalTemperatureValue;
-import com.easternedgerobotics.rov.value.PressureValue;
-import com.easternedgerobotics.rov.value.RotationValue;
-import com.easternedgerobotics.rov.value.TemperatureValue;
+import com.easternedgerobotics.rov.io.MockPressureSensor;
+import com.easternedgerobotics.rov.io.devices.MockBluetooth;
+import com.easternedgerobotics.rov.io.pololu.MockAltIMU;
+import com.easternedgerobotics.rov.io.pololu.MockMaestro;
 
 import org.pmw.tinylog.Logger;
 import rx.broadcast.BasicOrder;
@@ -30,81 +19,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.AbstractList;
-import java.util.HashMap;
-import java.util.Map;
-
-final class NullChannel implements ADC, PWM {
-    private final byte id;
-
-    NullChannel(final byte id) {
-        this.id = id;
-    }
-
-    @Override
-    @SuppressWarnings({"checkstyle:MagicNumber"})
-    public final float voltage() {
-        return 42;
-    }
-
-    @Override
-    public final void write(final float value) {
-        Logger.debug("Write {} to Maestro channel {}", value, id);
-    }
-
-    @Override
-    public final void writeZero() {
-        write(0);
-    }
-
-    @Override
-    public final PWM setOutputRange(final Range range) {
-        return this;
-    }
-}
-
-final class NullMaestro extends AbstractList<NullChannel> {
-    private static final byte NUMBER_OF_CHANNELS = 24;
-
-    private final Map<Byte, NullChannel> channels = new HashMap<>();
-
-    @Override
-    public final NullChannel get(final int index) {
-        return channels.computeIfAbsent((byte) index, NullChannel::new);
-    }
-
-    @Override
-    public final int size() {
-        return NUMBER_OF_CHANNELS;
-    }
-}
-
-class NullAltIMU implements Accelerometer, Barometer, Thermometer, Gyroscope, Magnetometer {
-    @Override
-    public AccelerationValue acceleration() {
-        return new AccelerationValue();
-    }
-
-    @Override
-    public PressureValue pressure() {
-        return new InternalPressureValue();
-    }
-
-    @Override
-    public AngularVelocityValue angularVelocity() {
-        return new AngularVelocityValue();
-    }
-
-    @Override
-    public RotationValue rotation() {
-        return new RotationValue();
-    }
-
-    @Override
-    public TemperatureValue temperature() {
-        return new InternalTemperatureValue();
-    }
-}
 
 public final class RovSimulator {
     private RovSimulator() {
@@ -118,11 +32,12 @@ public final class RovSimulator {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final NullMaestro maestro = new NullMaestro();
-        final NullAltIMU imu = new NullAltIMU();
+        final MockMaestro maestro = new MockMaestro();
+        final MockAltIMU imu = new MockAltIMU();
+        final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
         final MockRovConfig config = new MockRovConfig();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, config);
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
