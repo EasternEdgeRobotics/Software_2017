@@ -1,7 +1,6 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
-import com.easternedgerobotics.rov.io.MPX4250AP;
 import com.easternedgerobotics.rov.math.AverageTransformer;
 import com.easternedgerobotics.rov.math.MedianTransformer;
 import com.easternedgerobotics.rov.value.CpuValue;
@@ -111,7 +110,6 @@ public class SensorViewController implements ViewController {
             externalPressureA.map(ExternalPressureValue::getValue)
                 .compose(new MedianTransformer<>(SENSOR_MEDIAN_SAMPLE_SIZE))
                 .compose(new AverageTransformer<>(SENSOR_AVERAGE_SAMPLE_SIZE))
-                .compose(MPX4250AP.CALIBRATION)
                 .map(Number::floatValue)
                 .map(ExternalPressureValue::new)
                 .observeOn(JAVA_FX_SCHEDULER)
