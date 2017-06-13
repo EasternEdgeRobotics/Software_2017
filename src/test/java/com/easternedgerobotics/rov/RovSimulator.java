@@ -124,7 +124,7 @@ public final class RovSimulator {
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
-        rov.init(Schedulers.io(), Schedulers.computation());
+        rov.init(Schedulers.io(), Schedulers.newThread(), Schedulers.computation());
         Logger.info("Started");
         eventPublisher.await();
     }

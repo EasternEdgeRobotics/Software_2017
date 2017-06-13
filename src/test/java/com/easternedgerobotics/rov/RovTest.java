@@ -146,7 +146,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel())).writeZero();
         Mockito.verify(maestro.get(ROV_CONFIG.vertForeChannel())).writeZero();
@@ -165,7 +165,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
@@ -186,7 +186,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
 
         Mockito.verify(maestro.get(ROV_CONFIG.starboardForeChannel()), Mockito.times(2)).writeZero();
@@ -206,7 +206,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
@@ -227,7 +227,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new GlobalPowerValue(1));
         eventPublisher.emit(new HeavePowerValue(1));
@@ -279,7 +279,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueA(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
@@ -296,7 +296,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new CameraSpeedValueB(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
@@ -313,7 +313,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new ToolingASpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
@@ -330,7 +330,7 @@ public class RovTest {
         final MockBluetooth bluetooth = new MockBluetooth();
         final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, ROV_CONFIG);
 
-        rov.init(scheduler, scheduler);
+        rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
         eventPublisher.emit(new LightASpeedValue(1));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
