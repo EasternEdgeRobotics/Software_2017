@@ -2,7 +2,7 @@ package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.config.Configurable;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.EmergencyStopController;
+import com.easternedgerobotics.rov.io.panel.EmergencyStopController;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
 import com.easternedgerobotics.rov.value.PicameraAHeartbeatValue;
 import com.easternedgerobotics.rov.value.PicameraBHeartbeatValue;

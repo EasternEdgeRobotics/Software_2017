@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.panel;
 
 import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.value.DigitalPinValue;

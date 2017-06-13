@@ -1,7 +1,8 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.panel;
 
 import com.easternedgerobotics.rov.control.TwoActionButton;
 import com.easternedgerobotics.rov.event.EventPublisher;
+import com.easternedgerobotics.rov.io.ValueStore;
 import com.easternedgerobotics.rov.io.arduino.Arduino;
 import com.easternedgerobotics.rov.value.DigitalPinValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;

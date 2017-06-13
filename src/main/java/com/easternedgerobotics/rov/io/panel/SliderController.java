@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.panel;
 
 import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.control.AnalogToPowerLevel;
