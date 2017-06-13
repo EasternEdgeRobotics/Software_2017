@@ -21,7 +21,7 @@ import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
-import com.easternedgerobotics.rov.io.pololu.PololuBus;
+import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
@@ -379,7 +379,7 @@ final class Rov {
             final Rov rov = new Rov(
                 eventPublisher,
                 new Maestro<>(serial, rovConfig.maestroDeviceNumber()),
-                new AltIMU10v3(new PololuBus(rovConfig.i2cBus()), rovConfig.altImuSa0High()),
+                new AltIMU10v3(new RaspberryI2CBus(rovConfig.i2cBus()), rovConfig.altImuSa0High()),
                 new BluetoothReader(
                     rovConfig.bluetoothComPortName(),
                     rovConfig.bluetoothComPort(),

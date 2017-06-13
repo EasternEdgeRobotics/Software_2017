@@ -51,7 +51,7 @@ final class MockPololuBus extends AbstractList<I2C> {
 
     @Override
     public int size() {
-        return PololuBus.MAX_ADDRESS;
+        return Byte.MAX_VALUE;
     }
 }
 

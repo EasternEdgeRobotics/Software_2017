@@ -5,7 +5,7 @@ import com.easternedgerobotics.rov.config.MockLaunchConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
-import com.easternedgerobotics.rov.io.pololu.PololuBus;
+import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.value.AccelerationValue;
 import com.easternedgerobotics.rov.value.AngularVelocityValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
@@ -36,7 +36,7 @@ public final class AltIMU10v3Test {
 
         // We want to ground SA0 because its easier than putting power to it
         // Therefore the last address bit will be low
-        final AltIMU10v3 imu = new AltIMU10v3(new PololuBus(I2CBus.BUS_1), false);
+        final AltIMU10v3 imu = new AltIMU10v3(new RaspberryI2CBus(I2CBus.BUS_1), false);
 
         final Observable<Long> readRate = Observable.interval(100, TimeUnit.MILLISECONDS);
 

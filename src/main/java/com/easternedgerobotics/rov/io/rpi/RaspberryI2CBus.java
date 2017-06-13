@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io.pololu;
+package com.easternedgerobotics.rov.io.rpi;
 
 import com.easternedgerobotics.rov.io.I2C;
 
@@ -13,12 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class PololuBus extends AbstractList<I2C> {
-    /**
-     * Maximum address value in i2c.
-     */
-    static final byte MAX_ADDRESS = 127;
-
+public final class RaspberryI2CBus extends AbstractList<I2C> {
     /**
      * Cache the i2c devices for further lookups.
      */
@@ -35,13 +30,13 @@ public final class PololuBus extends AbstractList<I2C> {
     private final Lock lock = new ReentrantLock();
 
     /**
-     * Create a Pololu i2c bus with this channel.
+     * Create a raspberry pi i2c bus with this channel.
      * Returns empty channels if device does not exits or
      * the device cannot be found.
      *
      * @param channel the bus id.
      */
-    public PololuBus(final int channel) {
+    public RaspberryI2CBus(final int channel) {
         I2CBus bus;
         try {
             bus = I2CFactory.getInstance(channel);
@@ -56,7 +51,7 @@ public final class PololuBus extends AbstractList<I2C> {
         return lookup.computeIfAbsent(index, i -> {
             if (bus != null) {
                 try {
-                    return new PololuI2C(bus.getDevice(i), lock);
+                    return new RaspberryI2C(bus.getDevice(i), lock);
                 } catch (final IOException e) {
                     Logger.warn(e);
                 }
@@ -67,6 +62,6 @@ public final class PololuBus extends AbstractList<I2C> {
 
     @Override
     public int size() {
-        return MAX_ADDRESS;
+        return Byte.MAX_VALUE;
     }
 }
