@@ -63,6 +63,8 @@ public class MainView implements View {
 
     final Button distanceButton = new Button("Distance Calculator");
 
+    final Button bluetoothButton = new Button("Bluetooth Sensor");
+
     @Inject
     public MainView() {
         final List<ToggleButton> indicatorButtons = Arrays.asList(
@@ -76,7 +78,8 @@ public class MainView implements View {
             cameraButton,
             resetCameraButton,
             calibrationButton,
-            distanceButton);
+            distanceButton,
+            bluetoothButton);
 
         final int totalWeight = START_BUTTON_WEIGHT + HEARTBEAT_WEIGHT + (normalButtons.size() * NORMAL_BUTTON_WEIGHT);
 

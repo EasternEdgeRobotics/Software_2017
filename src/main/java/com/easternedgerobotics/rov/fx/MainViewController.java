@@ -98,6 +98,8 @@ public class MainViewController implements ViewController {
             .subscribe(v -> viewLoader.load(DistanceCalculatorView.class, "Distance Calculator"));
         JavaFxObservable.valuesOf(view.calibrationButton.pressedProperty()).filter(x -> !x)
             .subscribe(v -> viewLoader.load(CameraCalibrationView.class, "California Camera Calibration by Cal"));
+        JavaFxObservable.valuesOf(view.bluetoothButton.pressedProperty()).filter(x -> !x)
+            .subscribe(v -> viewLoader.load(BluetoothView.class, "Bluetooth Sensor"));
     }
 
     @Override

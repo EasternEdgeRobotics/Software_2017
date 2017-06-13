@@ -116,7 +116,11 @@ public final class RovSimulator {
         final DatagramSocket socket = new DatagramSocket(broadcastPort);
         final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
             socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
-        final Rov rov = new Rov(eventPublisher, new NullMaestro(), new NullAltIMU(), new MockRovConfig());
+        final NullMaestro maestro = new NullMaestro();
+        final NullAltIMU imu = new NullAltIMU();
+        final MockBluetooth bluetooth = new MockBluetooth();
+        final MockRovConfig config = new MockRovConfig();
+        final Rov rov = new Rov(eventPublisher, maestro, imu, bluetooth, config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
