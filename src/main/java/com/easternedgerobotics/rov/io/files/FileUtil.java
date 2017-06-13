@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.files;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;

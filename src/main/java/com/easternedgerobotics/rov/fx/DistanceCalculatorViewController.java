@@ -6,7 +6,7 @@ import com.easternedgerobotics.rov.config.DistanceCalculatorConfig;
 import com.easternedgerobotics.rov.fx.distance.AxisNode;
 import com.easternedgerobotics.rov.fx.distance.ShapeScene;
 import com.easternedgerobotics.rov.fx.distance.TextNode;
-import com.easternedgerobotics.rov.io.FileUtil;
+import com.easternedgerobotics.rov.io.files.FileUtil;
 import com.easternedgerobotics.rov.math.DistanceCalculator;
 import com.easternedgerobotics.rov.value.AxisValue;
 import com.easternedgerobotics.rov.value.PointValue;

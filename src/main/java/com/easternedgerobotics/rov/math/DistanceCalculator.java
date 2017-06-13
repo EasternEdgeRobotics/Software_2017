@@ -1,7 +1,7 @@
 package com.easternedgerobotics.rov.math;
 
 import com.easternedgerobotics.rov.config.DistanceCalculatorConfig;
-import com.easternedgerobotics.rov.io.ValueStore;
+import com.easternedgerobotics.rov.io.files.ValueStore;
 import com.easternedgerobotics.rov.value.AxisValue;
 import com.easternedgerobotics.rov.value.CameraCalibrationValue;
 import com.easternedgerobotics.rov.value.PointValue;

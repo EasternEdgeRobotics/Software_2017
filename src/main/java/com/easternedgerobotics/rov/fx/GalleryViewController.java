@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.fx;
 
-import com.easternedgerobotics.rov.io.DirectoryUtil;
+import com.easternedgerobotics.rov.io.files.DirectoryUtil;
 
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
