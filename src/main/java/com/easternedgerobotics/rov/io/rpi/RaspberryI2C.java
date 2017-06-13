@@ -36,6 +36,18 @@ final class RaspberryI2C implements I2C {
     }
 
     @Override
+    public void write(final byte value) {
+        lock.lock();
+        try {
+            device.write(value);
+        } catch (final IOException e) {
+            Logger.warn(e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
     public void write(final byte writeAddress, final byte value) {
         lock.lock();
         try {
