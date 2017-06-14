@@ -3,8 +3,8 @@ package com.easternedgerobotics.rov.io;
 import com.easternedgerobotics.rov.io.devices.Barometer;
 import com.easternedgerobotics.rov.io.devices.I2C;
 import com.easternedgerobotics.rov.io.devices.Thermometer;
-import com.easternedgerobotics.rov.value.InternalPressureValue;
-import com.easternedgerobotics.rov.value.InternalTemperatureValue;
+import com.easternedgerobotics.rov.value.ExternalPressureValue;
+import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.PressureValue;
 import com.easternedgerobotics.rov.value.TemperatureValue;
 
@@ -33,9 +33,9 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
 
     private static final byte CONVERT_D2 = 0x5A;
 
-    private final AtomicReference<PressureValue> pressure = new AtomicReference<>(new InternalPressureValue());
+    private final AtomicReference<PressureValue> pressure = new AtomicReference<>(new ExternalPressureValue());
 
-    private final AtomicReference<TemperatureValue> temperature = new AtomicReference<>(new InternalTemperatureValue());
+    private final AtomicReference<TemperatureValue> temperature = new AtomicReference<>(new ExternalTemperatureValue());
 
     private final I2C channel;
 
@@ -69,7 +69,7 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
                 final short[] crc = new short[8];
                 for (byte i = 0; i < 7; i++) {
                     final byte[] c = channel.read((byte) (PROM_READ + i * 2), 2);
-                    crc[i] = (short) ((c[0] << 8) | c[2]);
+                    crc[i] = (short) ((c[0] << 8) | c[1]);
                 }
                 final byte crcRead = (byte) (crc[0] >> 12);
                 final byte crcCalculated = crc4(crc);
@@ -158,7 +158,7 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
         final double off2 = off - iOff;
         final double sens2 = sens - iSens;
 
-        temperature.set(new InternalTemperatureValue((float) ((t - iT)  / 100.0)));
-        pressure.set(new InternalPressureValue((float) ((((d1 * sens2) / 2097152.0 - off2) / 8192.0) / 10)));
+        temperature.set(new ExternalTemperatureValue((float) ((t - iT)  / 100.0)));
+        pressure.set(new ExternalPressureValue((float) ((((d1 * sens2) / 2097152.0 - off2) / 8192.0) / 10)));
     }
 }
