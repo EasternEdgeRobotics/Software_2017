@@ -63,10 +63,10 @@ public class CameraCalibration {
     public void calibrate() {
         final Scheduler.Worker worker = scheduler.createWorker();
         worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
-            config.cameraAImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
+            config.cameraAImagesDirectory(), config.chessboardWidth(), config.chessboardHeight(), config.downSample()
         ).ifPresent(value -> store.set(config.cameraAName(), value)));
         worker.schedule(() -> ChessboardCalibration.findCameraCalibrationResult(
-            config.cameraBImagesDirectory(), config.chessboardWidth(), config.chessboardHeight()
+            config.cameraBImagesDirectory(), config.chessboardWidth(), config.chessboardHeight(), config.downSample()
         ).ifPresent(value -> store.set(config.cameraBName(), value)));
     }
 
