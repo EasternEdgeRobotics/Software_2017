@@ -101,4 +101,8 @@ public final class MockRovConfig implements RovConfig {
     public int bluetoothBaudRate() {
         return 9600;
     }
+
+    public int pressureSensorConvertTime() {
+        return 9600;
+    }
 }

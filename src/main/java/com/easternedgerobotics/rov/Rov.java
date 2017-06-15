@@ -6,22 +6,24 @@ import com.easternedgerobotics.rov.config.RovConfig;
 import com.easternedgerobotics.rov.control.SixThrusterConfig;
 import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.ADC;
-import com.easternedgerobotics.rov.io.Accelerometer;
-import com.easternedgerobotics.rov.io.Barometer;
-import com.easternedgerobotics.rov.io.Bluetooth;
+import com.easternedgerobotics.rov.io.Bar30PressureSensor;
 import com.easternedgerobotics.rov.io.BluetoothReader;
-import com.easternedgerobotics.rov.io.CpuInformation;
-import com.easternedgerobotics.rov.io.Gyroscope;
 import com.easternedgerobotics.rov.io.Light;
-import com.easternedgerobotics.rov.io.Magnetometer;
 import com.easternedgerobotics.rov.io.Motor;
-import com.easternedgerobotics.rov.io.PWM;
-import com.easternedgerobotics.rov.io.Thermometer;
 import com.easternedgerobotics.rov.io.Thruster;
+import com.easternedgerobotics.rov.io.devices.ADC;
+import com.easternedgerobotics.rov.io.devices.Accelerometer;
+import com.easternedgerobotics.rov.io.devices.Barometer;
+import com.easternedgerobotics.rov.io.devices.Bluetooth;
+import com.easternedgerobotics.rov.io.devices.Gyroscope;
+import com.easternedgerobotics.rov.io.devices.I2C;
+import com.easternedgerobotics.rov.io.devices.Magnetometer;
+import com.easternedgerobotics.rov.io.devices.PWM;
+import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
-import com.easternedgerobotics.rov.io.pololu.PololuBus;
+import com.easternedgerobotics.rov.io.rpi.RaspberryCpuInformation;
+import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
@@ -82,9 +84,13 @@ final class Rov {
 
     private final Accelerometer accelerometer;
 
-    private final Barometer barometer;
+    private final Barometer internalBarometer;
 
-    private final Thermometer thermometer;
+    private final Thermometer internalThermometer;
+
+    private final Barometer externalBarometer;
+
+    private final Thermometer externalThermometer;
 
     private final Gyroscope gyroscope;
 
@@ -99,10 +105,12 @@ final class Rov {
     private final Subject<Void, Void> killSwitch = PublishSubject.create();
 
     <AltIMU extends Accelerometer & Barometer & Thermometer & Gyroscope & Magnetometer,
+            PressureSensor extends Barometer & Thermometer,
             MaestroChannel extends ADC & PWM> Rov(
         final EventPublisher eventPublisher,
         final List<MaestroChannel> channels,
         final AltIMU imu,
+        final PressureSensor externalPressure,
         final Bluetooth bluetooth,
         final RovConfig rovConfig
     ) {
@@ -216,11 +224,14 @@ final class Rov {
                 channels.get(config.lightBChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD)))
         ));
 
-        barometer = () -> imu.pressure();
+        internalBarometer = () -> imu.pressure();
         magnetometer = () -> imu.rotation();
         accelerometer = () -> imu.acceleration();
         gyroscope = () -> imu.angularVelocity();
-        thermometer = () -> imu.temperature();
+        internalThermometer = () -> imu.temperature();
+
+        externalBarometer = () -> externalPressure.pressure();
+        externalThermometer = () -> externalPressure.temperature();
 
         this.bluetooth = bluetooth;
     }
@@ -253,7 +264,7 @@ final class Rov {
      */
     void init(final Scheduler io, final Scheduler sensorRead, final Scheduler clock) {
         Logger.debug("Wiring up heartbeat, timeout, and thruster updates");
-        final CpuInformation cpuInformation = new CpuInformation(
+        final RaspberryCpuInformation cpuInformation = new RaspberryCpuInformation(
             RasprimeCpuValue::new, config.cpuPollInterval(), TimeUnit.SECONDS);
         cpuInformation.observe().subscribe(eventPublisher::emit, Logger::error);
 
@@ -279,18 +290,18 @@ final class Rov {
 
         thrusters.forEach(Thruster::writeZero);
 
-        // Temporarily commented section to prevent logs overflowing. FIX ME!!!
-
         final Observable<Long> sensorInterval = Observable.interval(
                 config.sensorPollInterval(),
                 TimeUnit.MILLISECONDS,
                 sensorRead);
         sensorInterval.subscribe(tick -> {
-            eventPublisher.emit(barometer.pressure());
+            eventPublisher.emit(internalBarometer.pressure());
             eventPublisher.emit(accelerometer.acceleration());
             eventPublisher.emit(gyroscope.angularVelocity());
             eventPublisher.emit(magnetometer.rotation());
-            eventPublisher.emit(thermometer.temperature());
+            eventPublisher.emit(internalThermometer.temperature());
+            eventPublisher.emit(externalBarometer.pressure());
+            eventPublisher.emit(externalThermometer.temperature());
         });
 
         bluetooth.start(eventPublisher);
@@ -338,14 +349,14 @@ final class Rov {
     public static void main(final String[] args) throws InterruptedException, IOException {
         final String app = "rov";
         final HelpFormatter formatter = new HelpFormatter();
-        final Option defaultConfig = Option.builder("d")
+        final Option defaultConfigOption = Option.builder("d")
             .longOpt("default")
             .hasArg()
             .argName("DEFAULT")
             .desc("name of the default config file")
             .required()
             .build();
-        final Option config = Option.builder("c")
+        final Option configOption = Option.builder("c")
             .longOpt("config")
             .hasArg()
             .argName("CONFIG")
@@ -354,44 +365,51 @@ final class Rov {
             .build();
 
         final Options options = new Options();
-        options.addOption(defaultConfig);
-        options.addOption(config);
+        options.addOption(defaultConfigOption);
+        options.addOption(configOption);
 
         try {
             final CommandLineParser parser = new DefaultParser();
             final CommandLine arguments = parser.parse(options, args);
 
-            final LaunchConfig launchConfig = new Config(
-                arguments.getOptionValue("d"),
-                arguments.getOptionValue("c")
-            ).getConfig("launch", LaunchConfig.class);
+            final Config config = new Config(arguments.getOptionValue("d"), arguments.getOptionValue("c"));
+            final LaunchConfig launchConfig = config.getConfig("launch", LaunchConfig.class);
+            final RovConfig rovConfig = config.getConfig("rov", RovConfig.class);
 
             final InetAddress broadcastAddress = InetAddress.getByName(launchConfig.broadcast());
             final int broadcastPort = launchConfig.defaultBroadcastPort();
             final DatagramSocket socket = new DatagramSocket(broadcastPort);
             final EventPublisher eventPublisher = new BroadcastEventPublisher(new UdpBroadcast<>(
                 socket, broadcastAddress, broadcastPort, new BasicOrder<>()));
+
             final Serial serial = SerialFactory.createInstance();
-            final RovConfig rovConfig = new Config(
-                    arguments.getOptionValue("d"),
-                    arguments.getOptionValue("c")
-            ).getConfig("rov", RovConfig.class);
+            final List<I2C> i2cBus = new RaspberryI2CBus(rovConfig.i2cBus());
+
+            final Scheduler sensorRead = Schedulers.newThread();
+
             final Rov rov = new Rov(
                 eventPublisher,
-                new Maestro<>(serial, rovConfig.maestroDeviceNumber()),
-                new AltIMU10v3(new PololuBus(rovConfig.i2cBus()), rovConfig.altImuSa0High()),
+                new Maestro<>(
+                    serial,
+                    rovConfig.maestroDeviceNumber()),
+                new AltIMU10v3(
+                    i2cBus,
+                    rovConfig.altImuSa0High()),
+                new Bar30PressureSensor(
+                    i2cBus.get(Bar30PressureSensor.ADDRESS),
+                    sensorRead,
+                    rovConfig.pressureSensorConvertTime()),
                 new BluetoothReader(
                     rovConfig.bluetoothComPortName(),
                     rovConfig.bluetoothComPort(),
                     rovConfig.bluetoothConnectionTimeout(),
-                    rovConfig.bluetoothBaudRate()
-                ),
+                    rovConfig.bluetoothBaudRate()),
                 rovConfig);
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
 
             serial.open(launchConfig.serialPort(), launchConfig.baudRate());
-            rov.init(Schedulers.io(), Schedulers.newThread(), Schedulers.computation());
+            rov.init(Schedulers.io(), sensorRead, Schedulers.computation());
 
             Logger.info("Started");
             eventPublisher.await();

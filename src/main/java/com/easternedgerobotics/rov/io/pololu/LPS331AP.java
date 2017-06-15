@@ -1,6 +1,6 @@
 package com.easternedgerobotics.rov.io.pololu;
 
-import com.easternedgerobotics.rov.io.I2C;
+import com.easternedgerobotics.rov.io.devices.I2C;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 

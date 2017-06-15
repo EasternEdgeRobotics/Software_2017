@@ -10,8 +10,8 @@ version=9.0.0
 192.168.88.2 ansible_user=eedge ansible_ssh_pass=eedge ansible_sudo_pass=eedge entry_point=com.easternedgerobotics.rov.Topside
 
 [rasprime]
-192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.Rov
+192.168.88.4 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.Rov suspend=n
 
 [picamera]
-192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraA
-192.168.88.6 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraB
+192.168.88.5 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraA suspend=n
+192.168.88.6 ansible_user=pi ansible_ssh_pass=raspberry entry_point=com.easternedgerobotics.rov.PicameraB suspend=n

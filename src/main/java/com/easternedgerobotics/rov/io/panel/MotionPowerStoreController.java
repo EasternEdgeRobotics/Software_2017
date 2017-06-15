@@ -1,8 +1,9 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.panel;
 
 import com.easternedgerobotics.rov.control.TwoActionButton;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.arduino.Arduino;
+import com.easternedgerobotics.rov.io.devices.IOBoard;
+import com.easternedgerobotics.rov.io.files.ValueStore;
 import com.easternedgerobotics.rov.value.DigitalPinValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
@@ -30,7 +31,7 @@ public final class MotionPowerStoreController {
     private final CompositeSubscription subscription = new CompositeSubscription();
 
     public MotionPowerStoreController(
-        final Arduino arduino,
+        final IOBoard io,
         final byte[] inputs,
         final byte[] outputs,
         final int profileSwitchDuration,
@@ -42,10 +43,8 @@ public final class MotionPowerStoreController {
     ) {
         final List<TwoActionButton> buttons = Collections
             .unmodifiableList(IntStream.range(0, outputs.length).mapToObj(i -> {
-                final Observable<Boolean> click =  arduino
-                    .digitalPin(inputs[i])
-                    .map(DigitalPinValue::getValue);
-                subscription.add(click.map(x -> !x).subscribe(value -> arduino.setPinValue(outputs[i], value)));
+                final Observable<Boolean> click = io.digitalPin(inputs[i]).map(DigitalPinValue::getValue);
+                subscription.add(click.map(x -> !x).subscribe(value -> io.setPinValue(outputs[i], value)));
                 return new TwoActionButton(click, profileSwitchDuration, scheduler);
             }).collect(Collectors.toList()));
 
@@ -63,10 +62,10 @@ public final class MotionPowerStoreController {
                 ), (click, value) -> value)
             .subscribe(value -> {
                 store.set(i, value);
-                arduino.setPinValue(outputs[i], true);
+                io.setPinValue(outputs[i], true);
                 Observable.interval(profileSaveFlashDuration, TimeUnit.MILLISECONDS, Schedulers.io())
                     .take(profileSaveFlashCount)
-                    .subscribe(tick -> arduino.setPinValue(outputs[i], tick % 2 == 0));
+                    .subscribe(tick -> io.setPinValue(outputs[i], tick % 2 == 0));
             })));
 
         subscription.add(Observable.range(0, outputs.length)

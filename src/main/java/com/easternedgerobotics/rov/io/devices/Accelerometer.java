@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.devices;
 
 import com.easternedgerobotics.rov.value.AccelerationValue;
 

@@ -48,6 +48,7 @@ rov:
   bluetoothComPort: /dev/ttyS0
   bluetoothConnectionTimeout: 2000
   bluetoothBaudRate: 9600
+  pressureSensorConvertTime: 100
 videoDecoder:
   host: 192.168.88.2
   portA: 12345

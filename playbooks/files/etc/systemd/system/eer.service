@@ -1,11 +1,14 @@
 [Unit]
 Description=Eastern Edge Robotics Control Software
+Wants=network-online.target
+After=network.target network-online.target
 
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
 RuntimeDirectory=eer
-ExecStart=/usr/bin/java -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} \
+ExecStart=/usr/bin/java -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend={{ suspend }} \
+    -cp "/opt/eer-{{ version }}/libs/*" {{ entry_point }} \
     --default /opt/eer-{{ version }}/defaultConfig.yml \
     --config /home/{{ ansible_user }}/config.yml
 

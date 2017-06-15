@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.files;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

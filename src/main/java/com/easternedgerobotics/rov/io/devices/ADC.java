@@ -1,4 +1,4 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.devices;
 
 /**
  * An Analog Digital Converter.

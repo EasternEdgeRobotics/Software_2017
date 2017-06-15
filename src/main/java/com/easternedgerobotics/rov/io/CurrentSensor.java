@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.io.devices.ADC;
 import com.easternedgerobotics.rov.value.CurrentValue;
 
 import java.util.function.Function;

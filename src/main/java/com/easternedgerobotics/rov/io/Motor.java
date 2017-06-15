@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.io;
 
+import com.easternedgerobotics.rov.io.devices.PWM;
 import com.easternedgerobotics.rov.value.SpeedValue;
 
 import rx.Observable;

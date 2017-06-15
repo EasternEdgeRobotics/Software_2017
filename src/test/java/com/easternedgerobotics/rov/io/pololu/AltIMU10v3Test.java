@@ -1,65 +1,19 @@
 package com.easternedgerobotics.rov.io.pololu;
 
-import com.easternedgerobotics.rov.io.I2C;
+import com.easternedgerobotics.rov.io.devices.I2C;
+import com.easternedgerobotics.rov.io.devices.MockI2CBus;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.AbstractList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-final class MockI2C implements I2C {
-    private Map<Byte, Byte> storage = new ConcurrentHashMap<>();
-
-    @Override
-    public void write(final byte writeAddress, final byte value) {
-        storage.put(writeAddress, value);
-    }
-
-    @Override
-    public void write(final byte writeAddress, final byte[] buffer) {
-        for (byte i = 0; i < buffer.length; i++) {
-            write((byte) (writeAddress + i), buffer[i]);
-        }
-    }
-
-    @Override
-    public byte read(final byte readAddress) {
-        return storage.computeIfAbsent(readAddress, i -> (byte) 0);
-    }
-
-    @Override
-    public byte[] read(final byte readAddress, final int readLength) {
-        final byte[] result = new byte[readLength];
-        for (byte i = 0; i < readLength; i++) {
-            result[i] = read((byte) (readAddress + i));
-        }
-        return result;
-    }
-}
-
-final class MockPololuBus extends AbstractList<I2C> {
-    private final Map<Integer, I2C> lookup = new ConcurrentHashMap<>();
-
-    @Override
-    public I2C get(final int index) {
-        return lookup.computeIfAbsent(index, i -> new MockI2C());
-    }
-
-    @Override
-    public int size() {
-        return PololuBus.MAX_ADDRESS;
-    }
-}
 
 @SuppressWarnings({"checkstyle:MagicNumber"})
 public final class AltIMU10v3Test {
     @Test
     public void doesEnableJustLowDevices() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
 
         final I2C l3gLow = bus.get(AltIMU10v3.L3GD20H_SA0_LOW_ADDRESS);
         final I2C l3gHigh = bus.get(AltIMU10v3.L3GD20H_SA0_HIGH_ADDRESS);
@@ -90,7 +44,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesEnableJustHighDevices() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
 
         final I2C l3gLow = bus.get(AltIMU10v3.L3GD20H_SA0_LOW_ADDRESS);
         final I2C l3gHigh = bus.get(AltIMU10v3.L3GD20H_SA0_HIGH_ADDRESS);
@@ -121,7 +75,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesReadCorrectPressure() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
         final AltIMU10v3 imu = new AltIMU10v3(bus, false);
         Assert.assertEquals(0, imu.pressure().getPressure(), 0.001);
         final float pressure = 111;
@@ -140,7 +94,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesReadCorrectTemperature() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
         final AltIMU10v3 imu = new AltIMU10v3(bus, false);
         Assert.assertEquals(LPS331AP.TEMP_OFFSET, imu.temperature().getTemperature(), 0.001);
         final float temperature = 33;
@@ -157,7 +111,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesReadCorrectGyro() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
         final AltIMU10v3 imu = new AltIMU10v3(bus, false);
         Assert.assertEquals(0, imu.angularVelocity().getX(), 0.001);
         Assert.assertEquals(0, imu.angularVelocity().getY(), 0.001);
@@ -181,7 +135,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesReadCorrectMagnetometer() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
         final AltIMU10v3 imu = new AltIMU10v3(bus, false);
         Assert.assertEquals(0, imu.rotation().getX(), 0.001);
         Assert.assertEquals(0, imu.rotation().getY(), 0.001);
@@ -205,7 +159,7 @@ public final class AltIMU10v3Test {
 
     @Test
     public void doesReadCorrectAccelerometer() {
-        final List<I2C> bus = new MockPololuBus();
+        final List<I2C> bus = new MockI2CBus();
         final AltIMU10v3 imu = new AltIMU10v3(bus, false);
         Assert.assertEquals(0, imu.acceleration().getX(), 0.001);
         Assert.assertEquals(0, imu.acceleration().getY(), 0.001);

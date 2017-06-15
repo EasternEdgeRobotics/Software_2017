@@ -2,9 +2,9 @@ package com.easternedgerobotics.rov.video;
 
 import com.easternedgerobotics.rov.config.CameraCalibrationConfig;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.DirectoryUtil;
-import com.easternedgerobotics.rov.io.FileUtil;
-import com.easternedgerobotics.rov.io.ValueStore;
+import com.easternedgerobotics.rov.io.files.DirectoryUtil;
+import com.easternedgerobotics.rov.io.files.FileUtil;
+import com.easternedgerobotics.rov.io.files.ValueStore;
 import com.easternedgerobotics.rov.value.CameraCalibrationValue;
 import com.easternedgerobotics.rov.value.CameraCaptureValueA;
 import com.easternedgerobotics.rov.value.CameraCaptureValueB;

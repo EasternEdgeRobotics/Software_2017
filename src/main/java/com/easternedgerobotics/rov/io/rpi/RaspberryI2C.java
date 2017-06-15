@@ -1,6 +1,6 @@
-package com.easternedgerobotics.rov.io.pololu;
+package com.easternedgerobotics.rov.io.rpi;
 
-import com.easternedgerobotics.rov.io.I2C;
+import com.easternedgerobotics.rov.io.devices.I2C;
 
 import com.pi4j.io.i2c.I2CDevice;
 import org.pmw.tinylog.Logger;
@@ -8,14 +8,14 @@ import org.pmw.tinylog.Logger;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
-final class PololuI2C implements I2C {
+final class RaspberryI2C implements I2C {
     /**
      * Set this bit high in the register address to enable multiple byte reads.
      */
     private static final byte MULTI_READ_ENABLE = (byte) 0x80;
 
     /**
-     * The I2C interface connected to an IMU chip.
+     * The I2C interface connected to a raspberry pi i2c device.
      */
     private I2CDevice device;
 
@@ -25,14 +25,26 @@ final class PololuI2C implements I2C {
     private final Lock lock;
 
     /**
-     * Read from an IMU chip.
+     * Read from a raspberry pi i2c device.
      *
      * @param device the base I2C interface.
      * @param lock concurrency safety.
      */
-    PololuI2C(final I2CDevice device, final Lock lock) {
+    RaspberryI2C(final I2CDevice device, final Lock lock) {
         this.device = device;
         this.lock = lock;
+    }
+
+    @Override
+    public void write(final byte value) {
+        lock.lock();
+        try {
+            device.write(value);
+        } catch (final IOException e) {
+            Logger.warn(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -82,6 +94,18 @@ final class PololuI2C implements I2C {
         } catch (final IOException e) {
             Logger.warn(e);
             return new byte[readLength];
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public byte[] readUnsafe(final byte readAddress, final int readLength) throws IOException {
+        lock.lock();
+        try {
+            final byte[] readBuffer = new byte[readLength];
+            device.read(readAddress, readBuffer, 0, readBuffer.length);
+            return readBuffer;
         } finally {
             lock.unlock();
         }

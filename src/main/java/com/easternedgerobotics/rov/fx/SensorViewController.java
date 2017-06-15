@@ -1,11 +1,9 @@
 package com.easternedgerobotics.rov.fx;
 
 import com.easternedgerobotics.rov.event.Event;
-import com.easternedgerobotics.rov.io.MPX4250AP;
-import com.easternedgerobotics.rov.math.AverageTransformer;
-import com.easternedgerobotics.rov.math.MedianTransformer;
 import com.easternedgerobotics.rov.value.CpuValue;
 import com.easternedgerobotics.rov.value.ExternalPressureValue;
+import com.easternedgerobotics.rov.value.ExternalTemperatureValue;
 import com.easternedgerobotics.rov.value.InternalPressureValue;
 import com.easternedgerobotics.rov.value.InternalTemperatureValue;
 import com.easternedgerobotics.rov.value.PicameraACpuValue;
@@ -53,9 +51,11 @@ public class SensorViewController implements ViewController {
 
     private final Observable<PicameraBCpuValue> picameraBCpuValues;
 
-    private final Observable<InternalPressureValue> internalPressure;
+    private final Observable<ExternalPressureValue> externalPressure;
 
-    private final Observable<ExternalPressureValue> externalPressureA;
+    private final Observable<ExternalTemperatureValue> externalTemperature;
+
+    private final Observable<InternalPressureValue> internalPressure;
 
     private final Observable<InternalTemperatureValue> internalTemperature;
 
@@ -70,8 +70,9 @@ public class SensorViewController implements ViewController {
         @Event final Observable<RasprimeCpuValue> rasprimeCpuValues,
         @Event final Observable<PicameraACpuValue> picameraACpuValues,
         @Event final Observable<PicameraBCpuValue> picameraBCpuValues,
+        @Event final Observable<ExternalPressureValue> externalPressure,
+        @Event final Observable<ExternalTemperatureValue> externalTemperature,
         @Event final Observable<InternalPressureValue> internalPressure,
-        @Event final Observable<ExternalPressureValue> externalPressureA,
         @Event final Observable<InternalTemperatureValue> internalTemperature
     ) {
         this.view = view;
@@ -83,8 +84,9 @@ public class SensorViewController implements ViewController {
         this.picameraBCpuValues = picameraBCpuValues;
         this.subscriptions = new CompositeSubscription();
 
+        this.externalPressure = externalPressure;
+        this.externalTemperature = externalTemperature;
         this.internalPressure = internalPressure;
-        this.externalPressureA = externalPressureA;
         this.internalTemperature = internalTemperature;
     }
 
@@ -106,16 +108,9 @@ public class SensorViewController implements ViewController {
         picameraACpuInformationView.name.setText("PiCameraA");
         picameraBCpuInformationView.name.setText("PiCameraB");
 
+        subscriptions.add(externalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
+        subscriptions.add(externalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
         subscriptions.add(internalPressure.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updatePressureLabel));
-        subscriptions.add(
-            externalPressureA.map(ExternalPressureValue::getValue)
-                .compose(new MedianTransformer<>(SENSOR_MEDIAN_SAMPLE_SIZE))
-                .compose(new AverageTransformer<>(SENSOR_AVERAGE_SAMPLE_SIZE))
-                .compose(MPX4250AP.CALIBRATION)
-                .map(Number::floatValue)
-                .map(ExternalPressureValue::new)
-                .observeOn(JAVA_FX_SCHEDULER)
-                .subscribe(this::updatePressureLabel));
         subscriptions.add(internalTemperature.observeOn(JAVA_FX_SCHEDULER).subscribe(this::updateTemperatureLabel));
     }
 
@@ -124,12 +119,17 @@ public class SensorViewController implements ViewController {
         subscriptions.unsubscribe();
     }
 
-    private void updatePressureLabel(final InternalPressureValue value) {
-        view.internalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getPressure()));
+    private void updatePressureLabel(final ExternalPressureValue value) {
+        view.externalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getPressure()));
     }
 
-    private void updatePressureLabel(final ExternalPressureValue value) {
-        view.externalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getValue()));
+    private void updateTemperatureLabel(final ExternalTemperatureValue externalTemperatureValue) {
+        view.externalTemperatureLabel.setText(
+            String.format(SensorView.TEMPERATURE_LABEL_FORMAT, externalTemperatureValue.getTemperature()));
+    }
+
+    private void updatePressureLabel(final InternalPressureValue value) {
+        view.internalPressureLabel.setText(String.format(SensorView.PRESSURE_LABEL_FORMAT, value.getPressure()));
     }
 
     private void updateTemperatureLabel(final InternalTemperatureValue internalTemperatureValue) {

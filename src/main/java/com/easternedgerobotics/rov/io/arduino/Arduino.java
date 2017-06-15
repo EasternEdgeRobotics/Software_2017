@@ -1,5 +1,6 @@
 package com.easternedgerobotics.rov.io.arduino;
 
+import com.easternedgerobotics.rov.io.devices.IOBoard;
 import com.easternedgerobotics.rov.value.AnalogPinValue;
 import com.easternedgerobotics.rov.value.ArduinoHeartbeatValue;
 import com.easternedgerobotics.rov.value.DigitalPinValue;
@@ -12,7 +13,7 @@ import rx.subscriptions.CompositeSubscription;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public final class Arduino {
+public final class Arduino implements IOBoard {
     /**
      * Used to debounce buttons where a physical push may cause jankiness.
      */
@@ -139,33 +140,18 @@ public final class Arduino {
         port.close();
     }
 
-    /**
-     * Observe change events from a specific digital pin.
-     *
-     * @param address the physical location of the pin.
-     * @return Observable
-     */
+    @Override
     public Observable<DigitalPinValue> digitalPin(final byte address) {
         return reader.valuesOfType(DigitalPinValue.class).filter(pin -> pin.getAddress() == address)
             .debounce(DIGITAL_DEBOUNCE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Observe change events from a specific analog pin.
-     *
-     * @param address the physical location of the pin.
-     * @return Observable
-     */
+    @Override
     public Observable<AnalogPinValue> analogPin(final byte address) {
         return reader.valuesOfType(AnalogPinValue.class).filter(pin -> pin.getAddress() == address);
     }
 
-    /**
-     * Set the value of a digital pin.
-     *
-     * @param address the physical location of the pin.
-     * @param value the desired state of the pin.
-     */
+    @Override
     public void setPinValue(final byte address, final boolean value) {
         writer.setPinValue(address, value);
     }

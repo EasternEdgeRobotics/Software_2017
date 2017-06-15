@@ -1,10 +1,10 @@
-package com.easternedgerobotics.rov.io;
+package com.easternedgerobotics.rov.io.panel;
 
 import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.control.AnalogToPowerLevel;
 import com.easternedgerobotics.rov.control.SourceController;
 import com.easternedgerobotics.rov.event.EventPublisher;
-import com.easternedgerobotics.rov.io.arduino.Arduino;
+import com.easternedgerobotics.rov.io.devices.IOBoard;
 import com.easternedgerobotics.rov.value.AftPowerValue;
 import com.easternedgerobotics.rov.value.AnalogPinValue;
 import com.easternedgerobotics.rov.value.ForePowerValue;
@@ -26,39 +26,39 @@ public final class SliderController {
     private final CompositeSubscription subscription = new CompositeSubscription();
 
     public SliderController(
-        final Arduino arduino,
+        final IOBoard io,
         final Scheduler scheduler,
         final EventPublisher eventPublisher,
         final SliderConfig config
     ) {
-        final Observable<GlobalPowerValue> global = arduino.analogPin(config.globalPowerSliderAddress())
+        final Observable<GlobalPowerValue> global = io.analogPin(config.globalPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(GlobalPowerValue::new);
 
-        final Observable<HeavePowerValue> heave = arduino.analogPin(config.heavePowerSliderAddress())
+        final Observable<HeavePowerValue> heave = io.analogPin(config.heavePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(HeavePowerValue::new);
 
-        final Observable<SwayPowerValue> sway = arduino.analogPin(config.swayPowerSliderAddress())
+        final Observable<SwayPowerValue> sway = io.analogPin(config.swayPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(SwayPowerValue::new);
 
-        final Observable<SurgePowerValue> surge = arduino.analogPin(config.surgePowerSliderAddress())
+        final Observable<SurgePowerValue> surge = io.analogPin(config.surgePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(SurgePowerValue::new);
 
-        final Observable<PitchPowerValue> pitch = arduino.analogPin(config.pitchPowerSliderAddress())
+        final Observable<PitchPowerValue> pitch = io.analogPin(config.pitchPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(PitchPowerValue::new);
 
-        final Observable<YawPowerValue> yaw = arduino.analogPin(config.yawPowerSliderAddress())
+        final Observable<YawPowerValue> yaw = io.analogPin(config.yawPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(YawPowerValue::new);
 
-        final Observable<AftPowerValue> aft = arduino.analogPin(config.aftPowerSliderAddress())
+        final Observable<AftPowerValue> aft = io.analogPin(config.aftPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(AftPowerValue::new);
 
-        final Observable<ForePowerValue> fore = arduino.analogPin(config.forePowerSliderAddress())
+        final Observable<ForePowerValue> fore = io.analogPin(config.forePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(ForePowerValue::new);
 
-        final Observable<LightASpeedValue> lightA = arduino.analogPin(config.lightAPowerSliderAddress())
+        final Observable<LightASpeedValue> lightA = io.analogPin(config.lightAPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(LightASpeedValue::new);
 
-        final Observable<LightBSpeedValue> lightB = arduino.analogPin(config.lightBPowerSliderAddress())
+        final Observable<LightBSpeedValue> lightB = io.analogPin(config.lightBPowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(LightBSpeedValue::new);
 
         subscription.addAll(
