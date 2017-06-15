@@ -106,6 +106,7 @@ cameraCalibration:
   cameraBPreUndistortedDirectory: /home/eedge/pre-undistorted-b/
   chessboardWidth: 6
   chessboardHeight: 9
+  downSample: 1.5
 distanceCalculator:
   imageDirectory: /home/eedge/undistorted-images/
   dataDirectory: /home/eedge/undistorted-images-data/

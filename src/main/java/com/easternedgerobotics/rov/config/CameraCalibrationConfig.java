@@ -16,4 +16,6 @@ public interface CameraCalibrationConfig {
     int chessboardWidth();
 
     int chessboardHeight();
+
+    int downSample();
 }
