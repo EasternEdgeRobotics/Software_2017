@@ -99,6 +99,18 @@ final class RaspberryI2C implements I2C {
         }
     }
 
+    @Override
+    public byte[] readUnsafe(final byte readAddress, final int readLength) throws IOException {
+        lock.lock();
+        try {
+            final byte[] readBuffer = new byte[readLength];
+            device.read(readAddress, readBuffer, 0, readBuffer.length);
+            return readBuffer;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * This device requires the most significant bit in the address
      * to be set high when reading multiple bytes at once.

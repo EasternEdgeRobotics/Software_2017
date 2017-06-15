@@ -1,5 +1,7 @@
 package com.easternedgerobotics.rov.io.devices;
 
+import java.io.IOException;
+
 public interface I2C {
     /**
      * Write a single byte to the i2c device.
@@ -48,6 +50,17 @@ public interface I2C {
      * @return the bytes received
      */
     default byte[] read(final byte readAddress, final int readLength) {
+        return new byte[readLength];
+    }
+
+    /**
+     * Read multiple bytes from the i2c device.
+     *
+     * @param readAddress the starting register address
+     * @param readLength the amount of bytes to read
+     * @return the bytes received
+     */
+    default byte[] readUnsafe(final byte readAddress, final int readLength)  throws IOException {
         return new byte[readLength];
     }
 }
