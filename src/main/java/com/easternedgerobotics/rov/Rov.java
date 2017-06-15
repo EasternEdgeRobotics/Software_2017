@@ -290,8 +290,6 @@ final class Rov {
 
         thrusters.forEach(Thruster::writeZero);
 
-        // Temporarily commented section to prevent logs overflowing. FIX ME!!!
-
         final Observable<Long> sensorInterval = Observable.interval(
                 config.sensorPollInterval(),
                 TimeUnit.MILLISECONDS,
