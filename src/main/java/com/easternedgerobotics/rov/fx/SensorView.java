@@ -21,9 +21,11 @@ public class SensorView implements View {
 
     static final String TEMPERATURE_LABEL_FORMAT = "%.1f °C";
 
-    final Label internalPressureLabel = new Label("???");
-
     final Label externalPressureLabel = new Label("???");
+
+    final Label externalTemperatureLabel = new Label("???");
+
+    final Label internalPressureLabel = new Label("???");
 
     final Label internalTemperatureLabel = new Label("???");
 
@@ -35,8 +37,9 @@ public class SensorView implements View {
     public SensorView() {
         this.row = new HBox(
             LABEL_SPACING,
-            column(bold(internalPressureLabel), new Label("Internal Pressure")),
             column(bold(externalPressureLabel), new Label("External Pressure")),
+            column(bold(externalTemperatureLabel), new Label("External Temperature")),
+            column(bold(internalPressureLabel), new Label("Internal Pressure")),
             column(bold(internalTemperatureLabel), new Label("Internal Temperature"))
         );
 
