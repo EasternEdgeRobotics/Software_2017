@@ -11,6 +11,8 @@ import com.easternedgerobotics.rov.value.TemperatureValue;
 import org.pmw.tinylog.Logger;
 import rx.Scheduler;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,17 +39,17 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
 
     private final AtomicReference<TemperatureValue> temperature = new AtomicReference<>(new ExternalTemperatureValue());
 
+    private final AtomicBoolean firstReading = new AtomicBoolean(true);
+
     private final I2C channel;
 
-    private final Scheduler scheduler;
+    private final Scheduler.Worker worker;
 
     private final long conversionTime;
 
-    private final AtomicBoolean ready = new AtomicBoolean(false);
-
     public Bar30PressureSensor(final I2C channel, final Scheduler scheduler, final long conversionTime) {
         this.channel = channel;
-        this.scheduler = scheduler;
+        this.worker = scheduler.createWorker();
         this.conversionTime = conversionTime;
         init();
     }
@@ -63,20 +65,25 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
     }
 
     private void init() {
-        scheduler.createWorker().schedule(() -> {
+        worker.schedule(() -> {
             channel.write(RESET);
-            scheduler.createWorker().schedule(() -> {
-                final short[] crc = new short[8];
+            worker.schedule(() -> {
+                final long[] crc = new long[8];
                 for (byte i = 0; i < 7; i++) {
                     final byte[] c = channel.read((byte) (PROM_READ + i * 2), 2);
-                    crc[i] = (short) ((c[0] << 8) | c[1]);
+                    final ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+                    byteBuffer.put((byte) 0);
+                    byteBuffer.put((byte) 0);
+                    byteBuffer.put(c[0]);
+                    byteBuffer.put(c[1]);
+                    byteBuffer.flip();
+                    crc[i] = byteBuffer.asIntBuffer().get();
                 }
-                final byte crcRead = (byte) (crc[0] >> 12);
-                final byte crcCalculated = crc4(crc);
+                final long crcRead = crc[0] >> 12;
+                final long crcCalculated = crc4(crc);
 
                 if (crcCalculated == crcRead) {
-                    ready.set(true);
-                    scheduler.createWorker().schedule(() -> this.convert(crc));
+                    worker.schedule(() -> this.convert(crc));
                 } else {
                     Logger.error("Could not initialize the MS5837 pressure sensor");
                 }
@@ -84,81 +91,105 @@ public final class Bar30PressureSensor implements Barometer, Thermometer {
         });
     }
 
-    private static byte crc4(final short[] prom) {
-        short remainder = 0;
-
-        prom[0] = (short) ((prom[0]) & 0x0FFF);
+    private static long crc4(final long[] prom) {
+        long remainder = 0;
+        prom[0] = (prom[0]) & 0x0FFF;
         prom[7] = 0;
 
-        for (byte i = 0; i < 16; i++) {
+        for (int i = 0; i < 16; i++) {
             if (i % 2 == 1) {
-                remainder ^= (short) ((prom[i >> 1]) & 0x00FF);
+                remainder ^= prom[i >> 1] & 0x00FF;
             } else {
-                remainder ^= (short) (prom[i >> 1] >> 8);
+                remainder ^= prom[i >> 1] >> 8;
             }
-            for (byte nBit = 8; nBit > 0; nBit--) {
+            for (int nBit = 8; nBit > 0; nBit--) {
                 if ((remainder & 0x8000) != 0) {
-                    remainder = (short) ((remainder << 1) ^ 0x3000);
+                    remainder = (remainder << 1) ^ 0x3000;
                 } else {
-                    remainder = (short) (remainder << 1);
+                    remainder = remainder << 1;
                 }
             }
         }
-
-        remainder = (short) ((remainder >> 12) & 0x000F);
-
-        return (byte) remainder;
+        remainder = (remainder >> 12) & 0x000F;
+        return remainder;
     }
 
-    private void convert(final short[] crc) {
+    private void convert(final long[] crc) {
         channel.write(CONVERT_D1);
-        scheduler.createWorker().schedule(() -> {
-            final byte[] d1Bytes = channel.read(ADC_READ, 3);
-            final int d1 = (((d1Bytes[0] << 8) | d1Bytes[1]) << 8) | d1Bytes[2];
+        worker.schedule(() -> {
+            final byte[] d1Bytes;
+            try {
+                d1Bytes = channel.readUnsafe(ADC_READ, 3);
+            } catch (final IOException e) {
+                worker.schedule(() -> convert(crc));
+                return;
+            }
+            final ByteBuffer d1ByteBuffer = ByteBuffer.allocate(4);
+            d1ByteBuffer.put((byte) 0);
+            d1ByteBuffer.put(d1Bytes[0]);
+            d1ByteBuffer.put(d1Bytes[1]);
+            d1ByteBuffer.put(d1Bytes[2]);
+            d1ByteBuffer.flip();
+            final int d1 = d1ByteBuffer.asIntBuffer().get();
             channel.write(CONVERT_D2);
-            scheduler.createWorker().schedule(() -> {
-                channel.write(ADC_READ);
-                final byte[] d2Bytes = channel.read(ADC_READ, 3);
-                final int d2 = (((d2Bytes[0] << 8) | d2Bytes[1]) << 8) | d2Bytes[2];
+            worker.schedule(() -> {
+                final byte[] d2Bytes;
+                try {
+                    d2Bytes = channel.readUnsafe(ADC_READ, 3);
+                } catch (final IOException e) {
+                    worker.schedule(() -> convert(crc));
+                    return;
+                }
+                final ByteBuffer d2ByteBuffer = ByteBuffer.allocate(4);
+                d2ByteBuffer.put((byte) 0);
+                d2ByteBuffer.put(d2Bytes[0]);
+                d2ByteBuffer.put(d2Bytes[1]);
+                d2ByteBuffer.put(d2Bytes[2]);
+                d2ByteBuffer.flip();
+                final int d2 = d2ByteBuffer.asIntBuffer().get();
                 calculate(crc, d1, d2);
-                scheduler.createWorker().schedule(() -> convert(crc));
+                worker.schedule(() -> convert(crc));
             }, conversionTime, TimeUnit.MILLISECONDS);
-
         }, conversionTime, TimeUnit.MILLISECONDS);
     }
 
-    private void calculate(final short[] crc, final int d1, final int d2) {
+    private void calculate(final long[] crc, final int d1, final int d2) {
 
-        final double dT = d2 - crc[5] * 256.0;
-        final double sens = crc[1] * 32768.0 + (crc[3] * dT) / 256.0;
-        final double off = crc[2] * 65536.0 + (crc[4] * dT) / 128.0;
-        final double t = 2000.0 + dT * crc[6] / 8388608.0;
+        final long dT = d2 - crc[5] * 256;
+        final long sens1 = crc[1] * 32768 + (crc[3] * dT) / 256;
+        final long off1 = crc[2] * 65536 + (crc[4] * dT) / 128;
+        final long t1 = 2000 + dT * crc[6] / 8388608;
 
-        double iSens = 0;
-        double iOff = 0;
-        double iT = 0;
+        long sens2 = 0;
+        long off2 = 0;
+        long t2 = 0;
 
-        if (t / 100.0 < 20.0) {
-            // low temp
-            iT = 3.0 * dT * dT / 8589934592.0;
-            iOff = 3.0 * (t - 2000.0) * (t - 2000.0) / 2.0;
-            iSens = 5.0 * (t - 2000.0) * (t - 2000.0) / 8.0;
-            if (t / 100.0 < -15.0) {
-                //Very low temp
-                iOff = iOff + 7 * (t + 1500.0) * (t + 1500.0);
-                iSens = iSens + 4 * (t + 1500.0) * (t + 1500.0);
+        if (t1 >= 2000) {
+            t2 = 2 * (dT * dT) / 137438953472L;
+            off2 = ((t1 - 2000) * (t1 - 2000)) / 16;
+            sens2 = 0;
+        } else if (t1 < 2000) {
+            t2 = 3 * (dT * dT) / 8589934592L;
+            off2 = 3 * ((t1 - 2000) * (t1 - 2000)) / 2;
+            sens2 = 5 * ((t1 - 2000) * (t1 - 2000)) / 8;
+            if (t1 < -1500) {
+                off2 = off2 + 7 * ((t1 + 1500) * (t1 + 1500));
+                sens2 = sens2 + 4 * ((t1 + 1500) * (t1 + 1500));
             }
-        } else if (t / 100.0 >= 20.0) {
-            //High temp
-            iT = 2.0 * dT * dT / 137438953472.0;
-            iOff = 1.0 * (t - 2000.0) * (t - 2000.0) / 16.0;
-            iSens = 0.0;
         }
 
-        final double off2 = off - iOff;
-        final double sens2 = sens - iSens;
+        final double t = t1 - t2;
+        final double off = off1 - off2;
+        final double sens = sens1 - sens2;
 
-        temperature.set(new ExternalTemperatureValue((float) ((t - iT)  / 100.0)));
-        pressure.set(new ExternalPressureValue((float) ((((d1 * sens2) / 2097152.0 - off2) / 8192.0) / 10)));
+        final float tFinal = (float) (t / 100.0);
+        final float pFinal = (float) ((((d1 * sens) / 2097152) - off) / 8192) / 100;
+        if (firstReading.getAndSet(false)
+            || (Math.abs(tFinal - temperature.get().getTemperature()) / temperature.get().getTemperature() < 0.1
+            && Math.abs(pFinal - pressure.get().getPressure()) / pressure.get().getPressure() < 0.1)
+        ) {
+            temperature.set(new ExternalTemperatureValue(tFinal));
+            pressure.set(new ExternalPressureValue(pFinal));
+        }
     }
 }
