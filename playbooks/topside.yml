@@ -12,12 +12,6 @@
           ssh_interface: "{{ item }}"
       when: "{{ hostvars[inventory_hostname]['ansible_' ~ item].get('ipv4', {}).get('address') == ssh_connection_ip }}"
       with_items: "{{ ansible_interfaces }}"
-    - name: Update and upgrade apt packages
-      become: true
-      apt:
-        upgrade: yes
-        update_cache: yes
-      environment: "{{ proxy }}"
     - name: Configure journald settings
       copy: src=files/etc/systemd/journald.conf dest=/etc/systemd/journald.conf mode=644 owner=root group=root
     - name: Install Vim
