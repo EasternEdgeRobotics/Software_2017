@@ -11,6 +11,7 @@ import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_core.TermCriteria;
 import org.bytedeco.javacpp.opencv_imgcodecs;
+import org.bytedeco.javacpp.opencv_imgproc;
 import org.pmw.tinylog.Logger;
 
 import java.io.File;
@@ -40,7 +41,8 @@ public final class ChessboardCalibration {
     public static Optional<CameraCalibrationValue> findCameraCalibrationResult(
         final String folder,
         final int boardWidth,
-        final int boardHeight
+        final int boardHeight,
+        final double downSample
     ) {
         final List<String> fileNames = getFolderFileNames(folder);
         final List<String> validNames = new ArrayList<>();
@@ -51,7 +53,7 @@ public final class ChessboardCalibration {
         final Mat distortionCoeffs = new Mat();
 
         final Size imageSize = evaluateChessboardImages(
-            fileNames, validNames, boardSize, objectCornerMatsVect, imageCornerMatsVect);
+            fileNames, validNames, boardSize, downSample, objectCornerMatsVect, imageCornerMatsVect);
 
         if (imageSize == null) {
             return Optional.empty();
@@ -82,6 +84,7 @@ public final class ChessboardCalibration {
             new TermCriteria(TermCriteria.MAX_ITER + TermCriteria.EPS, 30, 0.00001)
         );
 
+        Logger.info("calibrateCameraRmsError: " + calibrateCameraRmsError);
         final DoubleIndexer cameraMatrixIndexer = cameraMatrix.createIndexer();
         final StringBuilder cameraStringBuilder = new StringBuilder();
         cameraStringBuilder.append("cameraMatrix = {\n");
@@ -158,6 +161,7 @@ public final class ChessboardCalibration {
         final List<String> fileNames,
         final List<String> validNames,
         final Size boardSize,
+        final double downSample,
         final MatVector objectCornerMatsVect,
         final MatVector imageCornerMatsVect
     ) {
@@ -168,11 +172,52 @@ public final class ChessboardCalibration {
         final List<Mat> imageCornerMats = new ArrayList<>();
         Size imageSize = null;
 
+        final int winSizeLength = 5;
+        final Size winSize = new Size(winSizeLength, winSizeLength);
+        final Size zeroZone = new Size(-1, -1);
+        final int maxIter = 30;
+        final double epsilon =  0.00001;
+        final double resizeDelta = 1.05;
+        final TermCriteria termCriteria = new TermCriteria(
+            opencv_core.CV_TERMCRIT_ITER | opencv_core.CV_TERMCRIT_EPS, maxIter, epsilon);
+
         for (final String fileName : fileNames) {
             final Mat image = opencv_imgcodecs.imread(fileName, opencv_imgcodecs.IMREAD_GRAYSCALE);
             final Mat imageCorners = new Mat();
 
-            if (opencv_calib3d.findChessboardCorners(image, boardSize, imageCorners)) {
+            final Size origSize = image.size();
+
+            final Mat resizeimage = new Mat();
+            final Size downSize = new Size(
+                (int) (origSize.width() / downSample),
+                (int) (origSize.height() / downSample));
+            opencv_imgproc.resize(image, resizeimage, downSize);
+
+            if (opencv_calib3d.findChessboardCorners(resizeimage, boardSize, imageCorners)) {
+                Logger.info("Valid Calibration Image: " + fileName);
+
+                final FloatIndexer imageCornersIndex = imageCorners.createIndexer();
+                for (double sample = downSample / resizeDelta; sample > 1; sample /= resizeDelta) {
+                    final Mat sampleImage = new Mat();
+                    final Size sampleSize = new Size(
+                        (int) (origSize.width() / sample),
+                        (int) (origSize.height() / sample));
+                    opencv_imgproc.resize(image, sampleImage, sampleSize);
+                    for (int i = 0; i < imageCorners.size(0); i++) {
+                        imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) * (float) (downSample / sample));
+                        imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) * (float) (downSample / sample));
+                    }
+                    opencv_imgproc.cornerSubPix(sampleImage, imageCorners, winSize, zeroZone, termCriteria);
+                    for (int i = 0; i < imageCorners.size(0); i++) {
+                        imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) / (float) (downSample / sample));
+                        imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) / (float) (downSample / sample));
+                    }
+                }
+                for (int i = 0; i < imageCorners.size(0); i++) {
+                    imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) * (float) downSample);
+                    imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) * (float) downSample);
+                }
+                opencv_imgproc.cornerSubPix(image, imageCorners, winSize, zeroZone, termCriteria);
                 imageCornerMats.add(imageCorners);
                 validNames.add(fileName);
                 // Create imageSize on first valid image
@@ -182,6 +227,8 @@ public final class ChessboardCalibration {
                     Logger.info("All images must have the same size!");
                     return null;
                 }
+            } else {
+                Logger.info("Invalid Calibration Image: " + fileName);
             }
         }
 
