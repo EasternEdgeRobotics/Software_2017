@@ -177,10 +177,17 @@ public final class DistanceCalculatorViewController implements ViewController {
             }
             final Observable<Boolean> calcPress = JavaFxObservable.valuesOf(view.calculateButton.pressedProperty());
             currentDistanceSubscriptions.add(calcPress.filter(x -> !x).skip(1).subscribe(x -> {
+                final String scalarString = view.xAxisLength.getText();
+                final float scalar;
+                try {
+                    scalar = Float.parseFloat(scalarString);
+                } catch (final NumberFormatException e) {
+                    return;
+                }
                 final AxisValue axis = view.axisNode.get().getAxis();
                 final List<PointValue> pixelPoints = view.imagePoints
                     .stream().map(TextNode::getPoint).collect(Collectors.toList());
-                distanceCalculator.calculate(axis, pixelPoints, cameraName).ifPresent(objectPoints -> {
+                distanceCalculator.calculate(axis, pixelPoints, cameraName, scalar).ifPresent(objectPoints -> {
                     for (int i = 0; i < objectPoints.size(); i++) {
                         view.imagePoints.get(i).setText(String.format("(%.2f, %.2f)",
                             objectPoints.get(i).getX(), objectPoints.get(i).getY()));
@@ -214,17 +221,31 @@ public final class DistanceCalculatorViewController implements ViewController {
                 .share();
 
             currentDistanceSubscriptions.add(JavaFxObservable.actionEventsOf(axis).withLatestFrom(events, (a, e) -> e)
-                .subscribe(event -> {
+                .take(1).subscribe(event -> {
                     final AxisNode axisNode = new AxisNode();
                     view.axisNode.set(axisNode);
                     shapeScene.add(axisNode, event.getX(), event.getY());
+                    contextMenu.getItems().remove(axis);
                 }));
 
             currentDistanceSubscriptions.add(JavaFxObservable.actionEventsOf(point).withLatestFrom(events, (a, e) -> e)
                 .subscribe(event -> {
-                    final TextNode imagePoint = new TextNode(new Circle(7, Color.CHARTREUSE));
+                    final TextNode imagePoint = new TextNode(new Circle(7, Color.DEEPPINK));
                     view.imagePoints.add(imagePoint);
                     shapeScene.add(imagePoint, event.getX(), event.getY());
+                    final ContextMenu pointMenu = new ContextMenu();
+                    final MenuItem delete = new MenuItem("Delete");
+                    pointMenu.getItems().addAll(delete);
+                    currentDistanceSubscriptions.add(JavaFxObservable
+                        .eventsOf(imagePoint.getHandleShape(), EventType.ROOT)
+                        .filter(e -> e.getEventType().equals(MouseEvent.MOUSE_CLICKED))
+                        .cast(MouseEvent.class)
+                        .filter(e -> e.getButton().equals(MouseButton.SECONDARY))
+                        .subscribe(e -> pointMenu.show(imagePoint.getHandleShape(), e.getScreenX(), e.getScreenY())));
+                    currentDistanceSubscriptions.add(JavaFxObservable.actionEventsOf(delete).take(1).subscribe(e -> {
+                        view.imagePoints.remove(imagePoint);
+                        shapeScene.remove(imagePoint);
+                    }));
                 }));
 
         } catch (final IOException e) {

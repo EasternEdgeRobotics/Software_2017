@@ -45,7 +45,8 @@ public final class DistanceCalculator {
     public Optional<List<PointValue>> calculate(
         final AxisValue axis,
         final List<PointValue> points,
-        final String cameraName
+        final String cameraName,
+        final float scalar
     ) {
         return store.get(cameraName).map(calibration -> {
             /**
@@ -242,7 +243,7 @@ public final class DistanceCalculator {
 
                 final DoubleIndexer objectPointIndexer = objectPoint.createIndexer();
 
-                return new PointValue(objectPointIndexer.get(0, 0), objectPointIndexer.get(1, 0));
+                return new PointValue(objectPointIndexer.get(0, 0) * scalar, objectPointIndexer.get(1, 0) * scalar);
             }).collect(Collectors.toList());
         });
     }

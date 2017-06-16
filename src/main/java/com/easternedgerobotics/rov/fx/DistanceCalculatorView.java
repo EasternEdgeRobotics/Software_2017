@@ -6,6 +6,7 @@ import com.easternedgerobotics.rov.fx.distance.TextNode;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
@@ -52,6 +53,8 @@ public final class DistanceCalculatorView implements View {
 
     final Button calculateButton = new Button("Calculate");
 
+    final TextField xAxisLength = new TextField();
+
     final ImageView imageView = new ImageView();
 
     final StackPane imageStack = new StackPane();
@@ -70,6 +73,9 @@ public final class DistanceCalculatorView implements View {
         buttonPanel.getChildren().addAll(buttons);
         calculateButton.setPrefHeight(BUTTON_HEIGHT);
         calculateButton.prefWidthProperty().bind(buttonPanel.widthProperty());
+        xAxisLength.setPrefHeight(BUTTON_HEIGHT);
+        xAxisLength.prefWidthProperty().bind(buttonPanel.widthProperty());
+        xAxisLength.setPromptText("X Axis Length");
 
         galleryBorderPane.setBorder(new Border(new BorderStroke(Color.GRAY,
             BorderStrokeStyle.SOLID, new CornerRadii(RADIUS), BorderWidths.DEFAULT)));
@@ -78,7 +84,7 @@ public final class DistanceCalculatorView implements View {
 
         imageSelectionPanel.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
         imageSelectionPanel.setSpacing(PADDING);
-        imageSelectionPanel.getChildren().addAll(buttonPanel, calculateButton, galleryBorderPane);
+        imageSelectionPanel.getChildren().addAll(buttonPanel, xAxisLength, calculateButton, galleryBorderPane);
         imageSelectionPanel.setMaxWidth(SELECTION_WIDTH);
         imageSelectionPanel.setMinWidth(SELECTION_WIDTH);
 
