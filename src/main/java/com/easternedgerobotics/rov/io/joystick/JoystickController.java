@@ -31,6 +31,8 @@ public final class JoystickController {
 
     private final Func4<Boolean, Boolean, Boolean, Float, Float> speedRegulator;
 
+    private final Func1<MotionValue, MotionValue> autoDepth;
+
     private final JoystickConfig config;
 
     public JoystickController(
@@ -38,12 +40,14 @@ public final class JoystickController {
         final Func1<MotionValue, MotionValue> scaleController,
         final Func2<MotionValue, Boolean, MotionValue> reverseController,
         final Func4<Boolean, Boolean, Boolean, Float, Float> speedRegulator,
+        final Func1<MotionValue, MotionValue> autoDepth,
         final JoystickConfig config
     ) {
         this.eventPublisher = eventPublisher;
         this.scaleController = scaleController;
         this.reverseController = reverseController;
         this.speedRegulator = speedRegulator;
+        this.autoDepth = autoDepth;
         this.config = config;
     }
 
@@ -66,9 +70,10 @@ public final class JoystickController {
         final Observable<MotionValue> scaledMotion = getScaledMotion(motion);
         final Observable<MotionValue> pitchedMotion = getPitchedMotion(joystick, scaledMotion);
         final Observable<MotionValue> reversedMotion = getReversedMotion(joystick, pitchedMotion);
+        final Observable<MotionValue> autoDepthMotion = getAutoDepthMotion(reversedMotion);
 
         componentSubscriptions.add(Observable.merge(
-            reversedMotion,
+            autoDepthMotion,
             getCameraFlipA(joystick),
             getCameraFlipB(joystick),
             getCameraSpeedA(joystick),
@@ -108,6 +113,10 @@ public final class JoystickController {
     private Observable<MotionValue> getReversedMotion(final Joystick joystick, final Observable<MotionValue> motion) {
         return Observable.combineLatest(
             motion, joystick.toggleButton(config.motionReverseButton()).startWith(false), reverseController);
+    }
+
+    private Observable<MotionValue> getAutoDepthMotion(final Observable<MotionValue> motion) {
+        return motion.map(autoDepth);
     }
 
     private Observable<VideoFlipValueA> getCameraFlipA(final Joystick joystick) {

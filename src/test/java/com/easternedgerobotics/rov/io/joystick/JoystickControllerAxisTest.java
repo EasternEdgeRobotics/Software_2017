@@ -34,6 +34,7 @@ public class JoystickControllerAxisTest {
             m -> m,
             MotionReverser::apply,
             SpeedRegulator::apply,
+            m -> m,
             config);
     }
 

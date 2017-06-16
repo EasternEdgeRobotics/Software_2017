@@ -58,6 +58,7 @@ public final class JoystickControllerToggleButtonTest {
             m -> m,
             MotionReverser::apply,
             SpeedRegulator::apply,
+            m -> m,
             config);
 
         final Joystick joystick = Mockito.mock(Joystick.class);

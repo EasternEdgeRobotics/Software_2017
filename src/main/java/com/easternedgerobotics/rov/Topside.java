@@ -8,6 +8,7 @@ import com.easternedgerobotics.rov.config.LaunchConfig;
 import com.easternedgerobotics.rov.config.SliderConfig;
 import com.easternedgerobotics.rov.config.TopsidesConfig;
 import com.easternedgerobotics.rov.config.VideoDecoderConfig;
+import com.easternedgerobotics.rov.control.AutoDepth;
 import com.easternedgerobotics.rov.control.ExponentialMotionScale;
 import com.easternedgerobotics.rov.control.MotionReverser;
 import com.easternedgerobotics.rov.control.SpeedRegulator;
@@ -25,7 +26,10 @@ import com.easternedgerobotics.rov.io.panel.EmergencyStopController;
 import com.easternedgerobotics.rov.io.panel.MotionPowerStoreController;
 import com.easternedgerobotics.rov.io.panel.SliderController;
 import com.easternedgerobotics.rov.math.DistanceCalculator;
+import com.easternedgerobotics.rov.measure.Depth;
+import com.easternedgerobotics.rov.value.AutoDepthValue;
 import com.easternedgerobotics.rov.value.CameraCalibrationValue;
+import com.easternedgerobotics.rov.value.ExternalPressureValue;
 import com.easternedgerobotics.rov.value.MotionPowerValue;
 import com.easternedgerobotics.rov.video.CameraCalibration;
 import com.easternedgerobotics.rov.video.VideoDecoder;
@@ -145,11 +149,16 @@ public final class Topside extends Application {
             }
         });
 
+        final AutoDepth autoDepth = new AutoDepth(
+            eventPublisher.valuesOfType(AutoDepthValue.class),
+            eventPublisher.valuesOfType(ExternalPressureValue.class).map(Depth::fromPressure));
+
         joystickController = new JoystickController(
             eventPublisher,
             ExponentialMotionScale::apply,
             MotionReverser::apply,
             SpeedRegulator::apply,
+            autoDepth::apply,
             configSource.getConfig("joystick", JoystickConfig.class));
     }
 
