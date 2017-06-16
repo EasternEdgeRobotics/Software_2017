@@ -84,6 +84,7 @@ public final class ChessboardCalibration {
             new TermCriteria(TermCriteria.MAX_ITER + TermCriteria.EPS, 30, 0.00001)
         );
 
+        Logger.info("calibrateCameraRmsError: " + calibrateCameraRmsError);
         final DoubleIndexer cameraMatrixIndexer = cameraMatrix.createIndexer();
         final StringBuilder cameraStringBuilder = new StringBuilder();
         cameraStringBuilder.append("cameraMatrix = {\n");
@@ -176,6 +177,7 @@ public final class ChessboardCalibration {
         final Size zeroZone = new Size(-1, -1);
         final int maxIter = 30;
         final double epsilon =  0.00001;
+        final double resizeDelta = 1.05;
         final TermCriteria termCriteria = new TermCriteria(
             opencv_core.CV_TERMCRIT_ITER | opencv_core.CV_TERMCRIT_EPS, maxIter, epsilon);
 
@@ -193,11 +195,27 @@ public final class ChessboardCalibration {
 
             if (opencv_calib3d.findChessboardCorners(resizeimage, boardSize, imageCorners)) {
                 Logger.info("Valid Calibration Image: " + fileName);
+
                 final FloatIndexer imageCornersIndex = imageCorners.createIndexer();
-                for (int i = 0; i < imageCorners.size(0); i++) {
-                    for (int j = 0; j < imageCorners.size(1); j++) {
-                        imageCornersIndex.put(i, j, imageCornersIndex.get(i, j) * (float) downSample);
+                for (double sample = downSample / resizeDelta; sample > 1; sample /= resizeDelta) {
+                    final Mat sampleImage = new Mat();
+                    final Size sampleSize = new Size(
+                        (int) (origSize.width() / sample),
+                        (int) (origSize.height() / sample));
+                    opencv_imgproc.resize(image, sampleImage, sampleSize);
+                    for (int i = 0; i < imageCorners.size(0); i++) {
+                        imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) * (float) (downSample / sample));
+                        imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) * (float) (downSample / sample));
                     }
+                    opencv_imgproc.cornerSubPix(sampleImage, imageCorners, winSize, zeroZone, termCriteria);
+                    for (int i = 0; i < imageCorners.size(0); i++) {
+                        imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) / (float) (downSample / sample));
+                        imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) / (float) (downSample / sample));
+                    }
+                }
+                for (int i = 0; i < imageCorners.size(0); i++) {
+                    imageCornersIndex.put(i, 0, 0, imageCornersIndex.get(i, 0, 0) * (float) downSample);
+                    imageCornersIndex.put(i, 0, 1, imageCornersIndex.get(i, 0, 1) * (float) downSample);
                 }
                 opencv_imgproc.cornerSubPix(image, imageCorners, winSize, zeroZone, termCriteria);
                 imageCornerMats.add(imageCorners);
