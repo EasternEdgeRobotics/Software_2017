@@ -62,6 +62,12 @@ public final class ShapeScene {
         draw(node);
     }
 
+    public void remove(final ShapeNode node) {
+        children.remove(node);
+        stack.getChildren().removeAll(node.getDrawnShapes());
+        draw();
+    }
+
     /**
      * Set up movement subscriptions for the node and add drawables to the scene.
      *
