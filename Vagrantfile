@@ -1,6 +1,7 @@
 # See <https://docs.vagrantup.com/v2/networking/public_network.html>
 NETWORK_INTERFACES = [
     "en3: Thunderbolt Ethernet",
+    "en4: Thunderbolt Ethernet",
     "en0: Ethernet",
     "Intel(R) 82579V Gigabit Network Connection",
     "Killer e2200 Gigabit Ethernet Controller",
