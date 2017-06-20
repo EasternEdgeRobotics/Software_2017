@@ -66,12 +66,12 @@ public final class MockRovConfig implements RovConfig {
         return 0x0b;
     }
 
-    public byte lightAChannel() {
-        return 0x0c;
+    public byte lightAPin() {
+        return 0;
     }
 
-    public byte lightBChannel() {
-        return 0x0d;
+    public byte lightBPin() {
+        return 1;
     }
 
     public boolean altImuSa0High() {

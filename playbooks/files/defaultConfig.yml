@@ -39,8 +39,8 @@ rov:
   toolingAMotorChannel: 11
   toolingBMotorChannel: 5
   toolingCMotorChannel: 22
-  lightAChannel: 23
-  lightBChannel: 22
+  lightAPin: 0
+  lightBPin: 2
   altImuSa0High: false
   i2cBus: 1
   shutdownTimeout: 1000

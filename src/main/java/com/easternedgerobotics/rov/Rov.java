@@ -8,7 +8,7 @@ import com.easternedgerobotics.rov.event.BroadcastEventPublisher;
 import com.easternedgerobotics.rov.event.EventPublisher;
 import com.easternedgerobotics.rov.io.Bar30PressureSensor;
 import com.easternedgerobotics.rov.io.BluetoothReader;
-import com.easternedgerobotics.rov.io.Light;
+import com.easternedgerobotics.rov.io.DigitalLight;
 import com.easternedgerobotics.rov.io.Motor;
 import com.easternedgerobotics.rov.io.Thruster;
 import com.easternedgerobotics.rov.io.devices.ADC;
@@ -17,19 +17,22 @@ import com.easternedgerobotics.rov.io.devices.Barometer;
 import com.easternedgerobotics.rov.io.devices.Bluetooth;
 import com.easternedgerobotics.rov.io.devices.Gyroscope;
 import com.easternedgerobotics.rov.io.devices.I2C;
+import com.easternedgerobotics.rov.io.devices.Light;
 import com.easternedgerobotics.rov.io.devices.Magnetometer;
 import com.easternedgerobotics.rov.io.devices.PWM;
 import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
+import com.easternedgerobotics.rov.io.rpi.RPiGPIOLight;
 import com.easternedgerobotics.rov.io.rpi.RaspberryCpuInformation;
 import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.math.Range;
 import com.easternedgerobotics.rov.value.CameraSpeedValueA;
 import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.HeartbeatValue;
-import com.easternedgerobotics.rov.value.LightASpeedValue;
-import com.easternedgerobotics.rov.value.LightBSpeedValue;
+import com.easternedgerobotics.rov.value.LightAValue;
+import com.easternedgerobotics.rov.value.LightBValue;
+import com.easternedgerobotics.rov.value.LightValue;
 import com.easternedgerobotics.rov.value.PortAftSpeedValue;
 import com.easternedgerobotics.rov.value.PortForeSpeedValue;
 import com.easternedgerobotics.rov.value.RasprimeCpuValue;
@@ -80,7 +83,7 @@ final class Rov {
 
     private final List<Motor> motors;
 
-    private final List<Light> lights;
+    private final List<DigitalLight> lights;
 
     private final Accelerometer accelerometer;
 
@@ -112,6 +115,7 @@ final class Rov {
         final AltIMU imu,
         final PressureSensor externalPressure,
         final Bluetooth bluetooth,
+        final List<Light> lightDevices,
         final RovConfig rovConfig
     ) {
         this.eventPublisher = eventPublisher;
@@ -164,6 +168,21 @@ final class Rov {
                     .setOutputRange(new Range(Motor.MAX_REV, Motor.MAX_FWD)))
         ));
 
+        this.lights = Collections.unmodifiableList(Arrays.asList(
+            new DigitalLight(
+                eventPublisher
+                    .valuesOfType(LightAValue.class)
+                    .startWith(new LightAValue())
+                    .cast(LightValue.class),
+                    lightDevices.get(0)),
+            new DigitalLight(
+                    eventPublisher
+                        .valuesOfType(LightBValue.class)
+                        .startWith(new LightBValue())
+                        .cast(LightValue.class),
+                    lightDevices.get(1))
+        ));
+
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
             new Thruster(
                 eventPublisher
@@ -209,21 +228,6 @@ final class Rov {
                     .setOutputRange(new Range(Thruster.MAX_REV, Thruster.MAX_FWD)))
         ));
 
-        this.lights = Collections.unmodifiableList(Arrays.asList(
-            new Light(
-                eventPublisher
-                    .valuesOfType(LightASpeedValue.class)
-                    .startWith(new LightASpeedValue())
-                    .cast(SpeedValue.class),
-                channels.get(config.lightAChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD))),
-            new Light(
-                eventPublisher
-                    .valuesOfType(LightBSpeedValue.class)
-                    .startWith(new LightBSpeedValue())
-                    .cast(SpeedValue.class),
-                channels.get(config.lightBChannel()).setOutputRange(new Range(Light.MAX_REV, Light.MAX_FWD)))
-        ));
-
         internalBarometer = () -> imu.pressure();
         magnetometer = () -> imu.rotation();
         accelerometer = () -> imu.acceleration();
@@ -248,7 +252,7 @@ final class Rov {
         }
 
         motors.forEach(Motor::writeZero);
-        lights.forEach(Light::writeZero);
+        lights.forEach(DigitalLight::writeZero);
         thrusters.forEach(Thruster::writeZero);
         bluetooth.stop();
         eventPublisher.emit(new RasprimeHeartbeatValue(false));
@@ -324,12 +328,12 @@ final class Rov {
     private void onNext(final HeartbeatValue heartbeat) {
         if (heartbeat.getOperational()) {
             thrustersUpdate();
-            lights.forEach(Light::write);
+            lights.forEach(DigitalLight::write);
             motors.forEach(Motor::write);
             eventPublisher.emit(new RasprimeHeartbeatValue(true));
         } else {
             softShutdown();
-            lights.forEach(Light::flash);
+            lights.forEach(DigitalLight::flash);
             motors.forEach(Motor::writeZero);
             eventPublisher.emit(new RasprimeHeartbeatValue(false));
         }
@@ -404,6 +408,10 @@ final class Rov {
                     rovConfig.bluetoothComPort(),
                     rovConfig.bluetoothConnectionTimeout(),
                     rovConfig.bluetoothBaudRate()),
+                Collections.unmodifiableList(Arrays.asList(
+                    new RPiGPIOLight(rovConfig.lightAPin()),
+                    new RPiGPIOLight(rovConfig.lightBPin())
+                )),
                 rovConfig);
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));

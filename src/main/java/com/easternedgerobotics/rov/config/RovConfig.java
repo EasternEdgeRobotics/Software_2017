@@ -33,9 +33,9 @@ public interface RovConfig {
 
     byte toolingCMotorChannel();
 
-    byte lightAChannel();
+    byte lightAPin();
 
-    byte lightBChannel();
+    byte lightBPin();
 
     boolean altImuSa0High();
 

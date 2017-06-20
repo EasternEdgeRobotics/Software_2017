@@ -3,7 +3,9 @@ package com.easternedgerobotics.rov;
 import com.easternedgerobotics.rov.config.MockRovConfig;
 import com.easternedgerobotics.rov.config.RovConfig;
 import com.easternedgerobotics.rov.io.MockPressureSensor;
+import com.easternedgerobotics.rov.io.devices.Light;
 import com.easternedgerobotics.rov.io.devices.MockBluetooth;
+import com.easternedgerobotics.rov.io.devices.MockLight;
 import com.easternedgerobotics.rov.io.pololu.MockAltIMU;
 import com.easternedgerobotics.rov.io.pololu.MockMaestro;
 import com.easternedgerobotics.rov.test.OrgPwmTinylogSuppressionRule;
@@ -14,7 +16,7 @@ import com.easternedgerobotics.rov.value.CameraSpeedValueB;
 import com.easternedgerobotics.rov.value.ForePowerValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
-import com.easternedgerobotics.rov.value.LightASpeedValue;
+import com.easternedgerobotics.rov.value.LightAValue;
 import com.easternedgerobotics.rov.value.MotionValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
 import com.easternedgerobotics.rov.value.RollPowerValue;
@@ -32,6 +34,9 @@ import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 import rx.schedulers.TestScheduler;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"checkstyle:magicnumber"})
@@ -49,7 +54,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
 
@@ -69,7 +78,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -91,7 +104,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         scheduler.advanceTimeBy(ROV_CONFIG.maxHeartbeatGap(), TimeUnit.SECONDS);
@@ -112,7 +129,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(false));
@@ -134,7 +155,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -187,7 +212,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -205,7 +234,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -223,7 +256,11 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            new MockLight(),
+            new MockLight()
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
@@ -241,13 +278,17 @@ public class RovTest {
         final MockAltIMU imu = new MockAltIMU();
         final MockPressureSensor pressureSensor = new MockPressureSensor();
         final MockBluetooth bluetooth = new MockBluetooth();
-        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, ROV_CONFIG);
+        final List<Light> lights = Collections.unmodifiableList(Arrays.asList(
+            Mockito.mock(MockLight.class, Mockito.RETURNS_SELF),
+            Mockito.mock(MockLight.class, Mockito.RETURNS_SELF)
+        ));
+        final Rov rov = new Rov(eventPublisher, maestro, imu, pressureSensor, bluetooth, lights, ROV_CONFIG);
 
         rov.init(scheduler, scheduler, scheduler);
         eventPublisher.emit(new TopsideHeartbeatValue(true));
-        eventPublisher.emit(new LightASpeedValue(1));
+        eventPublisher.emit(new LightAValue(true));
         scheduler.advanceTimeBy(ROV_CONFIG.sleepDuration(), TimeUnit.MILLISECONDS);
 
-        Mockito.verify(maestro.get(ROV_CONFIG.lightAChannel())).write(1);
+        Mockito.verify(lights.get(0)).write(true);
     }
 }
