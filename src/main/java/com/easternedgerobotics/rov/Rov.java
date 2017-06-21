@@ -23,7 +23,7 @@ import com.easternedgerobotics.rov.io.devices.PWM;
 import com.easternedgerobotics.rov.io.devices.Thermometer;
 import com.easternedgerobotics.rov.io.pololu.AltIMU10v3;
 import com.easternedgerobotics.rov.io.pololu.Maestro;
-import com.easternedgerobotics.rov.io.rpi.RPiGPIOLight;
+import com.easternedgerobotics.rov.io.rpi.RPiGPIOLightProvider;
 import com.easternedgerobotics.rov.io.rpi.RaspberryCpuInformation;
 import com.easternedgerobotics.rov.io.rpi.RaspberryI2CBus;
 import com.easternedgerobotics.rov.math.Range;
@@ -174,13 +174,13 @@ final class Rov {
                     .valuesOfType(LightAValue.class)
                     .startWith(new LightAValue())
                     .cast(LightValue.class),
-                    lightDevices.get(0)),
+                    lightDevices.get(rovConfig.lightAPin())),
             new DigitalLight(
                     eventPublisher
                         .valuesOfType(LightBValue.class)
                         .startWith(new LightBValue())
                         .cast(LightValue.class),
-                    lightDevices.get(1))
+                    lightDevices.get(rovConfig.lightBPin()))
         ));
 
         this.thrusters = Collections.unmodifiableList(Arrays.asList(
@@ -408,10 +408,7 @@ final class Rov {
                     rovConfig.bluetoothComPort(),
                     rovConfig.bluetoothConnectionTimeout(),
                     rovConfig.bluetoothBaudRate()),
-                Collections.unmodifiableList(Arrays.asList(
-                    new RPiGPIOLight(rovConfig.lightAPin()),
-                    new RPiGPIOLight(rovConfig.lightBPin())
-                )),
+                new RPiGPIOLightProvider(),
                 rovConfig);
 
             Runtime.getRuntime().addShutdownHook(new Thread(rov::shutdown));
