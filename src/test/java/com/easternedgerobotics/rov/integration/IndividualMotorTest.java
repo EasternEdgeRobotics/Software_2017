@@ -10,6 +10,7 @@ import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialFactory;
 import rx.subjects.PublishSubject;
 
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -19,7 +20,11 @@ public final class IndividualMotorTest {
 
     }
 
-    public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
+    public static void main(final String[] args) throws
+        IOException,
+        InterruptedException,
+        SocketException,
+        UnknownHostException {
         final byte maestroAddress = 0x01;
         final int baud = 115200;
         final Serial serial = SerialFactory.createInstance();

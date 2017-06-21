@@ -4,6 +4,8 @@ import com.easternedgerobotics.rov.io.devices.I2C;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
 import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
@@ -40,7 +42,7 @@ public final class RaspberryI2CBus extends AbstractList<I2C> {
         I2CBus bus;
         try {
             bus = I2CFactory.getInstance(channel);
-        } catch (final IOException e) {
+        } catch (final IOException | UnsupportedBusNumberException e) {
             bus = null;
         }
         this.bus = bus;
