@@ -25,6 +25,11 @@ public final class AnalogToPowerLevel {
     private static final float MAXIMUM = 1.00f;
 
     /**
+     * Centre of result range.
+     */
+    private static final float MIDDLE = 0.5f;
+
+    /**
      * Transform an analog pin value into an appropriate power slider value
      * with dead-bands at the top and bottom of the slider.
      *
@@ -44,6 +49,17 @@ public final class AnalogToPowerLevel {
      */
     public static float convertNeg(final float analogValue) {
         return 1f - convert(analogValue);
+    }
+
+    /**
+     * Transform an analog pin value into an appropriate power slider value
+     * with dead-bands at the top and bottom of the slider, and 0v is max power.
+     *
+     * @param analogValue the input.
+     * @return power slider value.
+     */
+    public static boolean convertBool(final float analogValue) {
+        return analogValue > MIDDLE;
     }
 
     /**

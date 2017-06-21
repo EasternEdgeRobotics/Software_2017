@@ -10,8 +10,8 @@ import com.easternedgerobotics.rov.value.AnalogPinValue;
 import com.easternedgerobotics.rov.value.ForePowerValue;
 import com.easternedgerobotics.rov.value.GlobalPowerValue;
 import com.easternedgerobotics.rov.value.HeavePowerValue;
-import com.easternedgerobotics.rov.value.LightASpeedValue;
-import com.easternedgerobotics.rov.value.LightBSpeedValue;
+import com.easternedgerobotics.rov.value.LightAValue;
+import com.easternedgerobotics.rov.value.LightBValue;
 import com.easternedgerobotics.rov.value.PitchPowerValue;
 import com.easternedgerobotics.rov.value.SurgePowerValue;
 import com.easternedgerobotics.rov.value.SwayPowerValue;
@@ -55,11 +55,11 @@ public final class SliderController {
         final Observable<ForePowerValue> fore = io.analogPin(config.forePowerSliderAddress())
             .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(ForePowerValue::new);
 
-        final Observable<LightASpeedValue> lightA = io.analogPin(config.lightAPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(LightASpeedValue::new);
+        final Observable<LightAValue> lightA = io.analogPin(config.lightAPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertBool).map(LightAValue::new);
 
-        final Observable<LightBSpeedValue> lightB = io.analogPin(config.lightBPowerSliderAddress())
-            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertNeg).map(LightBSpeedValue::new);
+        final Observable<LightBValue> lightB = io.analogPin(config.lightBPowerSliderAddress())
+            .map(AnalogPinValue::getValue).map(AnalogToPowerLevel::convertBool).map(LightBValue::new);
 
         subscription.addAll(
             SourceController.manageMultiViewModel(
@@ -87,10 +87,10 @@ public final class SliderController {
                 eventPublisher.valuesOfType(ForePowerValue.class), v -> { }, scheduler,
                 fore, eventPublisher::emit, Schedulers.io()),
             SourceController.manageMultiViewModel(
-                eventPublisher.valuesOfType(LightASpeedValue.class), v -> { }, scheduler,
+                eventPublisher.valuesOfType(LightAValue.class), v -> { }, scheduler,
                 lightA, eventPublisher::emit, Schedulers.io()),
             SourceController.manageMultiViewModel(
-                eventPublisher.valuesOfType(LightBSpeedValue.class), v -> { }, scheduler,
+                eventPublisher.valuesOfType(LightBValue.class), v -> { }, scheduler,
                 lightB, eventPublisher::emit, Schedulers.io()));
     }
 
