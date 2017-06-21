@@ -15,6 +15,7 @@ import com.pi4j.io.serial.SerialFactory;
 import rx.broadcast.BasicOrder;
 import rx.broadcast.UdpBroadcast;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -26,7 +27,11 @@ public final class IndividualLightTest {
 
     }
 
-    public static void main(final String[] args) throws InterruptedException, SocketException, UnknownHostException {
+    public static void main(final String[] args) throws
+        IOException,
+        InterruptedException,
+        SocketException,
+        UnknownHostException {
         final LaunchConfig launchConfig = new MockLaunchConfig();
         final byte deviceNumber = Byte.parseByte(args[0]);
         final byte channel = Byte.parseByte(args[1]);

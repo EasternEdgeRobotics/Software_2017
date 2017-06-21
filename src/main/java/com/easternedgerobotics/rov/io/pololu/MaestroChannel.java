@@ -5,7 +5,9 @@ import com.easternedgerobotics.rov.io.devices.PWM;
 import com.easternedgerobotics.rov.math.Range;
 
 import com.pi4j.io.serial.Serial;
+import org.pmw.tinylog.Logger;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
@@ -141,7 +143,11 @@ final class MaestroChannel implements ADC, PWM {
             final byte lsb = (byte) (microseconds & 0x7F);
             final byte msb = (byte) ((microseconds >> 7) & 0x7F);
 
-            serial.write(new byte[] {START_BYTE, maestro, COMMAND_SET_TARGET, channel, lsb, msb});
+            try {
+                serial.write(new byte[] {START_BYTE, maestro, COMMAND_SET_TARGET, channel, lsb, msb});
+            } catch (final IOException e) {
+                Logger.error(e);
+            }
         } finally {
             lock.unlock();
         }
@@ -156,9 +162,12 @@ final class MaestroChannel implements ADC, PWM {
         lock.lock();
         try {
             serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_POSITION, channel});
-            final ByteBuffer response = ByteBuffer.allocate(4).putChar(serial.read()).putChar(serial.read());
+            final ByteBuffer response = ByteBuffer.allocate(4).put(serial.read(4));
             return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(
                 new byte[]{response.get(1), response.get(3)}).getShort(0);
+        } catch (final IOException e) {
+            Logger.error(e);
+            return 0;
         } finally {
             lock.unlock();
         }
@@ -175,9 +184,14 @@ final class MaestroChannel implements ADC, PWM {
     private BitSet getErrors() {
         lock.lock();
         try {
-            serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_ERRORS});
-            final ByteBuffer response = ByteBuffer.allocate(2).putChar(serial.read());
-            return BitSet.valueOf(new byte[]{response.get(1), response.get(0)});
+            try {
+                serial.write(new byte[] {START_BYTE, maestro, COMMAND_GET_ERRORS});
+                final ByteBuffer response = ByteBuffer.allocate(2).put(serial.read(2));
+                return BitSet.valueOf((byte[]) ByteBuffer.allocate(2).put(serial.read(2)).flip().array());
+            } catch (final IOException e) {
+                Logger.error(e);
+                return BitSet.valueOf(new byte[]{0});
+            }
         } finally {
             lock.unlock();
         }
